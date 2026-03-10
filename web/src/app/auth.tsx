@@ -79,6 +79,10 @@ export default function Auth() {
   }, [password])
 
   const isPasswordStrong = passwordStrength.score >= 3
+  const passwordsMatch =
+    mode !== 'signup' || !confirmPassword
+      ? true
+      : confirmPassword === password
 
   useEffect(() => {
     if (mode !== 'signup') {
@@ -274,6 +278,22 @@ export default function Auth() {
                           required
                         />
                       </div>
+
+                      {confirmPassword && (
+                        <div
+                          className={`mt-1 rounded-lg border px-3 py-2 text-xs ${
+                            passwordsMatch
+                              ? 'border-emerald-500/40 bg-emerald-500/5 text-emerald-300'
+                              : 'border-red-500/40 bg-red-500/5 text-red-300'
+                          }`}
+                        >
+                          <p className="font-mono">
+                            {passwordsMatch
+                              ? 'Passwords match.'
+                              : 'Passwords do not match yet.'}
+                          </p>
+                        </div>
+                      )}
 
                       <button
                         type="submit"
