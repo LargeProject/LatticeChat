@@ -1,11 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, lazy, Suspense } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from '@tanstack/react-router'
 import { useMutation } from '@tanstack/react-query'
 import { ShineBorder } from '@/components/ui/shine-border'
-import Lattice from '@/components/ui/lattice' // Direct import (Vite client‑side)
-import zxcvbn from 'zxcvbn'
+const Lattice = lazy(() => import('@/components/ui/lattice'))
+import type { ZXCVBNFeedback } from 'zxcvbn'
 
 export default function Auth() {
   const [mode, setMode] = useState<'login' | 'signup'>('login')
@@ -71,16 +71,47 @@ export default function Auth() {
     })
   }
 
-  const passwordStrength = useMemo(() => {
-    const { score, feedback } = zxcvbn(password) //
+  const [passwordStrength, setPasswordStrength] = useState<{
+    score: number
+    label: string
+    feedback: ZXCVBNFeedback | null
+  }>({
+    score: 0,
+    label: '',
+    feedback: null,
+  })
 
-    const labels = ['Extremely weak', 'Very Weak', 'Weak', 'Okay', 'Strong']
-
-    return {
-      score,
-      label: labels[score],
-      feedback,
+  useEffect(() => {
+    if (!password) {
+      setPasswordStrength({
+        score: 0,
+        label: "",
+        feedback: null,
+      })
+      return
     }
+  
+    const timer = setTimeout(async () => {
+      const { default: zxcvbn } = await import("zxcvbn")
+  
+      const { score, feedback } = zxcvbn(password)
+  
+      const labels = [
+        "Extremely weak",
+        "Very Weak",
+        "Weak",
+        "Okay",
+        "Strong",
+      ]
+  
+      setPasswordStrength({
+        score,
+        label: labels[score],
+        feedback,
+      })
+    }, 200)
+  
+    return () => clearTimeout(timer)
   }, [password])
 
   const isPasswordStrong = passwordStrength.score >= 3
@@ -167,11 +198,15 @@ export default function Auth() {
             animate={{ x: mode === 'login' ? '0%' : '50%' }}
             transition={{ type: 'spring', stiffness: 140, damping: 18 }}
           >
-            <Lattice />
+            <Suspense fallback={null}>
+              <Lattice />
+            </Suspense>
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
               <div className="relative max-w-md space-y-4 rounded-xl border border-zinc-800 bg-black/90 backdrop-blur-1xl p-6 text-center shadow-[0_20px_80px_rgba(0,0,0,0.45)] z-30">
-                <h1 className="text-5xl font-extrabold tracking-tight bg-linear-to-r from-cyan-400 via-purple-400 to-blue-500 bg-clip-text text-transparent bg-size-[200%_200%] animate-gradient
-">
+                <h1
+                  className="text-5xl font-extrabold tracking-tight bg-linear-to-r from-cyan-400 via-purple-400 to-blue-500 bg-clip-text text-transparent bg-size-[200%_200%] animate-gradient
+"
+                >
                   Lattice Chat
                 </h1>
 

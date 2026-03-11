@@ -2,14 +2,15 @@
 
 import { Canvas, useFrame } from '@react-three/fiber'
 import { useMemo, useRef } from 'react'
+import { OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
 
 function CryptoLattice() {
   const group = useRef<THREE.Group>(null!)
 
   const { positions, colors, lines } = useMemo(() => {
-    const pointCount = 200
-    const spread = 12
+    const pointCount = 120
+    const spread = 10
     const threshold = 2.8
     const thresholdSq = threshold * threshold
 
@@ -17,6 +18,8 @@ function CryptoLattice() {
     const pos = new Float32Array(pointCount * 3)
     const col = new Float32Array(pointCount * 3)
 
+    const c = new THREE.Color()
+    
     for (let i = 0; i < pointCount; i++) {
       const x = THREE.MathUtils.randFloatSpread(spread)
       const y = THREE.MathUtils.randFloatSpread(spread)
@@ -34,7 +37,7 @@ function CryptoLattice() {
       const saturation = 0.5 + Math.random() * 0.5
       const lightness = 0.5 + Math.random() * 0.1
 
-      const c = new THREE.Color().setHSL(hue, saturation, lightness)
+      c.setHSL(hue, saturation, lightness)
 
       col[i * 3] = c.r
       col[i * 3 + 1] = c.g
@@ -72,21 +75,17 @@ function CryptoLattice() {
   }, [])
 
   const lastFrame = useRef(0)
-  useFrame(({ clock, camera }) => {
+  useFrame(({ clock }) => {
     const t = clock.getElapsedTime()
 
     if (t - lastFrame.current < 1 / 40) return
     lastFrame.current = t
 
-    group.current.position.y = Math.sin(t * 0.015) * 0.1
+    group.current.rotation.y = t * 0.05
+    group.current.rotation.x = Math.sin(t * 0.05) * 0.2
 
-    const radius = 5 + Math.sin(t * 0.1) * 3
-    const angle = t * 0.015
-
-    camera.position.x = Math.cos(angle) * radius
-    camera.position.z = Math.sin(angle) * radius
-
-    camera.lookAt(0, 0, 0)
+    // move forward/back
+    group.current.position.z = Math.sin(t * 0.1) * 2
   })
 
   const circleTexture = useMemo(() => {
@@ -144,10 +143,15 @@ function CryptoLattice() {
 export default function Lattice() {
   return (
     <Canvas
-      camera={{ position: [0, 0, 12], fov: 120 }}
+      camera={{ position: [0, 0, 5], fov: 100 }}
       gl={{ antialias: false }}
-      dpr={[1, 1.5]}
+      dpr={[0.8, 1.2]}
     >
+      <OrbitControls
+        enableRotate={true}
+        enableZoom={true}
+        enablePan={true}
+      />
       <CryptoLattice />
     </Canvas>
   )
