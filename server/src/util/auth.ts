@@ -1,4 +1,4 @@
-import {createClient} from "./database.js";
+import {createMongoClient} from "./database.js";
 import {betterAuth} from "better-auth";
 import {mongodbAdapter} from "@better-auth/mongo-adapter";
 import {bearer} from "better-auth/plugins";
@@ -6,7 +6,7 @@ import {bearer} from "better-auth/plugins";
 const ip = process.env.IP;
 const port = process.env.PORT;
 
-const client = createClient();
+const client = createMongoClient();
 const db = client.db();
 
 const auth = betterAuth({

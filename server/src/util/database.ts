@@ -7,15 +7,15 @@ const ip = process.env.IP;
 
 const uri = `mongodb://${username}:${password}@${ip}:${port}/`;
 
-function createClient() {
+function createMongoClient() {
   return new MongoClient(uri);
 }
 
 async function createMongoConnection() {
-  const client = createClient();
+  const client = createMongoClient();
   await client.connect();
 
   return client;
 }
 
-export { createMongoConnection, createClient };
+export { createMongoConnection, createMongoClient };
