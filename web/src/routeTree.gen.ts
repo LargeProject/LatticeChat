@@ -9,13 +9,19 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as ForgotRouteImport } from './routes/forgot'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as ChatsRouteImport } from './routes/chats'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 
-const ForgotRoute = ForgotRouteImport.update({
-  id: '/forgot',
-  path: '/forgot',
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChatsRoute = ChatsRouteImport.update({
+  id: '/chats',
+  path: '/chats',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -32,40 +38,51 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/forgot': typeof ForgotRoute
+  '/chats': typeof ChatsRoute
+  '/forgot-password': typeof ForgotPasswordRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/forgot': typeof ForgotRoute
+  '/chats': typeof ChatsRoute
+  '/forgot-password': typeof ForgotPasswordRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/forgot': typeof ForgotRoute
+  '/chats': typeof ChatsRoute
+  '/forgot-password': typeof ForgotPasswordRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/forgot'
+  fullPaths: '/' | '/about' | '/chats' | '/forgot-password'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/forgot'
-  id: '__root__' | '/' | '/about' | '/forgot'
+  to: '/' | '/about' | '/chats' | '/forgot-password'
+  id: '__root__' | '/' | '/about' | '/chats' | '/forgot-password'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
-  ForgotRoute: typeof ForgotRoute
+  ChatsRoute: typeof ChatsRoute
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/forgot': {
-      id: '/forgot'
-      path: '/forgot'
-      fullPath: '/forgot'
-      preLoaderRoute: typeof ForgotRouteImport
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chats': {
+      id: '/chats'
+      path: '/chats'
+      fullPath: '/chats'
+      preLoaderRoute: typeof ChatsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -88,7 +105,8 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
-  ForgotRoute: ForgotRoute,
+  ChatsRoute: ChatsRoute,
+  ForgotPasswordRoute: ForgotPasswordRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

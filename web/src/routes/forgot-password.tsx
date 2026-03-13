@@ -2,10 +2,6 @@ import { useState } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { ShineBorder } from '@/components/ui/shine-border'
 
-export const Route = createFileRoute('/forgot')({
-  component: ForgotPassword,
-})
-
 function ForgotPassword() {
   const [email, setEmail] = useState('')
   const [message, setMessage] = useState<string | null>(null)
@@ -26,7 +22,7 @@ function ForgotPassword() {
       <div className="w-full max-w-lg rounded-2xl border border-zinc-800 bg-zinc-950/80 backdrop-blur-lg p-8 shadow-2xl space-y-6">
         <ShineBorder shineColor={['#ffdf00', '#dfe6d5']} />
         <div className="space-y-2 text-center">
-          <h1 className="text-3xl md:text-3xl font-extrabold bg-linear-to-r from-cyan-400 via-purple-400 to-blue-500 bg-clip-text text-transparent">
+          <h1 className="text-3xl md:text-3xl font-extrabold bg-linear-to-r from-cyan-400 via-purple-400 to-blue-500 animate-gradient bg-clip-text text-transparent">
             Forgot your password?
           </h1>
           <p className="text-sm text-zinc-400">
@@ -89,3 +85,7 @@ function ForgotPassword() {
     </main>
   )
 }
+
+export const Route = createFileRoute('/forgot-password')({
+  component: ForgotPassword,
+})

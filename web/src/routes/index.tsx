@@ -1,190 +1,37 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useState, useMemo, lazy, Suspense } from 'react'
+import { lazy, Suspense } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useNavigate } from '@tanstack/react-router'
-import { useMutation } from '@tanstack/react-query'
 import { ShineBorder } from '@/components/ui/shine-border'
-const Lattice = lazy(() => import('@/components/ui/lattice'))
-import type { ZXCVBNFeedback } from 'zxcvbn'
+const LatticeAnimation = lazy(() => import('@/components/ui/lattice'))
+import Label from '../components/landing/label'
+import { useAuthLogic } from '../components/landing/logic'
 
 export default function Auth() {
-  const [mode, setMode] = useState<'login' | 'signup'>('login')
-  const [email, setEmail] = useState('')
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const [emailAvailability, setEmailAvailability] = useState<string | null>(
-    null,
-  )
-  const [usernameAvailability, setUsernameAvailability] = useState<
-    string | null
-  >(null)
-  const [isCheckingEmail, setIsCheckingEmail] = useState(false)
-  const [isCheckingUsername, setIsCheckingUsername] = useState(false)
-  const [isMobile, setIsMobile] = useState(false)
-  const navigate = useNavigate()
-
-  const toggleMode = () => {
-    setMode(mode === 'login' ? 'signup' : 'login')
-    setError(null) // clear errors on toggle
-  }
-
-  // Example mutation – replace with your actual API calls
-  const { mutate, isPending } = useMutation({
-    mutationFn: async (formData: {
-      email: string
-      password: string
-      username?: string
-    }) => {
-      const endpoint = mode === 'login' ? '/api/login' : '/api/signup'
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      })
-      if (!res.ok) throw new Error('Authentication failed')
-      return res.json()
-    },
-    onSuccess: () => {
-      // Redirect to about page after successful auth
-      navigate({ to: '/about' })
-    },
-    onError: (err: unknown) => {
-      setError(err instanceof Error ? err.message : 'Something went wrong')
-    },
-  })
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    setError(null)
-
-    if (mode === 'signup' && password !== confirmPassword) {
-      setError('Passwords do not match')
-      return
-    }
-
-    mutate({
-      email,
-      password,
-      username: mode === 'signup' ? username : undefined,
-    })
-  }
-
-  const [passwordStrength, setPasswordStrength] = useState<{
-    score: number
-    label: string
-    feedback: ZXCVBNFeedback | null
-  }>({
-    score: 0,
-    label: '',
-    feedback: null,
-  })
-
-  useEffect(() => {
-    if (!password) {
-      setPasswordStrength({
-        score: 0,
-        label: "",
-        feedback: null,
-      })
-      return
-    }
-  
-    const timer = setTimeout(async () => {
-      const { default: zxcvbn } = await import("zxcvbn")
-  
-      const { score, feedback } = zxcvbn(password)
-  
-      const labels = [
-        "Extremely weak",
-        "Very Weak",
-        "Weak",
-        "Okay",
-        "Strong",
-      ]
-  
-      setPasswordStrength({
-        score,
-        label: labels[score],
-        feedback,
-      })
-    }, 200)
-  
-    return () => clearTimeout(timer)
-  }, [password])
-
-  const isPasswordStrong = passwordStrength.score >= 3
-  const passwordsMatch =
-    mode !== 'signup' || !confirmPassword ? true : confirmPassword === password
-
-  useEffect(() => {
-    if (mode !== 'signup') {
-      setEmailAvailability(null)
-      setIsCheckingEmail(false)
-      return
-    }
-
-    if (!email) {
-      setEmailAvailability(null)
-      setIsCheckingEmail(false)
-      return
-    }
-
-    setIsCheckingEmail(true)
-    const timer = setTimeout(() => {
-      const trimmed = email.trim().toLowerCase()
-      const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)
-
-      if (!isValidEmail) {
-        setEmailAvailability('Enter a valid email to check availability.')
-        setIsCheckingEmail(false)
-        return
-      }
-
-      const looksTaken =
-        trimmed.endsWith('@taken.com') || trimmed.includes('taken@')
-      setEmailAvailability(
-        looksTaken ? 'Email appears taken.' : 'Email looks available.',
-      )
-      setIsCheckingEmail(false)
-    }, 500)
-
-    return () => clearTimeout(timer)
-  }, [mode, email])
-
-  useEffect(() => {
-    if (mode !== 'signup') {
-      setUsernameAvailability(null)
-      setIsCheckingUsername(false)
-      return
-    }
-
-    if (!username) {
-      setUsernameAvailability(null)
-      setIsCheckingUsername(false)
-      return
-    }
-
-    setIsCheckingUsername(true)
-    const timer = setTimeout(() => {
-      const looksTaken = username.trim().toLowerCase().includes('taken')
-      setUsernameAvailability(
-        looksTaken ? 'Username appears taken.' : 'Username looks available.',
-      )
-      setIsCheckingUsername(false)
-    }, 500)
-
-    return () => clearTimeout(timer)
-  }, [mode, username])
-
-  useEffect(() => {
-    const mql = window.matchMedia('(max-width: 767px)')
-    const update = () => setIsMobile(mql.matches)
-    update()
-    mql.addEventListener('change', update)
-    return () => mql.removeEventListener('change', update)
-  }, [])
+  // this is the brain of the auth page that has all of the functions api developer :) ily
+  const {
+    mode,
+    email,
+    setEmail,
+    username,
+    setUsername,
+    password,
+    setPassword,
+    confirmPassword,
+    setConfirmPassword,
+    error,
+    emailAvailability,
+    usernameAvailability,
+    isCheckingEmail,
+    isCheckingUsername,
+    passwordStrength,
+    isPasswordStrong,
+    passwordsMatch,
+    toggleMode,
+    handleSubmit,
+    isMobile,
+    isPending,
+    navigate,
+  } = useAuthLogic()
 
   return (
     <main className="relative min-h-screen w-screen bg-black overflow-hidden flex items-stretch justify-center">
@@ -199,49 +46,9 @@ export default function Auth() {
             transition={{ type: 'spring', stiffness: 140, damping: 18 }}
           >
             <Suspense fallback={null}>
-              <Lattice />
+              <LatticeAnimation />
             </Suspense>
-            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-              <div className="relative max-w-md space-y-4 rounded-xl border border-zinc-800 bg-black/90 backdrop-blur-1xl p-6 text-center shadow-[0_20px_80px_rgba(0,0,0,0.45)] z-30">
-                <h1
-                  className="text-5xl font-extrabold tracking-tight bg-linear-to-r from-cyan-400 via-purple-400 to-blue-500 bg-clip-text text-transparent bg-size-[200%_200%] animate-gradient
-"
-                >
-                  Lattice Chat
-                </h1>
-
-                <p className="text-zinc-400 text-base leading-relaxed">
-                  End-to-end encrypted messaging powered by
-                  <span className="text-zinc-200 font-semibold">
-                    {' '}
-                    post-quantum cryptography
-                  </span>
-                  .
-                </p>
-
-                <p className="text-black-500 text-sm leading-relaxed">
-                  Key exchange uses the
-                  <span className="text-purple-400 font-semibold">
-                    {' '}
-                    Kyber lattice algorithm
-                  </span>
-                  , designed to remain secure even against future quantum
-                  computers.
-                </p>
-
-                <div className="flex gap-4 justify-center pt-2 text-[12px] font-mono text-black-500">
-                  <span className="border border-zinc-800 px-2 py-1 rounded">
-                    E2EE
-                  </span>
-                  <span className="border border-zinc-800 px-2 py-1 rounded">
-                    Post-Quantum
-                  </span>
-                  <span className="border border-zinc-800 px-2 py-1 rounded">
-                    Kyber KEM
-                  </span>
-                </div>
-              </div>
-            </div>
+            <Label />
           </motion.div>
         )}
 
@@ -282,7 +89,7 @@ export default function Auth() {
                           type="email"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
-                          placeholder="you@example.com"
+                          placeholder="you@lattice.com"
                           className="w-full bg-zinc-950 border border-zinc-800 p-3 text-sm text-zinc-400 font-mono outline-none focus:border-zinc-600 transition-colors"
                           required
                         />
@@ -476,7 +283,7 @@ export default function Auth() {
                           type="email"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
-                          placeholder="you@example.com"
+                          placeholder="you@lattice.com"
                           className="w-full bg-zinc-950 border border-zinc-800 p-3 text-sm text-zinc-400 font-mono outline-none focus:border-zinc-600 transition-colors"
                           required
                         />
@@ -506,7 +313,7 @@ export default function Auth() {
 
                       <button
                         type="button"
-                        onClick={() => navigate({ to: '/forgot' })}
+                        onClick={() => navigate({ to: '/forgot-password' })}
                         className="w-full mt-3 text-sm font-mono text-zinc-400 hover:text-zinc-200 underline underline-offset-4 transition-colors"
                       >
                         Forgot Password?
