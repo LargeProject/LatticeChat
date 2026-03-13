@@ -2,75 +2,109 @@
 @import 'tailwindcss';
 @plugin "@tailwindcss/typography";
 
+@custom-variant dark (&:where(.dark, .dark *));
+ 
 @theme {
   --font-sans: 'Manrope', ui-sans-serif, system-ui, sans-serif;
 }
 
 :root {
-  --sea-ink: #173a40;
-  --sea-ink-soft: #416166;
-  --lagoon: #4fb8b2;
-  --lagoon-deep: #328f97;
-  --palm: #2f6a4a;
-  --sand: #e7f0e8;
-  --foam: #f3faf5;
-  --surface: rgba(255, 255, 255, 0.74);
-  --surface-strong: rgba(255, 255, 255, 0.9);
-  --line: rgba(23, 58, 64, 0.14);
-  --inset-glint: rgba(255, 255, 255, 0.82);
-  --kicker: rgba(47, 106, 74, 0.9);
-  --bg-base: #e7f3ec;
-  --header-bg: rgba(251, 255, 248, 0.84);
-  --chip-bg: rgba(255, 255, 255, 0.8);
-  --chip-line: rgba(47, 106, 74, 0.18);
-  --link-bg-hover: rgba(255, 255, 255, 0.9);
-  --hero-a: rgba(79, 184, 178, 0.36);
-  --hero-b: rgba(47, 106, 74, 0.2);
+  --sea-ink: #1e1b2e;
+  --sea-ink-soft: #5b5872;
+
+  --lagoon: #8b5cf6;
+  --lagoon-deep: #7c3aed;
+
+  --palm: #6d28d9;
+  --sand: #f3f1ff;
+  --foam: #f7f5ff;
+
+  --surface: rgba(255,255,255,0.78);
+  --surface-strong: rgba(255,255,255,0.92);
+
+  --line: rgba(30,27,46,0.12);
+  --inset-glint: rgba(255,255,255,0.86);
+
+  --kicker: rgba(109,40,217,0.9);
+
+  --bg-base: #f3f1ff;
+  --header-bg: rgba(252,251,255,0.85);
+
+  --chip-bg: rgba(255,255,255,0.82);
+  --chip-line: rgba(109,40,217,0.18);
+  --link-bg-hover: rgba(255,255,255,0.9);
+
+  --hero-a: rgba(139,92,246,0.35);
+  --hero-b: rgba(124,58,237,0.22);
+
+  --gradient-mix-target: white;
 }
 
 :root[data-theme='dark'] {
-  --sea-ink: #d7ece8;
-  --sea-ink-soft: #afcdc8;
-  --lagoon: #60d7cf;
-  --lagoon-deep: #8de5db;
-  --palm: #6ec89a;
-  --sand: #0f1a1e;
-  --foam: #101d22;
-  --surface: rgba(16, 30, 34, 0.8);
-  --surface-strong: rgba(15, 27, 31, 0.92);
-  --line: rgba(141, 229, 219, 0.18);
-  --inset-glint: rgba(194, 247, 238, 0.14);
-  --kicker: #b8efe5;
-  --bg-base: #0a1418;
-  --header-bg: rgba(10, 20, 24, 0.8);
-  --chip-bg: rgba(13, 28, 32, 0.9);
-  --chip-line: rgba(141, 229, 219, 0.24);
-  --link-bg-hover: rgba(24, 44, 49, 0.8);
-  --hero-a: rgba(96, 215, 207, 0.18);
-  --hero-b: rgba(110, 200, 154, 0.12);
+  --sea-ink: #f5f3ff;
+  --sea-ink-soft: #b6b3d1;
+
+  --lagoon: #a78bfa;
+  --lagoon-deep: #8b5cf6;
+
+  --palm: #c4b5fd;
+
+  --sand: #000000;
+  --foam: #000000;
+
+  --surface: rgba(18,18,24,0.72);
+  --surface-strong: #000000;
+
+  --line: rgba(255,255,255,0.14);
+  --inset-glint: rgba(255,255,255,0.05);
+
+  --kicker: #ddd6fe;
+
+  --bg-base: #000000;
+  --header-bg: rgba(0,0,0,0.82);
+
+  --chip-bg: rgba(255,255,255,0.1);
+  --chip-line: rgba(255,255,255,0.2);
+  --link-bg-hover: rgba(255,255,255,0.1);
+
+  --hero-a: rgba(139,92,246,0.06);
+  --hero-b: rgba(124,58,237,0.05);
+
+  --gradient-mix-target: #000000;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --sea-ink: #d7ece8;
-    --sea-ink-soft: #afcdc8;
-    --lagoon: #60d7cf;
-    --lagoon-deep: #8de5db;
-    --palm: #6ec89a;
-    --sand: #0f1a1e;
-    --foam: #101d22;
-    --surface: rgba(16, 30, 34, 0.8);
-    --surface-strong: rgba(15, 27, 31, 0.92);
-    --line: rgba(141, 229, 219, 0.18);
-    --inset-glint: rgba(194, 247, 238, 0.14);
-    --kicker: #b8efe5;
-    --bg-base: #0a1418;
-    --header-bg: rgba(10, 20, 24, 0.8);
-    --chip-bg: rgba(13, 28, 32, 0.9);
-    --chip-line: rgba(141, 229, 219, 0.24);
-    --link-bg-hover: rgba(24, 44, 49, 0.8);
-    --hero-a: rgba(96, 215, 207, 0.18);
-    --hero-b: rgba(110, 200, 154, 0.12);
+    --sea-ink: #f5f3ff;
+    --sea-ink-soft: #b6b3d1;
+
+    --lagoon: #a78bfa;
+    --lagoon-deep: #8b5cf6;
+
+    --palm: #c4b5fd;
+
+    --sand: #000000;
+    --foam: #000000;
+
+    --surface: rgba(18,18,24,0.72);
+    --surface-strong: #000000;
+
+    --line: rgba(255,255,255,0.14);
+    --inset-glint: rgba(255,255,255,0.05);
+
+    --kicker: #ddd6fe;
+
+    --bg-base: #000000;
+    --header-bg: rgba(0,0,0,0.82);
+
+    --chip-bg: rgba(255,255,255,0.1);
+    --chip-line: rgba(255,255,255,0.2);
+    --link-bg-hover: rgba(255,255,255,0.1);
+
+    --hero-a: rgba(139,92,246,0.06);
+    --hero-b: rgba(124,58,237,0.05);
+
+    --gradient-mix-target: #000000;
   }
 }
 
@@ -94,12 +128,12 @@ body {
     radial-gradient(1050px 620px at 112% -12%, var(--hero-b), transparent 62%),
     radial-gradient(
       720px 380px at 50% 115%,
-      rgba(79, 184, 178, 0.1),
+      rgba(139,92,246,0.1),
       transparent 68%
     ),
     linear-gradient(
       180deg,
-      color-mix(in oklab, var(--sand) 68%, white) 0%,
+      color-mix(in oklab, var(--sand) 68%, var(--gradient-mix-target)) 0%,
       var(--foam) 44%,
       var(--bg-base) 100%
     );
@@ -116,17 +150,18 @@ body::before {
   z-index: -1;
   opacity: 0.28;
   background:
-    radial-gradient(
-      circle at 20% 15%,
-      rgba(255, 255, 255, 0.8),
-      transparent 34%
-    ),
-    radial-gradient(
-      circle at 78% 26%,
-      rgba(79, 184, 178, 0.2),
-      transparent 42%
-    ),
-    radial-gradient(circle at 42% 82%, rgba(47, 106, 74, 0.14), transparent 36%);
+    radial-gradient(circle at 20% 15%, rgba(255,255,255,0.8), transparent 34%),
+    radial-gradient(circle at 78% 26%, rgba(139,92,246,0.22), transparent 42%),
+    radial-gradient(circle at 42% 82%, rgba(124,58,237,0.14), transparent 36%);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) body::before {
+    opacity: 0.05;
+  }
+}
+:root[data-theme='dark'] body::before {
+  opacity: 0.05;
 }
 
 body::after {
@@ -137,21 +172,21 @@ body::after {
   z-index: -1;
   opacity: 0.14;
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+    linear-gradient(rgba(255,255,255,0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px);
   background-size: 28px 28px;
   mask-image: radial-gradient(circle at 50% 30%, black, transparent 78%);
 }
 
 a {
   color: var(--lagoon-deep);
-  text-decoration-color: rgba(50, 143, 151, 0.4);
+  text-decoration-color: rgba(124,58,237,0.4);
   text-decoration-thickness: 1px;
   text-underline-offset: 2px;
 }
 
 a:hover {
-  color: #246f76;
+  color: #6d28d9;
 }
 
 code {
@@ -185,8 +220,8 @@ pre code {
   background: linear-gradient(165deg, var(--surface-strong), var(--surface));
   box-shadow:
     0 1px 0 var(--inset-glint) inset,
-    0 22px 44px rgba(30, 90, 72, 0.1),
-    0 6px 18px rgba(23, 58, 64, 0.08);
+    0 22px 44px rgba(124,58,237,0.12),
+    0 6px 18px rgba(30,27,46,0.08);
   backdrop-filter: blur(4px);
 }
 
@@ -198,8 +233,8 @@ pre code {
   );
   box-shadow:
     0 1px 0 var(--inset-glint) inset,
-    0 18px 34px rgba(30, 90, 72, 0.1),
-    0 4px 14px rgba(23, 58, 64, 0.06);
+    0 18px 34px rgba(124,58,237,0.12),
+    0 4px 14px rgba(30,27,46,0.06);
 }
 
 .feature-card:hover {
@@ -242,7 +277,7 @@ a {
   height: 2px;
   transform: scaleX(0);
   transform-origin: left;
-  background: linear-gradient(90deg, var(--lagoon), #7ed3bf);
+  background: linear-gradient(90deg, var(--lagoon), #c4b5fd);
   transition: transform 170ms ease;
 }
 
@@ -256,19 +291,13 @@ a {
   transform: scaleX(1);
 }
 
-@media (max-width: 640px) {
-  .nav-link::after {
-    bottom: -4px;
-  }
-}
-
 .site-footer {
   border-top: 1px solid var(--line);
   background: color-mix(in oklab, var(--header-bg) 84%, transparent 16%);
 }
 
 .rise-in {
-  animation: rise-in 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: rise-in 700ms cubic-bezier(0.16,1,0.3,1) both;
 }
 
 @keyframes rise-in {
@@ -283,17 +312,17 @@ a {
 }
 
 @keyframes gradient {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
+  0% { background-position: 0% 50% }
+  50% { background-position: 100% 50% }
+  100% { background-position: 0% 50% }
 }
 
 .animate-gradient {
   animation: gradient 10s ease infinite;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
 }
