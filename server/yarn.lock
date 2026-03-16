@@ -329,6 +329,13 @@
   dependencies:
     undici-types "~7.18.0"
 
+"@types/nodemailer@^7.0.11":
+  version "7.0.11"
+  resolved "https://registry.yarnpkg.com/@types/nodemailer/-/nodemailer-7.0.11.tgz#f04f91aac57eb4f2b79600867288bafe61c360d3"
+  integrity sha512-E+U4RzR2dKrx+u3N4DlsmLaDC6mMZOM/TPROxA0UAPiTgI0y4CEFBmZE+coGWTjakDriRsXG368lNk1u9Q0a2g==
+  dependencies:
+    "@types/node" "*"
+
 "@types/qs@*":
   version "6.15.0"
   resolved "https://registry.yarnpkg.com/@types/qs/-/qs-6.15.0.tgz#963ab61779843fe910639a50661b48f162bc7f79"
@@ -1015,6 +1022,11 @@ negotiator@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/negotiator/-/negotiator-1.0.0.tgz#b6c91bb47172d69f93cfd7c357bbb529019b5f6a"
   integrity sha512-8Ofs/AUQh8MaEcrlq5xOX0CQ9ypTF5dl78mjlMNfOK08fzpgTHQRQPBxcPlEtIw0yRpws+Zo/3r+5WRby7u3Gg==
+
+nodemailer@^8.0.2:
+  version "8.0.2"
+  resolved "https://registry.yarnpkg.com/nodemailer/-/nodemailer-8.0.2.tgz#70a6f031314a33bac7147eb9c378cdaa35fb619b"
+  integrity sha512-zbj002pZAIkWQFxyAaqoxvn+zoIwRnS40hgjqTXudKOOJkiFFgBeNqjgD3/YCR12sZnrghWYBY+yP1ZucdDRpw==
 
 nodemon@^3.1.14:
   version "3.1.14"
