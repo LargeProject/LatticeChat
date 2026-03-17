@@ -1,7 +1,7 @@
 import type {Middleware, UserRequest} from "../types.js";
 import User from "../../db/models/User.js";
 import {sendDuplicateEmail} from "../../util/mailer.js";
-import {getSession} from "../../util/auth.js";
+import {attemptGetSession} from "../../util/auth.js";
 
 const validateSignUp: Middleware = async (req, res, next) => {
   const { username, email, password } = req.body;
@@ -18,7 +18,7 @@ const validateSignUp: Middleware = async (req, res, next) => {
 
 const validateUser: Middleware = async (req: UserRequest, res, next) => {
   const token = req.headers.authorization?.replace("Bearer ", "") ?? "";
-  const authResponse = await getSession(token);
+  const authResponse = await attemptGetSession(token);
   const body = await authResponse.json() as any;
 
   const requestedUserId = req.params.id ?? "";

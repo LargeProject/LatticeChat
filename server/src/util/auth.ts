@@ -54,7 +54,7 @@ async function attemptEmailVerification(token: string) {
   })
 }
 
-async function getSession(token: string) {
+async function attemptGetSession(token: string) {
   return await auth.api.getSession({
     headers: {
       Authorization: `Bearer ${token}`,
@@ -73,4 +73,4 @@ async function attemptLogin(email: string, password: string) {
   });
 }
 
-export {attemptSignUp, attemptEmailVerification, getSession, attemptLogin};
+export {attemptSignUp, attemptEmailVerification, attemptGetSession, attemptLogin};

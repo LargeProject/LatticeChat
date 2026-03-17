@@ -1,6 +1,6 @@
 import type {Response as ExpressResponse} from 'express';
 import type {Service} from "../types.js";
-import {attemptEmailVerification, getSession, attemptSignUp, attemptLogin} from "../../util/auth.js";
+import {attemptEmailVerification, attemptGetSession, attemptSignUp, attemptLogin} from "../../util/auth.js";
 
 const handleSignUp: Service = async (req, res) => {
   const { username, email, password } = req.body;
@@ -37,11 +37,6 @@ const handleEmailVerify: Service = async (req, res) => {
 const handleLogin: Service = async (req, res) => {
   const { email, password } = req.body;
   const authResponse = await attemptLogin(email, password);
-  const headers = authResponse.headers;
-  const body = await authResponse.json() as any;
-
-  const token = headers.get('set-auth-token');
-  const userId = body.user.id;
 
   // TODO: add specific error responses
   if(authResponse.status !== 200) {
@@ -49,7 +44,10 @@ const handleLogin: Service = async (req, res) => {
     return;
   }
 
-  // TODO: include user information
+  const body = await authResponse.json() as any;
+  const token = authResponse.headers.get('set-auth-token');
+  const userId = body.user.id;
+
   res.status(200).send({
     success: true,
     message: "Login successful",
