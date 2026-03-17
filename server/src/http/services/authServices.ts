@@ -3,7 +3,6 @@ import type {Service} from "../types.js";
 import {attemptEmailVerification, getSession, attemptSignUp, attemptLogin} from "../../util/auth.js";
 
 const handleSignUp: Service = async (req, res) => {
-
   const { username, email, password } = req.body;
   const authResponse = await attemptSignUp(username, email, password);
 
@@ -15,12 +14,11 @@ const handleSignUp: Service = async (req, res) => {
 
   res.status(200).send({
     success: true,
-    message: "Sign up successful"
+    message: "Sign up successful, please check your account email"
   });
 }
 
 const handleEmailVerify: Service = async (req, res) => {
-
   const token = req.query.token?.toString() ?? "";
   const authResponse = await attemptEmailVerification(token);
 
@@ -37,38 +35,13 @@ const handleEmailVerify: Service = async (req, res) => {
 }
 
 const handleLogin: Service = async (req, res) => {
-
-  const token = (req.headers.authorization ?? "").replace("Bearer ", "");
-  const authResponse = await getSession(token);
-
-  const body = await authResponse.json() as any;
-  const isValid = (body != null);
-
-  // TODO: add specific error responses
-  if(authResponse.status !== 200) {
-    await sendDefaultError(res, authResponse);
-    return;
-  }
-
-  if (isValid) {
-    // TODO: include user information
-    res.status(200).send({
-      success: true,
-      message: "Login successful"
-    });
-  } else {
-    res.status(401).send({
-      success: false,
-      message: "Invalid token"
-    });
-  }
-}
-
-const handleGenerateToken: Service = async (req, res) => {
-
   const { email, password } = req.body;
   const authResponse = await attemptLogin(email, password);
-  const token = authResponse.headers.get('set-auth-token');
+  const headers = authResponse.headers;
+  const body = await authResponse.json() as any;
+
+  const token = headers.get('set-auth-token');
+  const userId = body.user.id;
 
   // TODO: add specific error responses
   if(authResponse.status !== 200) {
@@ -76,9 +49,11 @@ const handleGenerateToken: Service = async (req, res) => {
     return;
   }
 
-  // TODO: include user information (or only include for /login endpoint)
+  // TODO: include user information
   res.status(200).send({
     success: true,
+    message: "Login successful",
+    id: userId,
     token: token,
   });
 }
@@ -89,7 +64,7 @@ const handleLogout: Service = (req, res) => {
 
 //... TODO: add more auth handlers.
 
-export { handleSignUp, handleLogin, handleLogout, handleEmailVerify, handleGenerateToken }
+export { handleSignUp, handleLogin, handleLogout, handleEmailVerify}
 
 // temporary
 async function sendDefaultError(serverResponse: ExpressResponse, authResponse: Response) {

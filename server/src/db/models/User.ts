@@ -1,5 +1,4 @@
 import mongoose, { Schema } from "mongoose";
-import {boolean} from "better-auth";
 
 const UserSchema = new Schema({
   username: {
@@ -13,12 +12,24 @@ const UserSchema = new Schema({
     unique: true,
   },
   emailVerified: {
-    type: boolean,
+    type: Boolean,
     required: true,
     unique: true,
     default: false
+  },
+  createdAt: {
+    type: Date,
+    require: true,
+    unique: true,
+    default: Date.now()
+  },
+  updatedAt: {
+    type: Date,
+    require: true,
+    unique: true,
+    default: Date.now()
   }
 });
 
-const User = mongoose.model("users", UserSchema);
+const User = mongoose.model("user", UserSchema);
 export default User;

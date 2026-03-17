@@ -1,16 +1,16 @@
 import {betterAuth} from "better-auth";
 import {mongodbAdapter} from "@better-auth/mongo-adapter";
 import {bearer} from "better-auth/plugins";
-import transporter from "./mailer.js";
+import transporter, {sendVerificationEmail} from "./mailer.js";
 import mongoose from 'mongoose';
 import type { Db } from "mongodb";
 
-const ip = process.env.IP;
+const host = process.env.HOST;
 const port = process.env.PORT;
 
 const auth = betterAuth({
   plugins: [bearer()],
-  baseURL: `http://${ip}:${port}`,
+  baseURL: `http://${host}:${port}`,
   database: mongodbAdapter(mongoose.connection as unknown as Db),
   emailAndPassword: {
     enabled: true,
@@ -19,14 +19,16 @@ const auth = betterAuth({
   emailVerification: {
     sendOnSignUp: true,
     sendVerificationEmail: async ({ user, url, token }, request) => {
-      await transporter.sendMail({
-        from: `"No Reply" <encrypt.lattice.chat@gmail.com>`,
-        to: user.email,
-        subject: "Verify Email",
-        html: `<p>Verify Email: <a href="${url}">Click Here</a> </p>`
-      });
-    },
+      await sendVerificationEmail(user.email, url);
+    }
   },
+
+  user: {
+    modelName: "users",
+    fields: {
+      name: "username"
+    }
+  }
 
 });
 
