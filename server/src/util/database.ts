@@ -1,11 +1,7 @@
-import {MongoClient} from 'mongodb';
+import { MongoClient } from "mongodb";
+import { ENV } from "./env";
 
-const username= process.env.DB_USERNAME;
-const password = process.env.DB_PASSWORD;
-const port = process.env.DB_PORT;
-const ip = process.env.IP;
-
-const uri = `mongodb://${username}:${password}@${ip}:${port}/`;
+const uri = `mongodb://${ENV.DB_USERNAME}:${ENV.DB_PASSWORD}@${ENV.DB_HOSTNAME}:${ENV.DB_PORT}/`;
 
 function createMongoClient() {
   return new MongoClient(uri);
@@ -19,3 +15,4 @@ async function createMongoConnection() {
 }
 
 export { createMongoConnection, createMongoClient };
+
