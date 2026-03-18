@@ -4,7 +4,7 @@ import { bearer, emailOTP } from "better-auth/plugins";
 import { ENV } from "./env";
 import mongoose from "mongoose";
 import type { Db } from "mongodb";
-import { sendVerificationEmail } from "./mailer";
+import { sendDuplicateEmail, sendVerificationEmail } from "./mailer";
 
 const baseURL = ENV.HOST + ":" + ENV.PORT;
 
@@ -21,7 +21,14 @@ const auth = betterAuth({
   ],
   baseURL,
   database: mongodbAdapter(mongoose.connection as unknown as Db),
-  emailAndPassword: { enabled: true },
+  emailAndPassword: {
+    enabled: true,
+    onExistingUserSignUp: async ({user}, request) => {
+      if (user.emailVerified) {
+        await sendDuplicateEmail(user.email)
+      }
+    }
+  },
   user: {
     modelName: "users",
     fields: {
