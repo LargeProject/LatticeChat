@@ -38,7 +38,14 @@ const auth = betterAuth({
     }
   },
   user: {
-    modelName: "users"
+    modelName: "users",
+    additionalFields: {
+      phone: {
+        type: 'string',
+        required: false,
+        input: true
+      }
+    }
   }
 });
 
