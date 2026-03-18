@@ -1,7 +1,7 @@
 import type {Middleware, UserRequest} from "../types.js";
-import User from "../../db/models/User.js";
 import {sendDuplicateEmail} from "../../util/mailer.js";
 import {attemptGetSession} from "../../util/auth.js";
+import {User} from "../../db/models.js";
 
 const validateSignUp: Middleware = async (req, res, next) => {
   const { username, email, password } = req.body;

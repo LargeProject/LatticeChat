@@ -1,16 +1,13 @@
-import {betterAuth} from "better-auth";
-import {mongodbAdapter} from "@better-auth/mongo-adapter";
-import {bearer} from "better-auth/plugins";
-import transporter, {sendVerificationEmail} from "./mailer.js";
+import { betterAuth } from "better-auth";
+import { mongodbAdapter } from "@better-auth/mongo-adapter";
+import { bearer } from "better-auth/plugins";
+import { sendVerificationEmail } from "./mailer.js";
 import mongoose from 'mongoose';
 import type { Db } from "mongodb";
 
-const host = process.env.HOST;
-const port = process.env.PORT;
-
 const auth = betterAuth({
   plugins: [bearer()],
-  baseURL: `http://${host}:${port}`,
+  baseURL: process.env.BASE_URL,
   database: mongodbAdapter(mongoose.connection as unknown as Db),
   emailAndPassword: {
     enabled: true,
