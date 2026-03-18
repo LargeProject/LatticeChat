@@ -1,6 +1,6 @@
-import type {RequestService} from "./types.js";
-import {PingPacket} from "../packets/serverbound/PingPacket.js";
-import {PongPacket} from "../packets/clientbound/PongPacket.js";
+import type {RequestService} from "./types";
+import {PingPacket} from "../packets/serverbound/PingPacket";
+import {PongPacket} from "../packets/clientbound/PongPacket";
 
 // temporary
 const handlePing: RequestService<PingPacket> = (req) => {

@@ -1,9 +1,9 @@
 import express from "express";
 import http from "http";
-import { createIO } from "./socket/index.js";
-import apiRouter from "./http/index.js";
-import { ENV } from "./util/env.js";
-import { connectMongoDB } from "./db/index.js";
+import { createIO } from "./socket";
+import apiRouter from "./http";
+import { ENV } from "./util/env";
+import { connectMongoDB } from "./db";
 import "dotenv/config";
 
 const app = express();
