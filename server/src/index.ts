@@ -1,8 +1,10 @@
-import 'dotenv/config';
+import "dotenv/config";
 import express from "express";
 import http from "http";
-import {createIO} from "./socket/index.js";
-import apiRouter from "./http/index.js";
+import { createIO } from "./socket";
+import apiRouter from "./http";
+
+import "dotenv/config";
 
 const app = express();
 const server = http.createServer(app);
@@ -10,9 +12,9 @@ const io = createIO(server);
 const port = process.env.PORT;
 
 app.use(express.json());
-app.use('/api', apiRouter);
+app.use("/api", apiRouter);
 
 server.listen(port, () => {
   console.log("Lattice backend now listening");
-  console.log("Hello Noah :)");
+  console.log("Hello Andrew :)");
 });
