@@ -13,16 +13,24 @@ const transporter = nodemailer.createTransport({
 
 export default transporter;
 
-const sendVerificationEmail = async (receiverEmail: string, otp: string) => {
+const sendEmailOTP = async (receiverEmail: string, subject: string, otp: string, htmlCallback: (otp: string) => string) => {
   await transporter.sendMail({
     from: `"No Reply" <encrypt.lattice.chat@gmail.com>`,
     to: receiverEmail,
-    subject: "Email Verification Code",
-    html: `<p>Code: ${otp} </p>`
+    subject: subject,
+    html: htmlCallback(otp)
   });
 }
 
-const sendDuplicateEmail = async (receiverEmail: string) => {
+const sendEmailVerificationOTP = async (receiverEmail: string, otp: string) => {
+  sendEmailOTP(receiverEmail, otp, "Email Verification Code", otp => `<p>Verification Code: ${otp}</p>`);
+}
+
+const sendForgotPasswordOTP = async (receiverEmail: string, otp: string) => {
+  sendEmailOTP(receiverEmail, otp, "Forgot Password Code", otp => `<p>Forgot Reset Code: ${otp}</p>`);
+}
+
+const sendDuplicateEmailNotification = async (receiverEmail: string) => {
   await transporter.sendMail({
     from: `"No Reply" <encrypt.lattice.chat@gmail.com>`,
     to: receiverEmail,
@@ -31,4 +39,4 @@ const sendDuplicateEmail = async (receiverEmail: string) => {
   });
 }
 
-export {sendVerificationEmail, sendDuplicateEmail}
+export {sendEmailOTP, sendEmailVerificationOTP, sendDuplicateEmailNotification}
