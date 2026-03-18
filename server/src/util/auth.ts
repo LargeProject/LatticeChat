@@ -7,9 +7,11 @@ import { ENV } from "./env";
 const client = createMongoClient();
 const db = client.db();
 
+const baseURL = ENV.HOST + ":" + ENV.PORT;
+
 const auth = betterAuth({
   plugins: [bearer()],
-  baseURL: ENV.BASE_URL,
+  baseURL,
   database: mongodbAdapter(db, { client }),
   emailAndPassword: { enabled: true },
   user: {
