@@ -6,7 +6,7 @@ import { handleLog } from "./middleware/loggerMiddleware";
 const apiRouter = Router();
 
 apiRouter.use(handleLog);
-apiRouter.all("/api/auth/*", toNodeHandler(auth));
+apiRouter.all("/auth/*", toNodeHandler(auth));
 
 export default apiRouter;
 
