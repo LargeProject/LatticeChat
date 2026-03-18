@@ -1,9 +1,8 @@
+import { ENV } from "./util/env";
 import express from "express";
 import http from "http";
 import { createIO } from "./socket";
 import apiRouter from "./http";
-import { ENV } from "./util/env";
-import { connectMongoDB } from "./db";
 import "dotenv/config";
 
 const app = express();
@@ -15,5 +14,5 @@ app.use("/api", apiRouter);
 
 server.listen(ENV.PORT, () => {
   console.log("Lattice backend now listening");
-  console.log("Hello Andrew :)");
+  console.log("Hello Noah >:)");
 });

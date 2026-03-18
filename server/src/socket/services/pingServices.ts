@@ -1,6 +1,6 @@
-import type {RequestService} from "./types";
-import {PingPacket} from "../packets/serverbound/PingPacket";
-import {PongPacket} from "../packets/clientbound/PongPacket";
+import type { RequestService } from "./types";
+import { PingPacket } from "../packets/serverbound/PingPacket";
+import { PongPacket } from "../packets/clientbound/PongPacket";
 
 // temporary
 const handlePing: RequestService<PingPacket> = (req) => {
@@ -12,4 +12,4 @@ const handlePing: RequestService<PingPacket> = (req) => {
   socket.emit('pong', new PongPacket("pong!"));
 }
 
-export {handlePing}
+export { handlePing }

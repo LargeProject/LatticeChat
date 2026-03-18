@@ -1,10 +1,10 @@
-import { betterAuth } from "better-auth";
-import { mongodbAdapter } from "@better-auth/mongo-adapter";
-import { bearer, emailOTP, username } from "better-auth/plugins";
 import { ENV } from "./env";
 import mongoose from "mongoose";
-import { sendDuplicateEmailNotification, sendEmailVerificationOTP, sendForgetPasswordOTP } from "./mailer.js";
+import { betterAuth } from "better-auth";
+import { bearer, emailOTP, username } from "better-auth/plugins";
+import { mongodbAdapter } from "@better-auth/mongo-adapter";
 import { connectMongoDB } from "../db";
+import { sendDuplicateEmailNotification, sendEmailVerificationOTP, sendForgetPasswordOTP } from "./mailer.js";
 
 await connectMongoDB();
 const client = mongoose.connection.getClient();
@@ -31,7 +31,7 @@ const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
-    onExistingUserSignUp: async ({user}, request) => {
+    onExistingUserSignUp: async ({ user }, request) => {
       if (user.emailVerified) {
         await sendDuplicateEmailNotification(user.email)
       }
