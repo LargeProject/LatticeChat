@@ -1,8 +1,8 @@
-import type {Server as HttpServer} from "node:http";
-import {Server as IOServer} from "socket.io";
-import {PingPacket} from "./packets/serverbound/PingPacket.js";
-import {ClientRequest} from "./services/types.js";
-import {handlePing} from "./services/pingServices.js";
+import type { Server as HttpServer } from "node:http";
+import { Server as IOServer } from "socket.io";
+import { PingPacket } from "./packets/serverbound/PingPacket";
+import { ClientRequest } from "./services/types";
+import { handlePing } from "./services/pingServices";
 
 const createIO = (server: HttpServer) => {
   const io = new IOServer(server);
@@ -21,4 +21,4 @@ const createIO = (server: HttpServer) => {
   return io;
 }
 
-export {createIO}
+export { createIO }

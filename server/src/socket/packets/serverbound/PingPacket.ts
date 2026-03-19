@@ -1,6 +1,7 @@
-import type {Packet} from "../Packet.js";
+import type {Packet} from "../Packet";
 
 // temporary
-export class PingPacket implements Packet {
+export class PingPacket implements Packet
+{
   constructor(readonly content: string) {}
 }

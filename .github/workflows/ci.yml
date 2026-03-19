@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: server
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          node-version: 22
+          cache: "yarn"
+
+      - name: Enable Corepack (For yarn)
+        run: corepack enable
+
+      - name: Install deps
+        run: yarn install --frozen-lockfile
+
+      - name: Build
+        run: yarn build

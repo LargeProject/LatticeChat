@@ -1,10 +1,12 @@
-import {Router} from "express";
-import {handleLog} from "./middleware/loggerMiddleware.js";
-import authRouter from "./routes/authRouter.js";
+import auth from "../util/auth";
+import { toNodeHandler } from "better-auth/node";
+import { Router } from "express";
+import { handleLog } from "./middleware/loggerMiddleware";
 
 const apiRouter = Router();
 
 apiRouter.use(handleLog);
-apiRouter.use("/auth", authRouter);
+apiRouter.all("/auth/*any", toNodeHandler(auth));
 
 export default apiRouter;
+
