@@ -1,9 +1,19 @@
 import { Schema } from "mongoose";
 
 export const UserSchema = new Schema({
+  name: {
+    type: String,
+    required: true,
+    unique: true,
+  },
   username: {
     type: String,
     required: true,
+    unique: true,
+  },
+  displayUsername: {
+    type: String,
+    required: false,
     unique: true,
   },
   email: {

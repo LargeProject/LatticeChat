@@ -11,8 +11,6 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export default transporter;
-
 const sendEmailOTP = async (receiverEmail: string, subject: string, otp: string, htmlCallback: (otp: string) => string) => {
   await transporter.sendMail({
     from: `"No Reply" <encrypt.lattice.chat@gmail.com>`,
