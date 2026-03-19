@@ -7,6 +7,7 @@ import { motion } from 'framer-motion'
 function VerifyEmail() {
   const [code, setCode] = useState<string[]>(['', '', '', '', '', ''])
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
+  // @ts-expect-error - unused variable
   const navigate = useNavigate()
   const isLoading = false
 

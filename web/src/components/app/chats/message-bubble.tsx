@@ -1,4 +1,4 @@
-import type { Message } from './message-list'
+import type { Message } from './messages'
 
 export function MessageBubble({ message }: { message: Message }) {
   const isUser = message.role === 'user'

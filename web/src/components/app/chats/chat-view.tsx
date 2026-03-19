@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { Chat } from './layout'
-import { MessageList, type Message } from './message-list'
+import { MessageList, type Message } from './messages'
 import { ChatInput } from './chat-input'
 
 export function ChatView({
@@ -43,7 +43,7 @@ export function ChatView({
   return (
     <div className="flex flex-1 flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-(--line) p-3">
+      <div className="flex items-center justify-between border-b border-(--line) p-4">
         <span>{chat.user.name}</span>
 
         <button onClick={onTogglePanel} className="text-xs">

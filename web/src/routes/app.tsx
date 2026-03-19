@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import Sidebar from '../components/app/sidebar'
+import Sidebar from '#/components/app/sidebar'
 import ChatLayout from '#/components/app/chats/layout'
 
 function RouteComponent() {

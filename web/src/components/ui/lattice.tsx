@@ -3,7 +3,13 @@ import { useMemo, useRef } from 'react'
 import { OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
 
-function CryptoLattice() {
+function CryptoLattice({
+  animate = true,
+  position = [0, 0, 0],
+}: {
+  animate?: boolean
+  position?: [number, number, number]
+}) {
   const group = useRef<THREE.Group>(null!)
 
   const { positions, colors, lines } = useMemo(() => {
@@ -71,7 +77,10 @@ function CryptoLattice() {
   }, [])
 
   const acc = useRef(0)
+
   useFrame((state, delta) => {
+    if (!animate) return
+
     acc.current += delta
     if (acc.current < 1 / 40) return
     acc.current = 0
@@ -80,7 +89,10 @@ function CryptoLattice() {
 
     group.current.rotation.y = t * 0.05
     group.current.rotation.x = Math.sin(t * 0.05) * 0.2
-    group.current.position.z = 2 + Math.sin(t * 0.25) * 1
+
+    // ✅ preserve external position, animate relative to it
+    const baseZ = position[2]
+    group.current.position.z = baseZ + Math.sin(t * 0.25) * 1
   })
 
   const circleTexture = useMemo(() => {
@@ -102,7 +114,7 @@ function CryptoLattice() {
   }, [])
 
   return (
-    <group ref={group}>
+    <group ref={group} position={position}>
       <points>
         <bufferGeometry>
           <bufferAttribute
@@ -148,15 +160,30 @@ function CryptoLattice() {
   )
 }
 
-export default function LatticeAnimation() {
+export default function LatticeAnimation({
+  zoom = 5,
+  autoRotateCamera = false,
+  animateLattice = true,
+  position = [0, 0, 0],
+}: {
+  zoom?: number
+  autoRotateCamera?: boolean
+  animateLattice?: boolean
+  position?: [number, number, number]
+}) {
   return (
-    <Canvas
-      camera={{ position: [0, 0, 5], fov: 100 }}
-      gl={{ antialias: false }}
-      dpr={[0.8, 1]}
-    >
-      <OrbitControls enableRotate={true} enableZoom={true} enablePan={true} />
-      <CryptoLattice />
+    <Canvas camera={{ position: [0, 0, zoom], fov: 100 }}>
+      <OrbitControls
+        enableRotate
+        enableZoom
+        enablePan
+        autoRotate={autoRotateCamera}
+      />
+
+      <CryptoLattice
+        animate={animateLattice}
+        position={position}
+      />
     </Canvas>
   )
 }

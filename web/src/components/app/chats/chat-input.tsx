@@ -15,16 +15,21 @@ export function ChatInput({
 
   return (
     <div className="border-t border-(--line) p-3">
-      <div className="flex items-center gap-2 rounded-xl border border-(--line) bg-(--surface) px-3 py-2">
+      <div className="relative flex items-center gap-2 rounded-xl border border-(--line) bg-(--surface) px-3 py-2">
+        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-green-500 animate-pulse">
+          {">"}
+        </span>
+      
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === 'Enter') handleSend()
           }}
-          className="flex-1 bg-transparent outline-none text-sm"
+          className="flex-1 bg-transparent outline-none text-sm pl-6"
           placeholder="Speak freely..."
         />
+      
         <button onClick={handleSend} className="text-[#52525b]">
           Send
         </button>
