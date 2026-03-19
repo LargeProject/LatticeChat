@@ -339,7 +339,7 @@ a {
 }
 
 .animate-gradient {
-  animation: gradient 10s ease infinite;
+  animation: gradient 12s ease infinite;
 }
 
 ::view-transition-old(root),
