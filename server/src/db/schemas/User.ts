@@ -19,13 +19,11 @@ export const userSchema = new Schema({
   emailVerified: {
     type: Boolean,
     required: true,
-    unique: true,
     default: false,
   },
   phone: {
     type: String,
     required: true,
-    unique: true,
   },
   biography: {
     type: String,
