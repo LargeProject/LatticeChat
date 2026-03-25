@@ -43,6 +43,8 @@ const auth = betterAuth({
   database: mongodbAdapter(db, { client }),
   emailAndPassword: {
     enabled: true,
+    minPasswordLength: 3,
+    maxPasswordLength: 100,
     requireEmailVerification: true,
     onExistingUserSignUp: async ({ user }, request) => {
       if (user.emailVerified) {
@@ -65,7 +67,6 @@ const auth = betterAuth({
         type: "string",
         required: false,
         input: true,
-        defaultValue: "",
       },
       friends: {
         type: "string",
