@@ -61,6 +61,32 @@ const auth = betterAuth({
           input: z.string().refine(validator.isMobilePhone)
         }
       },
+      biography: {
+        type: "string",
+        required: false,
+        input: true,
+        defaultValue: "",
+      },
+      friends: {
+        type: "string",
+        input: false,
+        default: []
+      },
+      outgoingFriendRequests: {
+        type: "string",
+        input: false,
+        default: []
+      },
+      incomingFriendRequests: {
+        type: "string",
+        input: false,
+        default: []
+      },
+      conversations: {
+        type: "string",
+        input: false,
+        default: []
+      }
     },
   },
 });

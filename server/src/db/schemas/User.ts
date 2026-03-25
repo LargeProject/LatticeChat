@@ -27,6 +27,34 @@ export const userSchema = new Schema({
     required: true,
     unique: true,
   },
+  biography: {
+    type: String,
+    required: false,
+  },
+  friends: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    }
+  ],
+  outgoingFriendRequests: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "FriendRequest",
+    }
+  ],
+  incomingFriendRequests: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "FriendRequest",
+    }
+  ],
+  conversations: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Conversation"
+    }
+  ],
   createdAt: {
     type: Date,
     require: true,
