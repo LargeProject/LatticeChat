@@ -93,3 +93,14 @@ const auth = betterAuth({
 });
 
 export default auth;
+
+async function attemptGetSession(token: string) {
+  return await auth.api.getSession({
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    asResponse: true
+  })
+}
+
+export { attemptGetSession };
