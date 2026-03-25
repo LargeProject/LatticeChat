@@ -1,4 +1,4 @@
-import { Schema } from "mongoose";
+import {HydratedDocument, InferSchemaType, Schema} from "mongoose";
 import { User } from "../models";
 
 export const friendRequestSchema = new Schema({
@@ -46,3 +46,6 @@ friendRequestSchema.post("save", { document: true, query: false }, async functio
 });
 
 friendRequestSchema.index({ from: 1, to: 1 }, {unique: true});
+
+export type FriendRequestType = InferSchemaType<typeof friendRequestSchema>;
+export type FriendRequestDocument = HydratedDocument<FriendRequestType>;

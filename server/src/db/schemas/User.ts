@@ -1,4 +1,4 @@
-import { Schema } from "mongoose";
+import {HydratedDocument, InferSchemaType, Schema} from "mongoose";
 
 export const userSchema = new Schema({
   username: {
@@ -66,3 +66,6 @@ export const userSchema = new Schema({
     default: Date.now,
   },
 });
+
+export type UserType = InferSchemaType<typeof userSchema>;
+export type UserDocument = HydratedDocument<UserType>;
