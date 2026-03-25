@@ -19,7 +19,13 @@ const baseURL = "http://" + ENV.HOST + ":" + ENV.PORT;
 const auth = betterAuth({
   plugins: [
     jwt(),
-    username(),
+    username({
+      minUsernameLength: 3,
+      maxUsernameLength: 20,
+      usernameValidator: (username) => {
+        return /^[a-zA-Z0-9_-]+$/.test(username);
+      }
+    }),
     bearer(),
     emailOTP({
       async sendVerificationOTP({ email, otp, type }) {
