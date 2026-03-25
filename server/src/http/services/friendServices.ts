@@ -3,11 +3,11 @@ import { FriendRequest, User } from "../../db";
 import { addFriend, hasFriend } from "../../util/mongoose/user";
 import { getFriendRequestFromTo } from "../../util/mongoose/friendrequest";
 
-const handleAddOutgoingFriendRequest: Service = async (req: UserRequest, res) => {
+const handleAddFriendRequest: Service = async (req: UserRequest, res) => {
 
   const sessionBody = req.userSessionInfo;
   const senderId = sessionBody.user.id;
-  const targetId = req.query.targetId ?? "";
+  const targetId = req.params.target_id ?? "";
 
   const sender = await User.findById(senderId);
   const target = await User.findById(targetId);
@@ -43,11 +43,7 @@ const handleAddOutgoingFriendRequest: Service = async (req: UserRequest, res) =>
   }
 }
 
-const handleRemoveOutgoingFriendRequest: Service = async (req: UserRequest, res) => {
-
-}
-
-const handleRemoveIncomingFriendRequest: Service = async (req: UserRequest, res) => {
+const handleRemoveFriendRequest: Service = async (req: UserRequest, res) => {
 
 }
 
@@ -56,4 +52,4 @@ const handleRemoveFriend: Service = async (req: UserRequest, res) => {
 }
 
 
-export { handleAddOutgoingFriendRequest, handleRemoveOutgoingFriendRequest, handleRemoveIncomingFriendRequest, handleRemoveFriend };
+export { handleAddFriendRequest, handleRemoveFriendRequest, handleRemoveFriend };
