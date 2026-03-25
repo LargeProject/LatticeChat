@@ -1,11 +1,9 @@
-import type { RequestService } from "./types";
+import type { RequestService } from "../types";
 import { PingPacket } from "../packets/serverbound/PingPacket";
 import { PongPacket } from "../packets/clientbound/PongPacket";
 
 // temporary
-const handlePing: RequestService<PingPacket> = (req) => {
-  const socket = req.socket;
-  const packet = req.packet;
+const handlePing: RequestService<PingPacket> = (socket, packet) => {
 
   console.log(`User ${socket.id} is pinging the server! Additional Content: ${packet.content}`);
 
