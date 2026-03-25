@@ -1,3 +1,5 @@
+import * as z from "zod";
+import validator from "validator";
 import { ENV } from "./env";
 import mongoose from "mongoose";
 import { betterAuth } from "better-auth";
@@ -55,6 +57,9 @@ const auth = betterAuth({
         type: "string",
         required: false,
         input: true,
+        validator: {
+          input: z.string().refine(validator.isMobilePhone)
+        }
       },
     },
   },
