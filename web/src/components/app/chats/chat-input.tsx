@@ -62,6 +62,7 @@ export function ChatInput({
         focus-within:border-zinc-400/70 focus-within:ring-2 focus-within:ring-zinc-400/25
       "
     >
+      
       <textarea
         ref={textareaRef}
         value={text}

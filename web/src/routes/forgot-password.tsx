@@ -21,9 +21,9 @@ function ForgotPassword() {
   return (
     <main className="min-h-screen bg-black text-zinc-100 flex items-center justify-center px-4 py-16">
       <div className="w-full max-w-lg rounded-2xl border border-zinc-800 bg-zinc-950/80 backdrop-blur-lg p-8 shadow-2xl space-y-6">
-        <ShineBorder shineColor={['#34d399', '#22d3ee']} />
+        <ShineBorder shineColor={['#ef4444', '#3b82f6']} />
         <div className="space-y-2 text-center">
-          <h1 className="text-3xl md:text-3xl font-extrabold bg-linear-to-r from-green-400 via-teal-400 to-cyan-500 animate-gradient bg-clip-text text-transparent">
+          <h1 className="text-3xl md:text-3xl font-extrabold bg-[#E1E1E1] bg-clip-text text-transparent">
             Forgot your password?
           </h1>
           <p className="text-sm text-zinc-400">
@@ -70,7 +70,7 @@ function ForgotPassword() {
             whileTap={{ scale: 0.98 }}
             type="submit"
             disabled={!email || !isValidEmail}
-            className="w-full bg-linear-to-r from-black via-cyan-500 to-black bg-size-[200%_200%] text-white font-semibold py-3 rounded-lg hover:bg-zinc-200 active:translate-y-px transition disabled:opacity-60 animate-gradient"
+            className="w-full  text-white font-semibold py-3 rounded-lg hover:bg-zinc-200 active:translate-y-px transition disabled:opacity-60 "
           >
             Send reset link
           </motion.button>

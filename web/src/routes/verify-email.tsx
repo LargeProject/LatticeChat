@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { createFileRoute } from '@tanstack/react-router'
 import { ShineBorder } from '@/components/ui/shine-border'
-import { motion } from 'framer-motion'
 import { authClient } from '#/lib/auth.ts';
 
 function VerifyEmail() {
@@ -37,6 +36,23 @@ function VerifyEmail() {
       },
     );
   };
+  
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault()
+  
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, code.length)
+    if (!pasted) return
+  
+    const newCode = [...code]
+  
+    pasted.split('').forEach((char, i) => {
+      newCode[i] = char
+    })
+  
+    setCode(newCode)
+  
+    inputRefs.current[Math.min(pasted.length - 1, code.length - 1)]?.focus()
+  }
 
   const handleChange = (index: number, value: string) => {
     if (!/^\d*$/.test(value)) return
@@ -110,22 +126,13 @@ function VerifyEmail() {
                 inputMode="numeric"
                 pattern="[0-9]*"
                 value={digit}
+                onPaste={handlePaste}
                 onChange={(e) => handleChange(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(index, e)}
                 className="w-12 h-12 text-center text-xl border border-gray-300 rounded bg-black text-white"
               />
             ))}
           </div>
-
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            type="submit"
-            disabled={isLoading || code.some((digit) => !digit)}
-            className="w-full bg-linear-to-r from-black via-cyan-500 to-black bg-size-[200%_200%] text-white font-bold py-3 px-4 rounded-lg shadow-lg hover:from-cyan-500 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 disabled:opacity-50 animate-gradient"
-          >
-            {isLoading ? 'Verifying...' : 'Verify Email'}
-          </motion.button>
         </form>
       </div>
     </main>
