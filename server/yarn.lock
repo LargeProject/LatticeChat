@@ -2738,7 +2738,6 @@ __metadata:
     "@types/mongodb": "npm:^4.0.7"
     "@types/mongoose": "npm:^5.11.97"
     "@types/node": "npm:^25.3.5"
-    "@types/nodemailer": "npm:^7.0.11"
     "@types/validator": "npm:^13"
     better-auth: "npm:^1.5.5"
     better-call: "npm:1.3.2"
