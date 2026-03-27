@@ -4,6 +4,7 @@ import http from "http";
 import { createIO } from "./socket";
 import apiRouter from "./http";
 import "dotenv/config";
+import cors from 'cors';
 
 const app = express();
 const server = http.createServer(app);
