@@ -16,7 +16,7 @@ await connectMongoDB();
 const client = mongoose.connection.getClient();
 const db = client.db();
 
-const baseURL = "http://" + ENV.HOST + ":" + ENV.PORT;
+const baseURL = ENV.HOST + ":" + ENV.PORT;
 
 const auth = betterAuth({
   plugins: [
@@ -26,7 +26,7 @@ const auth = betterAuth({
       maxUsernameLength: 20,
       usernameValidator: (username) => {
         return /^[a-zA-Z0-9_-]+$/.test(username);
-      }
+      },
     }),
     emailOTP({
       async sendVerificationOTP({ email, otp, type }) {
@@ -39,6 +39,7 @@ const auth = betterAuth({
     }),
   ],
   baseURL,
+  trustedOrigins: [ENV.ALLOWED_ORIGIN],
   database: mongodbAdapter(db, { client }),
   emailAndPassword: {
     enabled: true,
@@ -59,8 +60,8 @@ const auth = betterAuth({
         required: false,
         input: true,
         validator: {
-          input: z.string().refine(validator.isMobilePhone)
-        }
+          input: z.string().refine(validator.isMobilePhone),
+        },
       },
       biography: {
         type: "string",
@@ -70,23 +71,23 @@ const auth = betterAuth({
       friends: {
         type: "string",
         input: false,
-        default: []
+        default: [],
       },
       outgoingFriendRequests: {
         type: "string",
         input: false,
-        default: []
+        default: [],
       },
       incomingFriendRequests: {
         type: "string",
         input: false,
-        default: []
+        default: [],
       },
       conversations: {
         type: "string",
         input: false,
-        default: []
-      }
+        default: [],
+      },
     },
   },
 });
@@ -98,8 +99,8 @@ async function attemptGetSession(token: string) {
     headers: {
       Authorization: `Bearer ${token}`,
     },
-    asResponse: true
-  })
+    asResponse: true,
+  });
 }
 
 export { attemptGetSession };
