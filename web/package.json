@@ -38,7 +38,11 @@
     "framer-motion": "^12.38.0",
     "install": "^0.13.0",
     "lucide-react": "^0.545.0",
+<<<<<<< HEAD
     "motion": "^12.38.0",
+=======
+    "nitro": "^3.0.260311-beta",
+>>>>>>> 8c9a5cce35444ec099b2b601ad1229a193d35c3b
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-icons": "^5.6.0",

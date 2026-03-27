@@ -53,7 +53,11 @@ export function useAuthLogic() {
         email,
         password,
         name: username,
+<<<<<<< HEAD:web/src/components/index/logic.tsx
         callbackURL: '/app',
+=======
+        callbackURL: '/verify-email',
+>>>>>>> 8c9a5cce35444ec099b2b601ad1229a193d35c3b:web/src/components/landing/logic.tsx
       },
       {
         onRequest: (ctx) => {
@@ -61,14 +65,24 @@ export function useAuthLogic() {
         },
         onSuccess: (ctx) => {
           setIsPending(false);
+          sendVerificationCode();
+          const jwt = ctx.response.headers.get('set-auth-token');
         },
         onError: (ctx) => {
           // display the error message
+          // if email is taken, setEmailAvailability(true)
           alert(ctx.error.message);
           setIsPending(false);
         },
       },
     );
+  }
+
+  async function sendVerificationCode() {
+    const { data, error } = await authClient.emailOtp.sendVerificationOtp({
+      email: email,
+      type: 'email-verification',
+    });
   }
 
   async function signin() {
