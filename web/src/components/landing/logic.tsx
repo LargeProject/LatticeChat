@@ -53,7 +53,7 @@ export function useAuthLogic() {
         email,
         password,
         name: username,
-        callbackURL: '/dashboard',
+        callbackURL: '/verify-email',
       },
       {
         onRequest: (ctx) => {
