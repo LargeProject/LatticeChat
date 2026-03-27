@@ -23,7 +23,7 @@ export function UserInfoPanel({ user }: UserInfoPanelProps) {
     <aside className="h-full border-l border-(--line) bg-(--surface) p-4">
       <div className="flex h-full flex-col gap-4">
         <header className="rounded-2xl border border-(--line) bg-(--surface-strong) p-4">
-          <div className="flex items-start gap-3">
+          <div className="flex gap-3">
             <div className="relative shrink-0">
               {user.avatar ? (
                 <img
@@ -43,13 +43,10 @@ export function UserInfoPanel({ user }: UserInfoPanelProps) {
               />
             </div>
 
-            <div className="min-w-0">
+            <div className="flex items-center justify-center">
               <h2 className="truncate text-sm font-semibold text-(--fg)">
                 {user.name}
               </h2>
-              <p className="mt-1 truncate text-xs text-(--text-secondary)">
-                Private conversation
-              </p>
             </div>
           </div>
         </header>
@@ -66,14 +63,6 @@ export function UserInfoPanel({ user }: UserInfoPanelProps) {
                 Joined
               </dt>
               <dd className="text-xs font-medium text-(--fg)">Recently</dd>
-            </div>
-
-            <div className="flex items-center justify-between gap-2">
-              <dt className="flex items-center gap-2 text-xs text-(--text-secondary)">
-                <Shield size={14} />
-                Trust level
-              </dt>
-              <dd className="text-xs font-medium text-(--fg)">Verified</dd>
             </div>
 
             <div className="flex items-center justify-between gap-2">
