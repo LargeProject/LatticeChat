@@ -1,7 +1,6 @@
 import type { Server as HttpServer } from "node:http";
 import { Server as IOServer } from "socket.io";
 import { PingPacket } from "./packets/serverbound/PingPacket";
-import { ClientRequest } from "./services/types";
 import { handlePing } from "./services/pingServices";
 
 const createIO = (server: HttpServer) => {
@@ -9,10 +8,7 @@ const createIO = (server: HttpServer) => {
 
   io.on("connection", (socket) => {
 
-    socket.on('ping', (packet) => {
-      const pingPacket = packet as PingPacket;
-      handlePing(new ClientRequest(socket, pingPacket))
-    });
+    socket.on('ping', (packet: PingPacket) => handlePing(socket, packet));
 
     console.log("Client connected!");
 
