@@ -87,7 +87,7 @@ export function useAuthLogic() {
       {
         email,
         password,
-        callbackURL: '/dashboard',
+        callbackURL: '/app',
       },
       {
         onRequest: (ctx) => {
