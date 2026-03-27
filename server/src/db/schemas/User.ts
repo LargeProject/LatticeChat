@@ -1,4 +1,4 @@
-import { Schema } from "mongoose";
+import {HydratedDocument, InferSchemaType, Schema} from "mongoose";
 
 export const userSchema = new Schema({
   username: {
@@ -19,14 +19,40 @@ export const userSchema = new Schema({
   emailVerified: {
     type: Boolean,
     required: true,
-    unique: true,
     default: false,
   },
   phone: {
     type: String,
-    required: true,
-    unique: true,
+    required: false,
   },
+  biography: {
+    type: String,
+    required: false,
+  },
+  friends: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    }
+  ],
+  outgoingFriendRequests: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "FriendRequest",
+    }
+  ],
+  incomingFriendRequests: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "FriendRequest",
+    }
+  ],
+  conversations: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Conversation"
+    }
+  ],
   createdAt: {
     type: Date,
     require: true,
@@ -40,3 +66,6 @@ export const userSchema = new Schema({
     default: Date.now,
   },
 });
+
+export type UserType = InferSchemaType<typeof userSchema>;
+export type UserDocument = HydratedDocument<UserType>;
