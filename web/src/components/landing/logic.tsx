@@ -53,11 +53,7 @@ export function useAuthLogic() {
         email,
         password,
         name: username,
-<<<<<<< HEAD:web/src/components/index/logic.tsx
-        callbackURL: '/app',
-=======
         callbackURL: '/verify-email',
->>>>>>> 8c9a5cce35444ec099b2b601ad1229a193d35c3b:web/src/components/landing/logic.tsx
       },
       {
         onRequest: (ctx) => {

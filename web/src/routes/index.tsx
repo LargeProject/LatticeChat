@@ -3,8 +3,8 @@ import { lazy, Suspense } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ShineBorder } from '@/components/ui/shine-border'
 const LatticeAnimation = lazy(() => import('@/components/ui/lattice'))
-import Label from '../components/index/label'
-import { useAuthLogic } from '../components/index/logic'
+import Label from '../components/landing/label'
+import { useAuthLogic } from '../components/landing/logic'
 
 export default function Auth() {
   // this is the brain of the auth page that has all of the functions api developer :) ily

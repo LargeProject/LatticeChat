@@ -1,8 +1,18 @@
 {
-  "dependencies": {
-    "@heroui/react": "^3.0.1",
-    "@heroui/styles": "^3.0.1",
-    "react-icons": "^5.6.0"
+  "name": "latticechat",
+  "private": true,
+  "packageManager": "yarn@4.13.0",
+  "workspaces": [
+    "web",
+    "server"
+  ],
+  "scripts": {
+    "dev": "concurrently \"yarn workspace server dev\" \"yarn workspace web dev\"",
+    "build": "yarn workspace server build && yarn workspace web build",
+    "lint": "yarn workspace web lint",
+    "test": "yarn workspace web test"
   },
-  "packageManager": "yarn@4.13.0"
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
 }
