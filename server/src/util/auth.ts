@@ -18,7 +18,6 @@ const baseURL = "http://" + ENV.HOST + ":" + ENV.PORT;
 
 const auth = betterAuth({
   plugins: [
-    jwt(),
     username(),
     bearer(),
     emailOTP({

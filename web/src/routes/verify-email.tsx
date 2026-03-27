@@ -3,6 +3,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { createFileRoute } from '@tanstack/react-router'
 import { ShineBorder } from '@/components/ui/shine-border'
 import { motion } from 'framer-motion'
+import { authClient } from '#/lib/auth.ts';
 
 function VerifyEmail() {
   const [code, setCode] = useState<string[]>(['', '', '', '', '', ''])
@@ -10,13 +11,31 @@ function VerifyEmail() {
   const navigate = useNavigate()
   const isLoading = false
 
-  const verifyCode = () => {
-    const verificationCode = code.join('')
-    console.log('Code:', verificationCode)
+  const verifyCode = async () => {
+    const verificationCode = code.join('');
+    console.log('Code:', verificationCode);
 
     // example
     // navigate({ to: "/dashboard" })
-  }
+
+    // Sorry Pranav not sure where you wanted me to put this, just putting it here
+    // so it works for now =D
+    const email = "placeholder@gmail.com"; // TODO: replace with actual email
+
+    const { data, error } = await authClient.emailOtp.verifyEmail({
+        email: email,
+        otp: verificationCode
+      },
+      {
+        onSuccess: (ctx) => {
+          navigate({ to: "/app" });
+        },
+        onError: (ctx) => {
+          alert(ctx.error.message);
+        },
+      },
+    );
+  };
 
   const handleChange = (index: number, value: string) => {
     if (!/^\d*$/.test(value)) return

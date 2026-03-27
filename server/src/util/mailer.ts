@@ -1,40 +1,36 @@
-import nodemailer from 'nodemailer';
+import sendgridMailer from '@sendgrid/mail'
 import { ENV } from "./env";
 
-const transporter = nodemailer.createTransport({
-  host: "smtp.sendgrid.net",
-  port: 587,
-  secure: false,
-  auth: {
-    user: 'apikey',
-    pass: ENV.SENDGRID_API_KEY
-  },
-});
-
-const sendEmailOTP = async (receiverEmail: string, subject: string, otp: string, htmlCallback: (otp: string) => string) => {
-  await transporter.sendMail({
-    from: `"No Reply" <encrypt.lattice.chat@gmail.com>`,
-    to: receiverEmail,
-    subject: subject,
-    html: htmlCallback(otp)
-  });
-}
+sendgridMailer.setApiKey(ENV.SENDGRID_API_KEY)
 
 const sendEmailVerificationOTP = async (receiverEmail: string, otp: string) => {
-  sendEmailOTP(receiverEmail, otp, "Email Verification Code", otp => `<p>Verification Code: ${otp}</p>`);
+  sendEmailOTP(receiverEmail, "Email Verification Code", otp, otp => `<p>Verification Code: ${otp}</p>`);
 }
 
 const sendForgetPasswordOTP = async (receiverEmail: string, otp: string) => {
-  sendEmailOTP(receiverEmail, otp, "Forgot Password Code", otp => `<p>Forgot Reset Code: ${otp}</p>`);
+  sendEmailOTP(receiverEmail, "Forgot Password Code", otp, otp => `<p>Forgot Reset Code: ${otp}</p>`);
+}
+
+const sendEmailOTP = async (receiverEmail: string, subject: string, otp: string, htmlCallback: (otp: string) => string) => {
+  try {
+    sendgridMailer.send({
+      from: `"No Reply" <lattice@cop4331site.com>`,
+      to: receiverEmail,
+      subject: subject,
+      html: htmlCallback(otp)
+    });
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 const sendDuplicateEmailNotification = async (receiverEmail: string) => {
-  await transporter.sendMail({
-    from: `"No Reply" <encrypt.lattice.chat@gmail.com>`,
+  sendgridMailer.send({
+    from: `"No Reply" <lattice@cop4331site.com>`,
     to: receiverEmail,
     subject: "Email Already In Use",
     html: `<p>This email is already in use.</p>`
   });
 }
 
-export {sendEmailOTP, sendEmailVerificationOTP, sendForgetPasswordOTP, sendDuplicateEmailNotification}
+export { sendEmailOTP, sendEmailVerificationOTP, sendForgetPasswordOTP, sendDuplicateEmailNotification }
