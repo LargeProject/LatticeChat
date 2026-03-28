@@ -4766,6 +4766,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/validator@npm:^13":
+  version: 13.15.10
+  resolution: "@types/validator@npm:13.15.10"
+  checksum: 10c0/3e2e65fcd37dd6961ca3fd0535293d0c42f5911dc3ca44b96f458835e6db2392b678ccbb0c9815d8c0a14e653439e6c62c7b8758a6cd1d6e390551c9e56618ac
+  languageName: node
+  linkType: hard
+
 "@types/webidl-conversions@npm:*":
   version: 7.0.3
   resolution: "@types/webidl-conversions@npm:7.0.3"
@@ -8152,6 +8159,27 @@ __metadata:
   languageName: node
   linkType: hard
 
+"motion@npm:^12.38.0":
+  version: 12.38.0
+  resolution: "motion@npm:12.38.0"
+  dependencies:
+    framer-motion: "npm:^12.38.0"
+    tslib: "npm:^2.4.0"
+  peerDependencies:
+    "@emotion/is-prop-valid": "*"
+    react: ^18.0.0 || ^19.0.0
+    react-dom: ^18.0.0 || ^19.0.0
+  peerDependenciesMeta:
+    "@emotion/is-prop-valid":
+      optional: true
+    react:
+      optional: true
+    react-dom:
+      optional: true
+  checksum: 10c0/661a08b17592295b267df6a4a4887e9da78b29c310aaf60860fcfa68dac6cf2c39ce03701d6182159ad6f3000f28b8c62c3c6d139e620435d56b3bb5f28c5c1b
+  languageName: node
+  linkType: hard
+
 "mpath@npm:0.9.0":
   version: 0.9.0
   resolution: "mpath@npm:0.9.0"
@@ -9341,6 +9369,7 @@ __metadata:
     "@types/mongodb": "npm:^4.0.7"
     "@types/mongoose": "npm:^5.11.97"
     "@types/node": "npm:^25.3.5"
+    "@types/validator": "npm:^13"
     better-auth: "npm:^1.5.5"
     better-call: "npm:1.3.2"
     cors: "npm:^2.8.6"
@@ -9357,6 +9386,7 @@ __metadata:
     tsup: "npm:^8.5.1"
     tsx: "npm:^4.21.0"
     typescript: "npm:^5.9.3"
+    validator: "npm:^13.15.26"
     zod: "npm:^4.3.6"
   languageName: unknown
   linkType: soft
@@ -10480,6 +10510,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"validator@npm:^13.15.26":
+  version: 13.15.26
+  resolution: "validator@npm:13.15.26"
+  checksum: 10c0/d66041685c531423f6b514d0481228503b96682fe30ed7925ad77ff3cd08c3983dc94f45e18457e44f62f89027b94a3342009d65421800ce65f6e0d2c6eaf7fc
+  languageName: node
+  linkType: hard
+
 "vary@npm:^1, vary@npm:^1.1.2":
   version: 1.1.2
   resolution: "vary@npm:1.1.2"
@@ -10703,6 +10740,7 @@ __metadata:
     install: "npm:^0.13.0"
     jsdom: "npm:^28.1.0"
     lucide-react: "npm:^0.545.0"
+    motion: "npm:^12.38.0"
     nitro: "npm:^3.0.260311-beta"
     prettier: "npm:^3.8.1"
     react: "npm:^19.2.0"
