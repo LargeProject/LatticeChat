@@ -2,9 +2,10 @@ import { createFileRoute } from '@tanstack/react-router'
 import { lazy, Suspense } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ShineBorder } from '@/components/ui/shine-border'
-const LatticeAnimation = lazy(() => import('@/components/ui/lattice'))
 import Label from '../components/landing/label'
 import { useAuthLogic } from '../components/landing/logic'
+
+const LatticeAnimation = lazy(() => import('@/components/ui/lattice'))
 
 export default function Auth() {
   // this is the brain of the auth page that has all of the functions api developer :) ily
@@ -35,6 +36,7 @@ export default function Auth() {
 
   return (
     <main className="relative min-h-screen w-screen bg-black overflow-hidden flex items-stretch justify-center">
+
       <div className="relative w-full h-screen md:h-screen overflow-hidden bg-zinc-950">
         <div className="pointer-events-none absolute inset-0 " />
 
@@ -73,16 +75,26 @@ export default function Auth() {
                     </p>
                   </div>
 
-                  {error && (
-                    <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-left mb-4">
-                      <p className="text-red-400 text-sm font-mono">{error}</p>
-                    </div>
-                  )}
+                  <AnimatePresence>
+                    {error && mode === 'signup' && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        transition={{ duration: 0.2, ease: 'easeOut' }}
+                        className="mb-4"
+                      >
+                        <div className="bg-red-500/15 border border-red-500/40 text-red-100 rounded-xl backdrop-blur px-4 py-3 shadow-lg shadow-red-500/20">
+                          <p className="text-sm font-medium">{error}</p>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
                   <div className="relative overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/60 p-6 backdrop-blur-md">
                     <ShineBorder shineColor={['#ffdf00', '#dfe6d5']} />
 
-                    <form onSubmit={handleSubmit} className="space-y-5">
+                    <form onSubmit={handleSubmit} noValidate className="space-y-5">
                       <div className="space-y-2">
                         <label className="text-zinc-500 text-sm">Email</label>
                         <input
@@ -91,7 +103,6 @@ export default function Auth() {
                           onChange={(e) => setEmail(e.target.value)}
                           placeholder="you@lattice.com"
                           className="w-full bg-zinc-950 border border-zinc-800 p-3 text-sm text-zinc-400 font-mono outline-none focus:border-zinc-600 transition-colors"
-                          required
                         />
                       </div>
 
@@ -121,10 +132,9 @@ export default function Auth() {
                         <input
                           type="text"
                           value={username}
-                          onChange={(e) => setUsername(e.target.value)}
+                          onChange={(e) => setUsername(e.target.value.slice(0, 20))}
                           placeholder="your-handle"
                           className="w-full bg-zinc-950 border border-zinc-800 p-3 text-sm text-zinc-400 font-mono outline-none focus:border-zinc-600 transition-colors"
-                          required
                         />
                       </div>
 
@@ -157,7 +167,6 @@ export default function Auth() {
                           onChange={(e) => setPassword(e.target.value)}
                           placeholder="••••••••••••"
                           className="w-full bg-zinc-950 border border-zinc-800 p-3 text-sm text-zinc-400 font-mono outline-none focus:border-zinc-600 transition-colors"
-                          required
                         />
                       </div>
 
@@ -195,7 +204,6 @@ export default function Auth() {
                           onChange={(e) => setConfirmPassword(e.target.value)}
                           placeholder="••••••••••••"
                           className="w-full bg-zinc-950 border border-zinc-800 p-3 text-sm text-zinc-400 font-mono outline-none focus:border-zinc-600 transition-colors"
-                          required
                         />
                       </div>
 
@@ -267,16 +275,26 @@ export default function Auth() {
                     </p>
                   </div>
 
-                  {error && (
-                    <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-left md:text-right mb-4">
-                      <p className="text-red-400 text-sm font-mono">{error}</p>
-                    </div>
-                  )}
+                  <AnimatePresence>
+                    {error && mode === 'login' && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        transition={{ duration: 0.2, ease: 'easeOut' }}
+                        className="mb-4"
+                      >
+                        <div className="bg-red-500/15 border border-red-500/40 text-red-100 rounded-xl backdrop-blur px-4 py-3 shadow-lg shadow-red-500/20">
+                          <p className="text-sm font-medium">{error}</p>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
                   <div className="relative overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/60 p-6 backdrop-blur-md">
                     <ShineBorder shineColor={['#ffdf00', '#dfe6d5']} />
 
-                    <form onSubmit={handleSubmit} className="space-y-5">
+                    <form onSubmit={handleSubmit} noValidate className="space-y-5">
                       <div className="space-y-2">
                         <label className="text-zinc-500 text-sm">Email</label>
                         <input
@@ -285,7 +303,6 @@ export default function Auth() {
                           onChange={(e) => setEmail(e.target.value)}
                           placeholder="you@lattice.com"
                           className="w-full bg-zinc-950 border border-zinc-800 p-3 text-sm text-zinc-400 font-mono outline-none focus:border-zinc-600 transition-colors"
-                          required
                         />
                       </div>
 
@@ -299,7 +316,6 @@ export default function Auth() {
                           onChange={(e) => setPassword(e.target.value)}
                           placeholder="••••••••••••"
                           className="w-full bg-zinc-950 border border-zinc-800 p-3 text-sm text-zinc-400 font-mono outline-none focus:border-zinc-600 transition-colors"
-                          required
                         />
                       </div>
 

@@ -7,34 +7,37 @@ import { authClient } from '#/lib/auth.ts';
 function VerifyEmail() {
   const [code, setCode] = useState<string[]>(['', '', '', '', '', ''])
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
-  // @ts-expect-error - unused variable
   const navigate = useNavigate()
-  const isLoading = false
+  const [isLoading, setIsLoading] = useState(false)
+  const isComplete = code.every(Boolean)
 
   const verifyCode = async () => {
-    const verificationCode = code.join('');
-    console.log('Code:', verificationCode);
+    if (isLoading || !isComplete) return
 
-    // example
-    // navigate({ to: "/dashboard" })
+    setIsLoading(true)
+    const verificationCode = code.join('')
+    console.log('Code:', verificationCode)
 
-    // Sorry Pranav not sure where you wanted me to put this, just putting it here
-    // so it works for now =D
-    const email = "placeholder@gmail.com"; // TODO: replace with actual email
+    const email = "placeholder@gmail.com" // TODO: replace with actual email
 
-    const { data, error } = await authClient.emailOtp.verifyEmail({
-        email: email,
-        otp: verificationCode
-      },
-      {
-        onSuccess: (ctx) => {
-          navigate({ to: "/app" });
+    try {
+      await authClient.emailOtp.verifyEmail(
+        {
+          email,
+          otp: verificationCode,
         },
-        onError: (ctx) => {
-          alert(ctx.error.message);
+        {
+          onSuccess: () => {
+            navigate({ to: "/app" })
+          },
+          onError: (ctx) => {
+            alert(ctx.error.message)
+          },
         },
-      },
-    );
+      )
+    } finally {
+      setIsLoading(false)
+    }
   };
   
   const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
@@ -113,7 +116,7 @@ function VerifyEmail() {
           complete your sign up.
         </p>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} noValidate className="space-y-6">
           <div className="flex justify-between">
             {code.map((digit, index) => (
               <input
@@ -133,6 +136,18 @@ function VerifyEmail() {
               />
             ))}
           </div>
+
+          <button
+            type="submit"
+            disabled={!isComplete || isLoading}
+            className={`w-full font-semibold py-3 rounded-lg transition active:translate-y-px ${
+              !isComplete || isLoading
+                ? 'bg-white/10 text-white/50 cursor-not-allowed'
+                : 'bg-white text-black hover:bg-zinc-200 hover:-translate-y-px shadow-lg shadow-white/10'
+            }`}
+          >
+            {isLoading ? 'Verifying...' : 'Verify code'}
+          </button>
         </form>
       </div>
     </main>

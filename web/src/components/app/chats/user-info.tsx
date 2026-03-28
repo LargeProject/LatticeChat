@@ -1,23 +1,23 @@
-import { CalendarDays, Circle, Shield } from 'lucide-react'
+import { CalendarDays, Circle, Shield } from 'lucide-react';
 
 type User = {
-  name: string
-  avatar: string
-}
+  name: string;
+  avatar: string;
+};
 
 type UserInfoPanelProps = {
-  user: User
-}
+  user: User;
+};
 
 const toInitials = (name: string) => {
-  const parts = name.trim().split(/\s+/).filter(Boolean)
-  if (parts.length === 0) return 'U'
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
-  return `${parts[0][0] ?? ''}${parts[1][0] ?? ''}`.toUpperCase()
-}
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return 'U';
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0][0] ?? ''}${parts[1][0] ?? ''}`.toUpperCase();
+};
 
 export function UserInfoPanel({ user }: UserInfoPanelProps) {
-  const initials = toInitials(user.name)
+  const initials = toInitials(user.name);
 
   return (
     <aside className="h-full border-l border-(--line) bg-(--surface) p-4">
@@ -36,11 +36,6 @@ export function UserInfoPanel({ user }: UserInfoPanelProps) {
                   {initials}
                 </div>
               )}
-              <span
-                className="absolute -bottom-0.5 -right-0.5 inline-flex size-3 rounded-full border-2 border-(--surface-strong) bg-emerald-500"
-                aria-label="Online"
-                title="Online"
-              />
             </div>
 
             <div className="flex items-center justify-center">
@@ -59,20 +54,20 @@ export function UserInfoPanel({ user }: UserInfoPanelProps) {
           <dl className="mt-3 space-y-3">
             <div className="flex items-center justify-between gap-2">
               <dt className="flex items-center gap-2 text-xs text-(--text-secondary)">
-                <CalendarDays size={14} />
-                Joined
-              </dt>
-              <dd className="text-xs font-medium text-(--fg)">Recently</dd>
-            </div>
-
-            <div className="flex items-center justify-between gap-2">
-              <dt className="flex items-center gap-2 text-xs text-(--text-secondary)">
                 <Circle size={10} className="fill-current text-emerald-500" />
                 Status
               </dt>
               <dd className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
                 Active now
               </dd>
+            </div>
+            
+            <div className="flex items-center justify-between gap-2">
+              <dt className="flex items-center gap-2 text-xs text-(--text-secondary)">
+                <CalendarDays size={14} />
+                Joined
+              </dt>
+              <dd className="text-xs font-medium text-(--fg)">Recently</dd>
             </div>
           </dl>
         </section>
@@ -88,5 +83,5 @@ export function UserInfoPanel({ user }: UserInfoPanelProps) {
         </section>
       </div>
     </aside>
-  )
+  );
 }

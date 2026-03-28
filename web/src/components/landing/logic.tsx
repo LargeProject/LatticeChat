@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import type { ZXCVBNFeedback } from 'zxcvbn';
 import { authClient } from '#/lib/auth';
@@ -48,7 +47,7 @@ export function useAuthLogic() {
   async function signup() {
     if (isPending) return;
 
-    const { data, error } = await authClient.signUp.email(
+    await authClient.signUp.email(
       {
         email,
         password,
@@ -56,13 +55,12 @@ export function useAuthLogic() {
         callbackURL: '/verify-email',
       },
       {
-        onRequest: (ctx) => {
+        onRequest: () => {
           setIsPending(true);
         },
-        onSuccess: (ctx) => {
+        onSuccess: () => {
           setIsPending(false);
           sendVerificationCode();
-          const jwt = ctx.response.headers.get('set-auth-token');
         },
         onError: (ctx) => {
           // display the error message
@@ -75,7 +73,7 @@ export function useAuthLogic() {
   }
 
   async function sendVerificationCode() {
-    const { data, error } = await authClient.emailOtp.sendVerificationOtp({
+    await authClient.emailOtp.sendVerificationOtp({
       email: email,
       type: 'email-verification',
     });
@@ -84,32 +82,56 @@ export function useAuthLogic() {
   async function signin() {
     if (isPending) return;
 
-    const { data, error } = await authClient.signIn.email(
+    await authClient.signIn.email(
       {
         email,
         password,
         callbackURL: '/app',
       },
       {
-        onRequest: (ctx) => {
+        onRequest: () => {
           setIsPending(true);
         },
-        onSuccess: (ctx) => {
+        onSuccess: () => {
           setIsPending(false);
         },
-        onError: (ctx) => {
+        onError: () => {
           setIsPending(false);
         },
       },
     );
   }
 
+  const validate = (): string | null => {
+    if (!email.trim()) return 'Email is required';
+    if (!email.includes('@')) return 'Enter a valid email address';
+
+    if (mode === 'signup') {
+      if (!username.trim()) return 'Username is required';
+      if (username.trim().length < 3)
+        return 'Username must be at least 3 characters';
+      if (username.trim().length > 20)
+        return 'Username must be at most 20 characters';
+    }
+
+    if (!password) return 'Password is required';
+    if (!isPasswordStrong) return 'Password is not strong enough';
+
+    if (mode === 'signup') {
+      if (!confirmPassword) return 'Confirm your password';
+      if (confirmPassword !== password) return 'Passwords do not match';
+    }
+
+    return null;
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
-    if (mode === 'signup' && password !== confirmPassword) {
-      setError('Passwords do not match');
+    const validationError = validate();
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
@@ -119,6 +141,12 @@ export function useAuthLogic() {
       signin();
     }
   };
+
+  useEffect(() => {
+    if (!error) return;
+    const timer = setTimeout(() => setError(null), 3000);
+    return () => clearTimeout(timer);
+  }, [error]);
 
   const [passwordStrength, setPasswordStrength] = useState<{
     score: number;
@@ -141,7 +169,7 @@ export function useAuthLogic() {
     }
 
     const timer = setTimeout(async () => {
-      const { default: zxcvbn } = await import('zxcvbn'); //heavy ass module
+      const { default: zxcvbn } = await import('zxcvbn'); // heavy module
 
       const { score, feedback } = zxcvbn(password);
 
@@ -205,7 +233,21 @@ export function useAuthLogic() {
       return;
     }
 
-    const looksTaken = debouncedUsername.trim().toLowerCase().includes('taken');
+    const trimmedUsername = debouncedUsername.trim().toLowerCase();
+
+    if (trimmedUsername.length < 3) {
+      setUsernameAvailability('Username must be at least 3 characters.');
+      setIsCheckingUsername(false);
+      return;
+    }
+
+    if (trimmedUsername.length > 20) {
+      setUsernameAvailability('Username must be at most 20 characters.');
+      setIsCheckingUsername(false);
+      return;
+    }
+
+    const looksTaken = trimmedUsername.includes('taken');
     setUsernameAvailability(
       looksTaken ? 'Username appears taken.' : 'Username looks available.',
     );
