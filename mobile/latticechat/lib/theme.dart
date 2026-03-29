@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tailwind_flutter/tailwind_flutter.dart';
+import 'package:animated_gradient_text/animated_gradient_text.dart';
 
 const focusedColor = Color(0xFF34C759);   // for active toggles
 final backgroundColor = TwColors.zinc.shade950; // trueblack
@@ -163,5 +164,19 @@ final class AppContainerStyles {
     color: foregroundColor,
     border: Border.fromBorderSide(BorderSide(color: borderColor)),
     borderRadius: BorderRadius.all(Radius.circular(8)),
+  );
+}
+
+AnimatedGradientText titleGradientText(BuildContext context, String text) {
+  return AnimatedGradientText(
+    text: text,
+    textStyle: Theme.of(context).textTheme.headlineLarge, // fallback
+    colors: [
+      // Title gradient
+      Colors.cyan,
+      Colors.purple,
+      Colors.blue,
+      Colors.cyan,
+    ],
   );
 }

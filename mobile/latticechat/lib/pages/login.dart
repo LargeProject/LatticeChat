@@ -1,4 +1,3 @@
-import 'package:animated_gradient_text/animated_gradient_text.dart';
 import 'package:flutter/material.dart';
 import 'package:latticechat/theme.dart';
 
@@ -67,16 +66,8 @@ class _LoginPageState extends State<LoginPage> {
           mainAxisSize: MainAxisSize.min,
           children: [
 
-            AnimatedGradientText(
-              text: 'Welcome Back',
-              textStyle: Theme.of(context).textTheme.headlineLarge, // fallback
-              colors: [
-                twCyan,
-                twPurple,
-                twBlue,
-                twCyan
-              ]
-            ),
+            // Animated Gradient Text title from theme.dart
+            titleGradientText(context, 'Welcome Back'),
 
             const SizedBox(height: 16),
 
