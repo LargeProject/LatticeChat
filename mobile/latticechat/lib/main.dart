@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:latticechat/pages/register.dart';
 import 'package:latticechat/theme.dart';
 import 'pages/login.dart';
 
@@ -13,7 +14,7 @@ class MyApp extends StatelessWidget {
 
       title: 'LatticeChat Login',
       theme: darkTheme,
-      home: const LoginPage(),
+      home: const RegisterPage(),
     );
   }
 }
