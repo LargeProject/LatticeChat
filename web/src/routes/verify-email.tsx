@@ -18,10 +18,7 @@ function VerifyEmail() {
 
     // example
     // navigate({ to: "/dashboard" })
-
-    // Sorry Pranav not sure where you wanted me to put this, just putting it here
-    // so it works for now =D
-    const email = "placeholder@gmail.com"; // TODO: replace with actual email
+    const email = localStorage.getItem("lastEmail");
 
     const { data, error } = await authClient.emailOtp.verifyEmail({
         email: email,
