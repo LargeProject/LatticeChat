@@ -39,18 +39,6 @@ export const userSchema = new Schema({
       ref: "User",
     }
   ],
-  outgoingFriendRequests: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: "FriendRequest",
-    }
-  ],
-  incomingFriendRequests: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: "FriendRequest",
-    }
-  ],
   conversations: [
     {
       type: Schema.Types.ObjectId,
@@ -101,22 +89,9 @@ export const authUserAdditionalFields: UserAdditionalFields = {
     input: false,
     default: [],
   },
-  outgoingFriendRequests: {
-    type: "string",
-    input: false,
-    default: [],
-  },
-  incomingFriendRequests: {
-    type: "string",
-    input: false,
-    default: [],
-  },
   conversations: {
     type: "string",
     input: false,
     default: [],
   },
 }
-
-export type UserType = InferSchemaType<typeof userSchema>;
-export type UserDocument = HydratedDocument<UserType>;

@@ -1,6 +1,5 @@
 import { Service, UserRequest } from "../types";
 import { FriendRequest, User } from "../../db";
-import { getFriendRequestFromTo } from "../../util/mongoose/friendrequest";
 
 const handleAddFriendRequest: Service = async (req: UserRequest, res) => {
 
@@ -22,7 +21,10 @@ const handleAddFriendRequest: Service = async (req: UserRequest, res) => {
   }
 
   // check if target has friend request to sender
-  const targetFriendRequest = await getFriendRequestFromTo(target, sender._id);
+  const targetFriendRequest = await FriendRequest.findOne({
+    from: target._id,
+    to: sender._id
+  });
 
   if (targetFriendRequest != null) { // add friend to both users' friend list
     await targetFriendRequest.deleteOne();
