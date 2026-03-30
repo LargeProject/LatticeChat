@@ -4,16 +4,10 @@ import { createFileRoute } from '@tanstack/react-router';
 import Sidebar from '#/components/app/sidebar';
 import ChatLayout from '#/components/app/chats/layout';
 import SettingsLayout from '#/components/app/settings/layout';
-import { useWebsocket } from '#/lib/hooks/useWebsocket';
 type Section = 'chats' | 'calls' | 'settings';
 
 function RouteComponent() {
   const [activeSection, setActiveSection] = useState<Section>('chats');
-  const { isConnected } = useWebsocket({
-    connect: () => {
-      console.log('connected locally ');
-    },
-  });
   const content = useMemo(() => {
     if (activeSection === 'settings') return <SettingsLayout />;
     // Calls can reuse chat layout until a dedicated calls screen exists

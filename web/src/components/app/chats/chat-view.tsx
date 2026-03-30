@@ -1,65 +1,65 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { Info, Phone, Video } from 'lucide-react'
-import type { Chat } from './layout'
-import { MessageList, type Message } from './messages'
-import { ChatInput } from './chat-input'
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Info, Phone, Video } from 'lucide-react';
+import type { Chat } from './layout';
+import { MessageList, type Message } from './messages';
+import { ChatInput } from './chat-input';
+import { useWebsocket } from '#/lib/hooks/useWebsocket';
 
 type ChatViewProps = {
-  chat: Chat
-  onTogglePanel: () => void
-}
+  chat: Chat;
+  onTogglePanel: () => void;
+};
 
-const INITIAL_GREETING = 'Hello 👋'
+const INITIAL_GREETING = 'Hello 👋';
 
-const createMessage = (
-  role: Message['role'],
-  content: string,
-): Message => ({
+const createMessage = (role: Message['role'], content: string): Message => ({
   id:
     typeof crypto !== 'undefined' && 'randomUUID' in crypto
       ? crypto.randomUUID()
       : `${Date.now()}-${Math.random().toString(36).slice(2)}`,
   role,
   content,
-})
+});
 
 export function ChatView({ chat, onTogglePanel }: ChatViewProps) {
+  const { sendMessage } = useWebsocket();
   const [messages, setMessages] = useState<Message[]>([
     createMessage('assistant', INITIAL_GREETING),
-  ])
-  const pendingReplyTimerRef = useRef<number | null>(null)
+  ]);
+  const pendingReplyTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
-    setMessages([createMessage('assistant', INITIAL_GREETING)])
+    setMessages([createMessage('assistant', INITIAL_GREETING)]);
 
     if (pendingReplyTimerRef.current !== null) {
-      window.clearTimeout(pendingReplyTimerRef.current)
-      pendingReplyTimerRef.current = null
+      window.clearTimeout(pendingReplyTimerRef.current);
+      pendingReplyTimerRef.current = null;
     }
 
     return () => {
       if (pendingReplyTimerRef.current !== null) {
-        window.clearTimeout(pendingReplyTimerRef.current)
-        pendingReplyTimerRef.current = null
+        window.clearTimeout(pendingReplyTimerRef.current);
+        pendingReplyTimerRef.current = null;
       }
-    }
-  }, [chat.id])
+    };
+  }, [chat.id]);
 
   const handleSend = useCallback((text: string) => {
-    const normalized = text.trim()
-    if (!normalized) return
+    const normalized = text.trim();
+    if (!normalized) return;
 
-    setMessages((prev) => [...prev, createMessage('user', normalized)])
+    sendMessage('test');
+    setMessages((prev) => [...prev, createMessage('user', normalized)]);
 
     if (pendingReplyTimerRef.current !== null) {
-      window.clearTimeout(pendingReplyTimerRef.current)
+      window.clearTimeout(pendingReplyTimerRef.current);
     }
 
     pendingReplyTimerRef.current = window.setTimeout(() => {
-      setMessages((prev) => [...prev, createMessage('assistant', 'Bread.')])
-      pendingReplyTimerRef.current = null
-    }, 800)
-  }, [])
+      setMessages((prev) => [...prev, createMessage('assistant', 'Bread.')]);
+      pendingReplyTimerRef.current = null;
+    }, 800);
+  }, []);
 
   return (
     <section
@@ -117,5 +117,6 @@ export function ChatView({ chat, onTogglePanel }: ChatViewProps) {
         <ChatInput onSend={handleSend} />
       </div>
     </section>
-  )
+  );
 }
+
