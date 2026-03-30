@@ -1,8 +1,8 @@
-import {HydratedDocument, InferSchemaType, Schema} from "mongoose";
+import { Schema } from "mongoose";
 import * as z from "zod";
 import validator from "validator";
 import { DBFieldAttribute } from "@better-auth/core/db";
-import {ObjectId} from "mongodb";
+import { ObjectId } from "mongodb";
 
 export const userSchema = new Schema({
   username: {

@@ -1,5 +1,4 @@
-import {HydratedDocument, InferSchemaType, Schema} from "mongoose";
-import { User } from "../models";
+import { Schema } from "mongoose";
 
 export const friendRequestSchema = new Schema({
   from: {

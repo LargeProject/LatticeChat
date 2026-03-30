@@ -2,7 +2,7 @@ import { ENV } from "./env";
 import zxcvbn from "zxcvbn";
 import mongoose from "mongoose";
 import {APIError, betterAuth} from "better-auth";
-import { bearer, emailOTP, jwt, username } from "better-auth/plugins";
+import { bearer, emailOTP, username } from "better-auth/plugins";
 import { mongodbAdapter } from "@better-auth/mongo-adapter";
 import { connectMongoDB } from "../db";
 import {
