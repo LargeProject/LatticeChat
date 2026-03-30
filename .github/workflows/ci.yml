@@ -24,8 +24,7 @@ jobs:
           node-version: 22
           cache: yarn
 
-      - name: Install deps
-        run: yarn install --immutable
-
-      - name: Build
-        run: yarn build
+      - name: Install and Build
+        run: |
+          yarn install --immutable
+          yarn build
