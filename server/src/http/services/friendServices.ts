@@ -1,6 +1,5 @@
 import { Service, UserRequest } from "../types";
 import { FriendRequest, User } from "../../db";
-import { addFriend, hasFriend } from "../../util/mongoose/user";
 import { getFriendRequestFromTo } from "../../util/mongoose/friendrequest";
 
 const handleAddFriendRequest: Service = async (req: UserRequest, res) => {
@@ -12,12 +11,12 @@ const handleAddFriendRequest: Service = async (req: UserRequest, res) => {
   const sender = await User.findById(senderId);
   const target = await User.findById(targetId);
 
-  if(sender == null || target == null) {
+  if (sender == null || target == null) {
     res.status(404).send({success: false, message: "Sender or target not found"});
     return;
   }
 
-  if(hasFriend(sender, target._id)) {
+  if (sender.hasFriend(target._id)) {
     res.status(409).send({success: false, message: "Already friends with this user"});
     return;
   }
@@ -25,10 +24,10 @@ const handleAddFriendRequest: Service = async (req: UserRequest, res) => {
   // check if target has friend request to sender
   const targetFriendRequest = await getFriendRequestFromTo(target, sender._id);
 
-  if(targetFriendRequest != null) { // add friend to both users' friend list
+  if (targetFriendRequest != null) { // add friend to both users' friend list
     await targetFriendRequest.deleteOne();
-    addFriend(sender, target._id);
-    addFriend(target, sender._id);
+    sender.addFriend(target._id);
+    target.addFriend(sender._id);
 
     res.status(200).send({success: true, message: "Friend successfully added"})
 

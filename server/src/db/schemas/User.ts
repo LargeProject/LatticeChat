@@ -2,6 +2,7 @@ import {HydratedDocument, InferSchemaType, Schema} from "mongoose";
 import * as z from "zod";
 import validator from "validator";
 import { DBFieldAttribute } from "@better-auth/core/db";
+import {ObjectId} from "mongodb";
 
 export const userSchema = new Schema({
   username: {
@@ -68,6 +69,16 @@ export const userSchema = new Schema({
     unique: true,
     default: Date.now,
   },
+}, {
+  methods: {
+    addFriend: function(friendId: ObjectId) {
+      this.friends.push(friendId);
+      this.save();
+    },
+    hasFriend: function(targetFriendId: ObjectId) {
+      return this.friends.some(friendId => friendId.equals(targetFriendId));
+    }
+  }
 });
 
 type UserAdditionalFields = { [x: string]: DBFieldAttribute & { default?: any }; }
