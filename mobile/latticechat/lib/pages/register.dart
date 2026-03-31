@@ -20,7 +20,6 @@ class _RegisterPageState extends State<RegisterPage> {
   String _email = '';
   String _username = '';
   String _password = '';
-  String _confirmation = '';
 
   bool _isEmailValid = false;
   bool _isUsernameValid = false;

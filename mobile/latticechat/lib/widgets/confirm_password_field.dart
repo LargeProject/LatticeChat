@@ -34,8 +34,11 @@ class ConfirmPasswordFieldState extends State<ConfirmPasswordField> {
         _notifyParent(value, false);
         return;
       }
+      
       final bool matches = (value == widget.password);
       _statusMessage = matches ? '✓ Passwords match' : '✗ Passwords do not match';
+
+      // Called after changing, allowing for response before server sees it
       _notifyParent(value, matches);
     });
   }
