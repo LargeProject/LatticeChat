@@ -58,7 +58,19 @@ class _RegisterPageState extends State<RegisterPage> {
     }
 
     // All fields should be valid and available from in here
-    debugPrint('Email: $_email, Username: $_username, Password: $_password');
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Sign Up Attempt'),
+        content: Text('Email: $_email\nUsername: $_username\nPassword: $_password'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   // A function meant to be called by the Already Have Account button
