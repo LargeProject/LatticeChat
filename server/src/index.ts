@@ -12,7 +12,7 @@ const server = http.createServer(app);
 const io = createIO(server);
 
 const corsOptions = {
-  origin: ENV.ALLOWED_ORIGIN,
+  origin: ENV.ALLOW_ORIGIN,
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
@@ -24,7 +24,6 @@ app.use(express.json());
 app.use("/api", apiRouter);
 
 server.listen(ENV.PORT, () => {
-  console.log("Lattice backend now listening");
+  console.log(`Lattice backend now listening at ${ENV.HOST}:${ENV.PORT}`);
   console.log("Hello Andrew >:)");
 });
-

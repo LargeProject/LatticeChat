@@ -4,7 +4,7 @@ import "dotenv/config";
 const envSchema = z.object({
   HOST: z.string().nonempty(),
   PORT: z.string().nonempty(),
-  ALLOWED_ORIGIN: z.string().nonempty(),
+  ALLOW_ORIGIN: z.string().nonempty(),
   BETTER_AUTH_SECRET: z.string().nonempty(),
   DB_NAME: z.string().nonempty(),
   DB_USERNAME: z.string().nonempty(),
@@ -17,7 +17,7 @@ const envSchema = z.object({
 export const ENV = envSchema.parse({
   HOST: process.env.HOST,
   PORT: process.env.PORT,
-  ALLOWED_ORIGIN: process.env.ALLOWED_ORIGIN,
+  ALLOW_ORIGIN: process.env.ALLOW_ORIGIN,
   BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
   DB_NAME: process.env.DB_NAME,
   DB_USERNAME: process.env.DB_USERNAME,

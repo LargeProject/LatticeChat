@@ -1,9 +1,8 @@
-import * as z from "zod";
-import validator from "validator";
 import { ENV } from "./env";
+import zxcvbn from "zxcvbn";
 import mongoose from "mongoose";
-import { betterAuth } from "better-auth";
-import { bearer, emailOTP, jwt, username } from "better-auth/plugins";
+import {APIError, betterAuth} from "better-auth";
+import { bearer, emailOTP, username } from "better-auth/plugins";
 import { mongodbAdapter } from "@better-auth/mongo-adapter";
 import { connectMongoDB } from "../db";
 import {
@@ -11,6 +10,8 @@ import {
   sendEmailVerificationOTP,
   sendForgetPasswordOTP,
 } from "./mailer";
+import { createAuthMiddleware } from "@better-auth/core/api";
+import { authUserAdditionalFields } from "../db/schemas/User";
 
 await connectMongoDB();
 const client = mongoose.connection.getClient();
@@ -39,7 +40,7 @@ const auth = betterAuth({
     }),
   ],
   baseURL,
-  trustedOrigins: [ENV.ALLOWED_ORIGIN],
+  trustedOrigins: [ENV.ALLOW_ORIGIN],
   database: mongodbAdapter(db, { client }),
   emailAndPassword: {
     enabled: true,
@@ -54,42 +55,29 @@ const auth = betterAuth({
   },
   user: {
     modelName: "users",
-    additionalFields: {
-      phone: {
-        type: "string",
-        required: false,
-        input: true,
-        validator: {
-          input: z.string().refine(validator.isMobilePhone),
-        },
-      },
-      biography: {
-        type: "string",
-        required: false,
-        input: true,
-      },
-      friends: {
-        type: "string",
-        input: false,
-        default: [],
-      },
-      outgoingFriendRequests: {
-        type: "string",
-        input: false,
-        default: [],
-      },
-      incomingFriendRequests: {
-        type: "string",
-        input: false,
-        default: [],
-      },
-      conversations: {
-        type: "string",
-        input: false,
-        default: [],
-      },
-    },
+    additionalFields: authUserAdditionalFields
   },
+
+  hooks: {
+    before: createAuthMiddleware(async (ctx) => {
+      if(ctx.path != "/sign-up/email" && ctx.path != "/email-otp/request-password-reset") return;
+
+      let password = "";
+      if (ctx.path == "/sign-up/email") {
+        password = ctx.body.password;
+      } else if (ctx.path == "/email-otp/request-password-reset") {
+        password = ctx.body.newPassword;
+      }
+
+      const { score, feedback } = zxcvbn(password);
+      if (score < 3) {
+        throw new APIError("BAD_REQUEST", {
+          success: false,
+          message: "Password is too weak"
+        });
+      }
+    })
+  }
 });
 
 export default auth;

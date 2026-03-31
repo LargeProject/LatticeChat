@@ -6,7 +6,8 @@ interface ViteTypeOptions {
 
 interface ImportMetaEnv {
   readonly VITE_BETTER_AUTH_BASE_URL: string;
-  // more env variables...
+  readonly VITE_API_BASE_URL: string;
+  readonly VITE_WS_BASE_URL: string;
 }
 
 interface ImportMeta {

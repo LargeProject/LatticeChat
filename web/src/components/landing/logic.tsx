@@ -49,10 +49,10 @@ export function useAuthLogic() {
 
     await authClient.signUp.email(
       {
+        name: "",
         email,
         password,
-        name: username,
-        callbackURL: '/verify-email',
+        username
       },
       {
         onRequest: () => {

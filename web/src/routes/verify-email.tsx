@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { useNavigate } from '@tanstack/react-router'
-import { createFileRoute } from '@tanstack/react-router'
+import { useNavigate, createFileRoute } from '@tanstack/react-router'
 import { ShineBorder } from '@/components/ui/shine-border'
 import { authClient } from '#/lib/auth.ts';
 

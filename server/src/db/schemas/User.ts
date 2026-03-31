@@ -1,4 +1,8 @@
-import {HydratedDocument, InferSchemaType, Schema} from "mongoose";
+import { Schema } from "mongoose";
+import * as z from "zod";
+import validator from "validator";
+import { DBFieldAttribute } from "@better-auth/core/db";
+import { ObjectId } from "mongodb";
 
 export const userSchema = new Schema({
   username: {
@@ -35,18 +39,6 @@ export const userSchema = new Schema({
       ref: "User",
     }
   ],
-  outgoingFriendRequests: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: "FriendRequest",
-    }
-  ],
-  incomingFriendRequests: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: "FriendRequest",
-    }
-  ],
   conversations: [
     {
       type: Schema.Types.ObjectId,
@@ -65,7 +57,41 @@ export const userSchema = new Schema({
     unique: true,
     default: Date.now,
   },
+}, {
+  methods: {
+    addFriend: function(friendId: ObjectId) {
+      this.friends.push(friendId);
+      this.save();
+    },
+    hasFriend: function(targetFriendId: ObjectId) {
+      return this.friends.some(friendId => friendId.equals(targetFriendId));
+    }
+  }
 });
 
-export type UserType = InferSchemaType<typeof userSchema>;
-export type UserDocument = HydratedDocument<UserType>;
+type UserAdditionalFields = { [x: string]: DBFieldAttribute & { default?: any }; }
+export const authUserAdditionalFields: UserAdditionalFields = {
+  phone: {
+    type: "string",
+    required: false,
+    input: true,
+    validator: {
+      input: z.string().refine(validator.isMobilePhone),
+    },
+  },
+  biography: {
+    type: "string",
+    required: false,
+    input: true,
+  },
+  friends: {
+    type: "string",
+    input: false,
+    default: [],
+  },
+  conversations: {
+    type: "string",
+    input: false,
+    default: [],
+  },
+}
