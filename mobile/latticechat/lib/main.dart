@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:latticechat/pages/register.dart';
 import 'package:latticechat/theme.dart';
-import 'pages/login.dart';
+// Pages
+import 'package:latticechat/pages/login.dart';
+import 'package:latticechat/pages/register.dart';
 
 void main() => runApp(const MyApp());
 
