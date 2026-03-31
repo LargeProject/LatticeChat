@@ -17,7 +17,7 @@ export function useWebsocket() {
     function onDisconnect() {
       setIsConnected(true);
     }
-    function onCreateMessage(data: contracts.SendMessage) {
+    function onCreateMessage(data: contracts.CreateMessage) {
       handlers.current.forEach((c) => c(data));
     }
 
@@ -33,7 +33,7 @@ export function useWebsocket() {
     };
   }, []);
 
-  async function createMessage(data: contracts.SendMessage) {
+  async function createMessage(data: contracts.CreateMessage) {
     const ack: boolean = await socket.emitWithAck('createMessage', data);
     return {
       success: ack,
@@ -42,7 +42,7 @@ export function useWebsocket() {
 
   // Triggers when a new message is received from server
   const onMessageReceive = useCallback(
-    (handler: (data: contracts.SendMessage) => any) => {
+    (handler: (data: contracts.CreateMessage) => any) => {
       handlers.current.add(handler);
 
       return () => {

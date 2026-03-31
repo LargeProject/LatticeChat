@@ -1,14 +1,14 @@
-import { Schema, Types } from "mongoose";
+import { Schema, Types } from 'mongoose';
 
 export const messageSchema = new Schema({
   sender: {
     type: Schema.Types.ObjectId,
-    ref: "User",
+    ref: 'User',
     required: true,
   },
   conversation: {
     type: Schema.Types.ObjectId,
-    ref: "Conversation",
+    ref: 'Conversation',
     required: true,
   },
   content: {
@@ -24,11 +24,20 @@ export const messageSchema = new Schema({
 });
 
 export const conversationSchema = new Schema({
+  owner: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
+  name: {
+    type: String,
+    required: false,
+  },
   members: {
     type: [
       {
         type: Schema.Types.ObjectId,
-        ref: "User",
+        ref: 'User',
       },
     ],
     validate: {
@@ -36,7 +45,7 @@ export const conversationSchema = new Schema({
       validator: (v: Types.ObjectId[]) => {
         return v && v.length >= 2;
       },
-      message: "A conversation must have at least two members",
+      message: 'A conversation must have at least two members',
     },
   },
 });
