@@ -50,10 +50,10 @@ export function useAuthLogic() {
 
     const { data, error } = await authClient.signUp.email(
       {
+        name: "",
         email,
         password,
-        name: username,
-        callbackURL: '/verify-email',
+        username
       },
       {
         onRequest: (ctx) => {
@@ -63,6 +63,11 @@ export function useAuthLogic() {
           setIsPending(false);
           sendVerificationCode();
           const jwt = ctx.response.headers.get('set-auth-token');
+          localStorage.setItem("lastEmail", email);
+
+          navigate({
+            to: '/verify-email'
+          });
         },
         onError: (ctx) => {
           // display the error message

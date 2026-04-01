@@ -13,5 +13,7 @@
     "types": ["node"], // Node globals
     "lib": ["esnext"],
     "skipLibCheck": true
-  }
+  },
+  "include": ["src"],
+  "exclude": ["dist", "node_modules"]
 }

@@ -2,7 +2,7 @@ name: CI
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
   push:
     branches: [main]
 
@@ -12,21 +12,26 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: server
-
     steps:
       - uses: actions/checkout@v4
-        with:
-          node-version: 22
-          cache: "yarn"
 
       - name: Enable Corepack (For yarn)
         run: corepack enable
 
-      - name: Install deps
-        run: yarn install --frozen-lockfile
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "yarn"
 
-      - name: Build
-        run: yarn build
+      - name: Install
+        run: yarn install --immutable
+
+      - name: Build Shared
+        run: yarn workspace @latticechat/shared build
+
+      - name: Build Server
+        run: yarn workspace server build
+
+      - name: Build Web
+        run: yarn workspace web build
