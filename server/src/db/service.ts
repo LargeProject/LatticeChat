@@ -23,6 +23,26 @@ export async function createConversation(data: actions.CreateConversation) {
   return conversation;
 }
 
+export async function removePrivateConversation(
+  data: actions.RemovePrivateConversation,
+) {
+  const { memberIds } = data;
+  const [memberId1, memberId2] = memberIds;
+
+  const conversation = await Conversation.findOne({
+    members: {
+      $all: [memberId1, memberId2],
+      $size: 2,
+    },
+  });
+
+  if (!conversation) {
+    throw new Error('Conversation not found');
+  }
+
+  await conversation.deleteOne();
+}
+
 export async function createMessage(data: actions.CreateMessage) {
   const { senderId, conversationId, content } = data;
   const sender = await User.findById(senderId);
