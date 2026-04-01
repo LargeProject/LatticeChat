@@ -19,9 +19,9 @@ const corsOptions = {
   allowedHeaders: ['Content-Type', 'Authorization'],
 };
 
-app.use(logger);
 app.use(cors(corsOptions));
 app.use(express.json());
+app.use(logger);
 app.use('/api', apiRouter);
 
 server.listen(ENV.PORT, () => {
