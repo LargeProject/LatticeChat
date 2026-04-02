@@ -1,16 +1,18 @@
-import { Router } from "express";
-import { validateUser } from "../middleware/authValidation";
+import { Router } from 'express';
+import { validateUser } from '../middleware/authValidation';
 import {
   handleAddFriendRequest,
   handleRemoveFriend,
-  handleRemoveFriendRequest
-} from "../services/friendServices";
+  handleRemoveFriendRequest,
+} from '../services/friendServices';
+import { handleGetBasicUserInformation } from '../services/userServices';
 
 const userRouter = Router({ mergeParams: true });
 
-userRouter.use(validateUser);
-userRouter.post("/friend-requests/:target_id", handleAddFriendRequest);
-userRouter.delete("/friend-requests/:target_id", handleRemoveFriendRequest);
-userRouter.delete("/friends/:target_id", handleRemoveFriend);
+userRouter.get('', handleGetBasicUserInformation);
+
+userRouter.post('/friend-requests', validateUser, handleAddFriendRequest);
+userRouter.delete('/friend-requests', validateUser, handleRemoveFriendRequest);
+userRouter.delete('/friends', validateUser, handleRemoveFriend);
 
 export default userRouter;

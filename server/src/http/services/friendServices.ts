@@ -1,56 +1,121 @@
-import { Service, UserRequest } from "../types";
-import { FriendRequest, User } from "../../db";
+import { Service, UserRequest } from '../types';
+import {
+  createConversation,
+  createFriendRequest,
+  removeFriend,
+  removeFriendRequest,
+  removePrivateConversation,
+} from '../../db';
+import {
+  CreateConversation,
+  RemovePrivateConversation,
+} from '@latticechat/shared';
+import { HttpError } from '../../util/error';
 
 const handleAddFriendRequest: Service = async (req: UserRequest, res) => {
+  const sessionBody = req.userSessionInfo;
+  const senderId = sessionBody.user.id;
+  const targetId = req.body.target_id ?? '';
+
+  try {
+    const friendRequest = await createFriendRequest(senderId, targetId);
+    if (!friendRequest) {
+      // create conversation
+      const createConversationData: CreateConversation = {
+        memberIds: [senderId, targetId],
+      };
+      await createConversation(createConversationData);
+
+      res
+        .status(200)
+        .send({ success: true, message: 'Friend successfully added' });
+    } else {
+      res
+        .status(200)
+        .send({ success: true, message: 'Friend request successfully sent' });
+    }
+  } catch (error) {
+    if (error instanceof HttpError) {
+      res
+        .status(error.statusCode)
+        .send({ success: false, message: error.message });
+      return;
+    }
+
+    res.status(500).send({ success: true, message: 'Unknown Error' });
+  }
+};
+
+const handleRemoveFriendRequest: Service = async (req: UserRequest, res) => {
+  const type = req.query.type;
 
   const sessionBody = req.userSessionInfo;
   const senderId = sessionBody.user.id;
-  const targetId = req.params.target_id ?? "";
+  const targetId = req.body.target_id ?? '';
 
-  const sender = await User.findById(senderId);
-  const target = await User.findById(targetId);
-
-  if (sender == null || target == null) {
-    res.status(404).send({success: false, message: "Sender or target not found"});
-    return;
-  }
-
-  if (sender.hasFriend(target._id)) {
-    res.status(409).send({success: false, message: "Already friends with this user"});
-    return;
-  }
-
-  // check if target has friend request to sender
-  const targetFriendRequest = await FriendRequest.findOne({
-    from: target._id,
-    to: sender._id
-  });
-
-  if (targetFriendRequest != null) { // add friend to both users' friend list
-    await targetFriendRequest.deleteOne();
-    sender.addFriend(target._id);
-    target.addFriend(sender._id);
-
-    res.status(200).send({success: true, message: "Friend successfully added"})
-
-  } else { // create friend request
-    const newFriendRequest = new FriendRequest({
-      from: sender.id,
-      to: target.id,
+  let fromId = '';
+  let toId = '';
+  if (type === 'outgoing') {
+    fromId = senderId;
+    toId = targetId;
+  } else if (type === 'incoming') {
+    fromId = targetId;
+    toId = senderId;
+  } else {
+    res.status(409).send({
+      success: false,
+      message: 'Unknown friend request type: ' + type,
     });
-    await newFriendRequest.save();
-
-    res.status(200).send({success: true, message: "Friend request successfully sent"})
   }
-}
 
-const handleRemoveFriendRequest: Service = async (req: UserRequest, res) => {
+  try {
+    await removeFriendRequest(fromId, toId);
+    res.status(200).send({
+      success: true,
+      message: 'Friend request successfully deleted',
+    });
+  } catch (error) {
+    if (error instanceof HttpError) {
+      res
+        .status(error.statusCode)
+        .send({ success: false, message: error.message });
+      return;
+    }
 
-}
+    res.status(500).send({ success: true, message: 'Unknown Error' });
+  }
+};
 
 const handleRemoveFriend: Service = async (req: UserRequest, res) => {
+  const sessionBody = req.userSessionInfo;
+  const senderId = sessionBody.user.id;
+  const targetId = req.body.target_id ?? '';
 
-}
+  try {
+    await removeFriend(senderId, targetId);
 
+    const removePrivateConversationData: RemovePrivateConversation = {
+      memberIds: [senderId, targetId],
+    };
+    await removePrivateConversation(removePrivateConversationData);
 
-export { handleAddFriendRequest, handleRemoveFriendRequest, handleRemoveFriend };
+    res
+      .status(200)
+      .send({ success: true, message: 'Friend successfully removed' });
+  } catch (error) {
+    if (error instanceof HttpError) {
+      res
+        .status(error.statusCode)
+        .send({ success: false, message: error.message });
+      return;
+    }
+
+    res.status(500).send({ success: true, message: 'Unknown Error' });
+  }
+};
+
+export {
+  handleAddFriendRequest,
+  handleRemoveFriendRequest,
+  handleRemoveFriend,
+};

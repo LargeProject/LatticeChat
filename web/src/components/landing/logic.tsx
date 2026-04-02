@@ -50,10 +50,10 @@ export function useAuthLogic() {
 
     const { data, error } = await authClient.signUp.email(
       {
-        name: "",
+        name: '',
         email,
         password,
-        username
+        username,
       },
       {
         onRequest: (ctx) => {
@@ -63,10 +63,13 @@ export function useAuthLogic() {
           setIsPending(false);
           sendVerificationCode();
           const jwt = ctx.response.headers.get('set-auth-token');
-          localStorage.setItem("lastEmail", email);
+          if (jwt !== null) {
+            localStorage.setItem('jwt', jwt);
+          }
+          localStorage.setItem('lastEmail', email);
 
           navigate({
-            to: '/verify-email'
+            to: '/verify-email',
           });
         },
         onError: (ctx) => {
@@ -101,6 +104,10 @@ export function useAuthLogic() {
         },
         onSuccess: (ctx) => {
           setIsPending(false);
+          const jwt = ctx.response.headers.get('set-auth-token');
+          if (jwt !== null) {
+            localStorage.setItem('jwt', jwt);
+          }
         },
         onError: (ctx) => {
           setIsPending(false);
