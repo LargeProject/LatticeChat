@@ -1,10 +1,15 @@
 import * as z from 'zod';
 
-const sendMessage = z.object({
+export const sendMessage = z.object({
   conversationId: z.string().nonempty(),
   senderId: z.string().nonempty(),
   content: z.string().nonempty(),
 });
-
-export { sendMessage };
 export type SendMessage = z.infer<typeof sendMessage>;
+
+export const createConversation = z.object({
+  ownerId: z.string().nonempty(),
+  name: z.string().nonempty(),
+  memberIds: z.array(z.string().nonempty()),
+});
+export type CreateConversation = z.infer<typeof createConversation>;

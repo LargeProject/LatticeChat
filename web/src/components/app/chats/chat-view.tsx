@@ -24,7 +24,7 @@ const createMessage = (role: Message['role'], content: string): Message => ({
 // test
 
 export function ChatView({ chat, onTogglePanel }: ChatViewProps) {
-  const { sendMessage } = useWebsocket();
+  const { createMessage: sendMessage } = useWebsocket();
   const [messages, setMessages] = useState<Message[]>([
     createMessage('assistant', INITIAL_GREETING),
   ]);
@@ -50,7 +50,6 @@ export function ChatView({ chat, onTogglePanel }: ChatViewProps) {
     const normalized = text.trim();
     if (!normalized) return;
 
-    sendMessage('test');
     setMessages((prev) => [...prev, createMessage('user', normalized)]);
 
     if (pendingReplyTimerRef.current !== null) {
