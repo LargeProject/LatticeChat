@@ -1,0 +1,46 @@
+name: CD
+
+on:
+  push:
+    branches: [ main ]
+
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+
+          echo -e "Host *\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
+
+      - name: Pull Repository
+        run: |
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "
+            cd /rep/LatticeChat && \
+            git pull origin main
+          "
+
+      - name: Deploy API
+        run: |
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "
+            cd /rep/LatticeChat/server && \
+            yarn install && \
+            yarn build && \
+            pm2 restart api
+          "
+
+      - name: Deploy Website Frontend
+        run: |
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "
+            cd /rep/LatticeChat/web && \
+            yarn install && \
+            export NODE_OPTIONS='--max-old-space-size=4096'
+            yarn build && \
+            pm2 restart web
+          "

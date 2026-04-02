@@ -1,0 +1,16 @@
+{
+  "name": "latticechat",
+  "private": true,
+  "packageManager": "yarn@4.13.0",
+  "workspaces": [
+    "packages/*",
+    "web",
+    "server"
+  ],
+  "scripts": {
+    "dev": "concurrently \"yarn workspace server dev\" \"yarn workspace web dev\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

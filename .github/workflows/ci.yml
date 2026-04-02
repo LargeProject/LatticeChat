@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Enable Corepack (For yarn)
+        run: corepack enable
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "yarn"
+
+      - name: Install
+        run: yarn install --immutable
+
+      - name: Build Shared
+        run: yarn workspace @latticechat/shared build
+
+      - name: Build Server
+        run: yarn workspace server build
+
+      - name: Build Web
+        run: yarn workspace web build
