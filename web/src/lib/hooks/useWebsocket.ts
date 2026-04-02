@@ -59,8 +59,3 @@ export function useWebsocket() {
     onMessageReceive,
   };
 }
-
-const { onMessageReceive } = useWebsocket();
-onMessageReceive((data) => {
-  console.log(data);
-});

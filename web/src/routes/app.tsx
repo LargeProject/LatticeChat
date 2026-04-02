@@ -22,7 +22,7 @@ function RouteComponent() {
       <UserProvider>
         <Sidebar
           activeSection={activeSection}
-          onSelectSection={(section) => setActiveSection(section)}
+          onSelectSection={setActiveSection}
         />
         <div className="flex-1">{content}</div>
       </UserProvider>
