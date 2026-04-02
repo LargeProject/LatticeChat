@@ -26,6 +26,14 @@ jobs:
             git pull origin main
           "
 
+      - name: Deploy Shared Directory
+        run: |
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "
+            cd /rep/LatticeChat/packages/shared && \
+            yarn install --immutable && \
+            yarn build
+          "
+
       - name: Deploy API
         run: |
           ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "
