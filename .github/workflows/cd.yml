@@ -48,7 +48,7 @@ jobs:
           ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "
             cd /rep/LatticeChat/web && \
             yarn install --immutable && \
-            export NODE_OPTIONS='--max-old-space-size=4096'
+            export NODE_OPTIONS='--max-old-space-size=3072'
             yarn build && \
             pm2 restart web
           "
