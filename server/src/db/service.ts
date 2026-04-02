@@ -6,6 +6,16 @@ function createConversationName(memberNames: string[]) {
   return memberNames.join(', ');
 }
 
+export async function getConversation(conversationId: string) {
+  const conversation = await Conversation.findById(conversationId);
+
+  if (!conversation) {
+    throw new HttpError('Conversation not found', 404);
+  }
+
+  return conversation;
+}
+
 export async function createConversation(data: actions.CreateConversation) {
   const { ownerId, memberIds } = data;
   const owner = await User.findById(ownerId);
@@ -44,6 +54,15 @@ export async function removePrivateConversation(
   await conversation.deleteOne();
 }
 
+export async function getConversationMessages(conversationId: string) {
+  const messages = await Message.find({ conversation: conversationId });
+  if (!messages) {
+    return [];
+  }
+
+  return messages;
+}
+
 export async function createMessage(data: actions.CreateMessage) {
   const { senderId, conversationId, content } = data;
   const sender = await User.findById(senderId);
@@ -79,6 +98,14 @@ export async function createFriendRequest(senderId: string, targetId: string) {
 
   if (sender.hasFriend(target._id)) {
     throw new HttpError('Already friends with this user', 409);
+  }
+
+  const friendRequest = await FriendRequest.findOne({
+    from: sender._id,
+    to: target._id,
+  });
+  if (friendRequest != null) {
+    throw new HttpError('Friend request already exists', 409);
   }
 
   const targetFriendRequest = await target.getFriendRequestTo(sender._id);
@@ -125,22 +152,34 @@ export async function removeFriendRequest(fromId: string, toId: string) {
   }
 }
 
+export async function getFriendRequests(userId: string) {
+  const friendRequests = await FriendRequest.find({
+    $or: [{ from: userId }, { to: userId }],
+  });
+
+  if (!friendRequests) {
+    return [];
+  }
+
+  return friendRequests;
+}
+
 export async function removeFriend(sourceId: string, targetId: string) {
-  const sender = await User.findById(sourceId);
+  const source = await User.findById(sourceId);
   const target = await User.findById(targetId);
 
-  if (sender == null) {
-    return new HttpError('User not found', 404);
+  if (source == null) {
+    throw new HttpError('User not found', 404);
   }
 
   if (target == null) {
-    return new HttpError('Target not found', 404);
+    throw new HttpError('Target not found', 404);
   }
 
-  if (!sender.hasFriend(target._id)) {
-    return new HttpError('Friend not found', 404);
+  if (!source.hasFriend(target._id)) {
+    throw new HttpError('Friend not found', 404);
   }
 
-  sender.removeFriend(target._id);
-  target.removeFriend(sender._id);
+  source.removeFriend(target._id);
+  target.removeFriend(source._id);
 }
