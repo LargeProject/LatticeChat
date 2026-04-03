@@ -4,6 +4,8 @@ import 'package:latticechat/logic/api.dart';
 import 'package:latticechat/logic/models/error.dart';
 import 'package:latticechat/theme.dart';
 
+import 'home.dart';
+
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -44,6 +46,13 @@ class _LoginPageState extends State<LoginPage> {
       var user = response.user;
       print('User-id: ${user.id}');
       print("User-name: ${user.username}");
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => HomePage()),
+      );
+
+
 
     } on ApiError catch (error) {
       print(error);
