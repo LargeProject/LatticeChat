@@ -226,12 +226,13 @@ export function useAuthLogic() {
       return;
     }
 
-    const looksTaken =
-      trimmed.endsWith('@taken.com') || trimmed.includes('taken@');
-    setEmailAvailability(
-      looksTaken ? 'Email appears taken.' : 'Email looks available.',
-    );
-    setIsCheckingEmail(false);
+    fetch(`${import.meta.env.VITE_HTTP_BASE_URL || 'http://localhost:3000'}/auth/email-taken?email=${encodeURIComponent(trimmed)}`)
+      .then(res => res.json())
+      .then(data => {
+        setEmailAvailability(data.taken ? 'Email appears taken.' : 'Email looks available.');
+      })
+      .catch(() => setEmailAvailability('Could not check availability.'))
+      .finally(() => setIsCheckingEmail(false));
   }, [mode, email, debouncedEmail]);
 
   useEffect(() => {
@@ -260,11 +261,13 @@ export function useAuthLogic() {
       return;
     }
 
-    const looksTaken = trimmedUsername.includes('taken');
-    setUsernameAvailability(
-      looksTaken ? 'Username appears taken.' : 'Username looks available.',
-    );
-    setIsCheckingUsername(false);
+    fetch(`${import.meta.env.VITE_HTTP_BASE_URL || 'http://localhost:3000'}/auth/username-taken?username=${encodeURIComponent(trimmedUsername)}`)
+      .then(res => res.json())
+      .then(data => {
+        setUsernameAvailability(data.taken ? 'Username appears taken.' : 'Username looks available.');
+      })
+      .catch(() => setUsernameAvailability('Could not check availability.'))
+      .finally(() => setIsCheckingUsername(false));
   }, [mode, username, debouncedUsername]);
 
   useEffect(() => {
