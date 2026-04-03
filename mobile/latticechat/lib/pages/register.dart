@@ -76,6 +76,12 @@ class _RegisterPageState extends State<RegisterPage> {
   // A function meant to be called by the Already Have Account button
   void _handleHaveAccount() {
     debugPrint('Already Have Account button was pressed');
+
+    // Temporary page navigation
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => LoginPage()),
+    );
   }
 
   @override

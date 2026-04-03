@@ -56,6 +56,12 @@ class _LoginPageState extends State<LoginPage> {
   // A function meant to be called by the No Account button
   void _handleNoAccount() {
     debugPrint('No Account button was pressed');
+
+    // Temporary page navigation
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => RegisterPage()),
+    );
   }
 
   @override
