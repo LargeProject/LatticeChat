@@ -1,23 +1,23 @@
-import { ENV } from "./env";
-import zxcvbn from "zxcvbn";
-import mongoose from "mongoose";
-import {APIError, betterAuth} from "better-auth";
-import { bearer, emailOTP, username } from "better-auth/plugins";
-import { mongodbAdapter } from "@better-auth/mongo-adapter";
-import { connectMongoDB } from "../db";
+import { ENV } from './env';
+import zxcvbn from 'zxcvbn';
+import mongoose from 'mongoose';
+import { betterAuth } from 'better-auth';
+import { bearer, emailOTP, username } from 'better-auth/plugins';
+import { mongodbAdapter } from '@better-auth/mongo-adapter';
+import { connectMongoDB, isEmailTaken } from '../db';
 import {
   sendDuplicateEmailNotification,
   sendEmailVerificationOTP,
   sendForgetPasswordOTP,
-} from "./mailer";
-import { createAuthMiddleware } from "@better-auth/core/api";
-import { authUserAdditionalFields } from "../db/schemas/User";
+} from './mailer';
+import { createAuthMiddleware } from '@better-auth/core/api';
+import { authUserAdditionalFields } from '../db/schemas/User';
 
 await connectMongoDB();
 const client = mongoose.connection.getClient();
 const db = client.db();
 
-const baseURL = ENV.HOST + ":" + ENV.PORT;
+const baseURL = ENV.HOST + ':' + ENV.PORT;
 
 const auth = betterAuth({
   plugins: [
@@ -31,9 +31,9 @@ const auth = betterAuth({
     }),
     emailOTP({
       async sendVerificationOTP({ email, otp, type }) {
-        if (type === "email-verification") {
+        if (type === 'email-verification') {
           await sendEmailVerificationOTP(email, otp);
-        } else if (type === "forget-password") {
+        } else if (type === 'forget-password') {
           await sendForgetPasswordOTP(email, otp);
         }
       },
@@ -53,31 +53,52 @@ const auth = betterAuth({
       }
     },
   },
+
+  account: {
+    modelName: 'accounts',
+  },
   user: {
-    modelName: "users",
-    additionalFields: authUserAdditionalFields
+    modelName: 'users',
+    additionalFields: authUserAdditionalFields,
   },
 
   hooks: {
     before: createAuthMiddleware(async (ctx) => {
-      if(ctx.path != "/sign-up/email" && ctx.path != "/email-otp/request-password-reset") return;
+      // password validation middleware
+      if (
+        ctx.path == '/sign-up/email' ||
+        ctx.path == '/email-otp/request-password-reset'
+      ) {
+        let password = '';
+        if (ctx.path == '/sign-up/email') {
+          password = ctx.body.password;
+        } else if (ctx.path == '/email-otp/request-password-reset') {
+          password = ctx.body.newPassword;
+        }
 
-      let password = "";
-      if (ctx.path == "/sign-up/email") {
-        password = ctx.body.password;
-      } else if (ctx.path == "/email-otp/request-password-reset") {
-        password = ctx.body.newPassword;
+        const { score, feedback } = zxcvbn(password);
+        if (score < 3) {
+          throw ctx.error(400, {
+            code: 'INVALID_PASSWORD',
+            message: 'Password is not strong enough',
+          });
+        }
       }
 
-      const { score, feedback } = zxcvbn(password);
-      if (score < 3) {
-        throw new APIError("BAD_REQUEST", {
-          success: false,
-          message: "Password is too weak"
-        });
+      // email validation middleware
+      if (ctx.path == '/sign-up/email') {
+        const email = ctx.body.email;
+
+        const isTaken = await isEmailTaken(email);
+        if (isTaken) {
+          throw ctx.error(400, {
+            code: 'EMAIL_TAKEN',
+            message: 'Email is taken',
+          });
+        }
       }
-    })
-  }
+    }),
+  },
 });
 
 export default auth;
