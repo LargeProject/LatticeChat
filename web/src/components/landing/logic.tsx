@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import type { ZXCVBNFeedback } from 'zxcvbn';
 import { authClient } from '#/lib/auth';
+import { useUser } from '#/lib/context/UseContext';
 
 export function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
@@ -20,6 +21,8 @@ export function useDebounce<T>(value: T, delay: number): T {
 }
 
 export function useAuthLogic() {
+  const { refreshUser } = useUser();
+  
   const [mode, setMode] = useState<'login' | 'signup'>('login');
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
@@ -70,6 +73,8 @@ export function useAuthLogic() {
           navigate({
             to: '/verify-email',
           });
+
+          refreshUser();
         },
         onError: (ctx) => {
           // display the error message
