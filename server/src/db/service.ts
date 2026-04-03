@@ -183,3 +183,8 @@ export async function removeFriend(sourceId: string, targetId: string) {
   source.removeFriend(target._id);
   target.removeFriend(source._id);
 }
+
+export async function isEmailTaken(email: string) {
+  const user = await User.findOne({ email: email });
+  return user != null;
+}
