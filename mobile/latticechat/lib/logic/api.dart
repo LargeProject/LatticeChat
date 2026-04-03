@@ -11,7 +11,7 @@ class ApiServices {
     http.Response response;
     Map<String, dynamic>;
     try {
-      response = await _fetch('$_baseUrl/auth/sign-up/email', {
+      response = await _post('$_baseUrl/auth/sign-up/email', {
         'name': '',
         'username': username,
         'email': email,
@@ -33,7 +33,7 @@ class ApiServices {
     http.Response response;
     Map<String, dynamic> body;
     try {
-      response = await _fetch('$_baseUrl/auth/sign-in/email', {
+      response = await _post('$_baseUrl/auth/sign-in/email', {
         'email': email,
         'password': password
       });
@@ -52,12 +52,70 @@ class ApiServices {
     }
   }
 
-  Future<http.Response> _fetch(String url, Map<String, dynamic> body) async {
+  Future<bool> attemptSendEmailVerification(String email) async {
+    http.Response response;
+    Map<String, dynamic> body;
+    try {
+      response = await _post('$_baseUrl/auth/email-otp/send-verification-otp', {
+        'email': email,
+        'type': 'email-verification'
+      });
+
+      body = jsonDecode(response.body);
+
+    } catch (error) {
+      throw ApiError(type: 'INTERNAL_ERROR', message: 'Internal server error');
+    }
+
+    if (response.statusCode == 200) {
+      return true;
+    } else {
+      throw ApiError(type: body['code'], message: body['message']);
+    }
+  }
+
+  Future<bool> attemptVerifyEmail(String email, String code) async {
+    http.Response response;
+    Map<String, dynamic> body;
+    try {
+      response = await _post('$_baseUrl/auth/email-otp/verify-email', {
+        'email': email,
+        'otp': code
+      });
+
+      body = jsonDecode(response.body);
+
+    } catch (error) {
+      throw ApiError(type: 'INTERNAL_ERROR', message: 'Internal server error');
+    }
+
+    if (response.statusCode == 200) {
+      return true;
+    } else {
+      throw ApiError(type: body['code'], message: body['message']);
+    }
+  }
+
+  Future<http.Response> _post(String url, Map<String, dynamic> body) async {
+    return await _fetch("post", url, body);
+  }
+
+  Future<http.Response> _get(String url) async {
+    return await _fetch("post", url, {});
+  }
+
+  Future<http.Response> _fetch(String type, String url, Map<String, dynamic> body) async {
     final headers = {
       'Content-Type': 'application/json',
       'Origin': dotenv.env['ALLOW_ORIGIN']!
     };
     final jsonBody = jsonEncode(body);
-    return await http.post(Uri.parse(url), headers: headers, body: jsonBody);
+
+    if(type == "post")
+      return await http.post(Uri.parse(url), headers: headers, body: jsonBody);
+    else if(type == "get")
+      return await http.get(Uri.parse(url), headers: headers);
+    else
+      return http.Response("{}", 500);
   }
 }

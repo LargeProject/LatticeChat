@@ -62,9 +62,11 @@ class _RegisterPageState extends State<RegisterPage> {
 
     try {
       final api = ApiServices();
-      final response = await api.attemptSignUp(_username, _email, _password);
-
+      await api.attemptSignUp(_username, _email, _password);
       print("Sign up successful!");
+
+      await api.attemptSendEmailVerification(_email);
+      print("Sent email verification code");
 
     } on ApiError catch (error) {
       print(error);
