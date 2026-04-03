@@ -2,14 +2,14 @@ import 'package:latticechat/logic/models/user.dart';
 
 class SignInResponse {
   final UserModel user;
-  final String jwt;
+  final String jsonWT;
 
-  SignInResponse._({required this.user, required this.jwt});
+  SignInResponse._({required this.user, required this.jsonWT});
 
   static SignInResponse? fromJson(Map<String, dynamic> json) {
     return SignInResponse._(
         user: UserModel.fromJson(json['user']),
-        jwt: json['jwt']
+        jsonWT: json['jsonWT']
     );
   }
 

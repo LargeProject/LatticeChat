@@ -63,13 +63,13 @@ class _RegisterPageState extends State<RegisterPage> {
     try {
       final api = ApiServices();
       await api.attemptSignUp(_username, _email, _password);
-      print("Sign up successful!");
+      debugPrint("Sign up successful!");
 
       await api.attemptSendEmailVerification(_email);
-      print("Sent email verification code");
+      debugPrint("Sent email verification code");
 
     } on ApiError catch (error) {
-      print(error);
+      debugPrint(error.toString());
     }
 
     // All fields should be valid and available from in here

@@ -39,14 +39,14 @@ class _LoginPageState extends State<LoginPage> {
       final api = ApiServices();
       final response = await api.attemptSignIn(email, password);
 
-      print('Sign in successful!');
+      debugPrint('Sign in successful!');
 
       var user = response.user;
-      print('User-id: ${user.id}');
-      print("User-name: ${user.username}");
+      debugPrint('User-id: ${user.id}');
+      debugPrint("User-name: ${user.username}");
 
     } on ApiError catch (error) {
-      print(error);
+      debugPrint(error.toString());
     }
 
     // Do something with the data – for now, just show a dialog

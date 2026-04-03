@@ -1,3 +1,5 @@
+// ignore_for_file: curly_braces_in_flow_control_structures
+
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
@@ -30,7 +32,7 @@ class ApiServices {
     });
 
     final body = jsonDecode(response.body);
-    body['jwt'] = response.headers['set-auth-token'];
+    body['jsonWT'] = response.headers['set-auth-token'];
 
     if (response.statusCode == 200) {
       return SignInResponse.fromJson(body)!;

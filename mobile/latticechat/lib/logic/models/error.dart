@@ -4,6 +4,7 @@ class ApiError implements Exception {
 
   ApiError({required this.type, required this.message});
 
+  @override
   String toString() {
     return '$type: $message';
   }
