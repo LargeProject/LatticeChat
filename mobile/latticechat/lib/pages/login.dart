@@ -48,21 +48,6 @@ class _LoginPageState extends State<LoginPage> {
     } on ApiError catch (error) {
       debugPrint(error.toString());
     }
-
-    // Do something with the data – for now, just show a dialog
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Login Attempt'),
-        content: Text('Email: $email\nPassword: $password'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
   }
 
   // A function meant to be called by the Forgot Password button
