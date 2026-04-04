@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:latticechat/utils/validators.dart';
+import 'package:zxcvbn/zxcvbn.dart';
 
 class PasswordField extends StatefulWidget {
   final String label;
