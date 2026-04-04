@@ -60,6 +60,7 @@ class _RegisterPageState extends State<RegisterPage> {
       return;
     }
 
+    // All fields should be valid and available from in here down
     try {
       final api = ApiServices();
       await api.attemptSignUp(_username, _email, _password);
@@ -71,21 +72,6 @@ class _RegisterPageState extends State<RegisterPage> {
     } on ApiError catch (error) {
       debugPrint(error.toString());
     }
-
-    // All fields should be valid and available from in here
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Sign Up Attempt'),
-        content: Text('Email: $_email\nUsername: $_username\nPassword: $_password'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
   }
 
   // A function meant to be called by the Already Have Account button
