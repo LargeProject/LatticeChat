@@ -20,6 +20,8 @@ export function useDebounce<T>(value: T, delay: number): T {
 }
 
 export function useAuthLogic() {
+  // const { refreshUser } = useUser();
+  
   const [mode, setMode] = useState<'login' | 'signup'>('login');
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
@@ -70,6 +72,8 @@ export function useAuthLogic() {
           navigate({
             to: '/verify-email',
           });
+
+          // refreshUser();
         },
         onError: (ctx) => {
           // display the error message
@@ -226,12 +230,13 @@ export function useAuthLogic() {
       return;
     }
 
-    const looksTaken =
-      trimmed.endsWith('@taken.com') || trimmed.includes('taken@');
-    setEmailAvailability(
-      looksTaken ? 'Email appears taken.' : 'Email looks available.',
-    );
-    setIsCheckingEmail(false);
+    fetch(`${import.meta.env.VITE_BETTER_AUTH_BASE_URL || 'http://localhost:3001/api/auth'}/email-taken?email=${encodeURIComponent(trimmed)}`)
+      .then(res => res.json())
+      .then(data => {
+        setEmailAvailability(data.isTaken ? 'Email appears taken.' : 'Email looks available.');
+      })
+      .catch((err) => { console.error('Email check failed:', err); setEmailAvailability('Could not check availability.'); })
+      .finally(() => setIsCheckingEmail(false));
   }, [mode, email, debouncedEmail]);
 
   useEffect(() => {
@@ -260,11 +265,13 @@ export function useAuthLogic() {
       return;
     }
 
-    const looksTaken = trimmedUsername.includes('taken');
-    setUsernameAvailability(
-      looksTaken ? 'Username appears taken.' : 'Username looks available.',
-    );
-    setIsCheckingUsername(false);
+    fetch(`${import.meta.env.VITE_BETTER_AUTH_BASE_URL || 'http://localhost:3001/api/auth'}/username-taken?username=${encodeURIComponent(trimmedUsername)}`)
+      .then(res => res.json())
+      .then(data => {
+        setUsernameAvailability(data.isTaken ? 'Username appears taken.' : 'Username looks available.');
+      })
+      .catch((err) => { console.error('Username check failed:', err); setUsernameAvailability('Could not check availability.'); })
+      .finally(() => setIsCheckingUsername(false));
   }, [mode, username, debouncedUsername]);
 
   useEffect(() => {

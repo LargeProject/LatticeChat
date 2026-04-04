@@ -188,3 +188,8 @@ export async function isEmailTaken(email: string) {
   const user = await User.findOne({ email: email });
   return user != null;
 }
+
+export async function isUsernameTaken(username: string) {
+  const user = await User.findOne({ username: username });
+  return user != null;
+}

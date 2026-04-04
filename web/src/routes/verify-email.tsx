@@ -17,7 +17,7 @@ function VerifyEmail() {
     const verificationCode = code.join('')
     console.log('Code:', verificationCode)
 
-    const email = "placeholder@gmail.com" // TODO: replace with actual email
+    const email = localStorage.getItem("lastEmail") ?? "";
 
     try {
       await authClient.emailOtp.verifyEmail(

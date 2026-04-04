@@ -85,9 +85,9 @@ class ApiServices {
     };
     final jsonBody = jsonEncode(body);
 
-    if(type == "post")
+    if(type == "post") {
       return await http.post(Uri.parse(url), headers: headers, body: jsonBody);
-    else if(type == "get")
+    } else if(type == "get")
       return await http.get(Uri.parse(url), headers: headers);
     else
       return http.Response("{}", 500);
