@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:latticechat/theme.dart';
 // Pages -- swap these out when testing pages
-import 'package:latticechat/pages/login.dart';
+//import 'package:latticechat/pages/login.dart';
 //import 'package:latticechat/pages/register.dart';
+import 'package:latticechat/pages/verify.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // Ensure Flutter is initialized
@@ -24,7 +25,7 @@ class MyApp extends StatelessWidget {
 
       title: 'LatticeChat Login',
       theme: darkTheme,
-      home: const LoginPage(), // <-- We swap this out when we're testing a page
+      home: const VerifyPage(), // <-- We swap this out when we're testing a page
     );
   }
 }

@@ -84,7 +84,7 @@ class _LoginPageState extends State<LoginPage> {
           children: [
 
             // Animated Gradient Text title from theme.dart
-            titleGradientText(context, 'Welcome Back'),
+            primaryGradientText(context, 'Welcome Back'),
 
             const SizedBox(height: 16),
 

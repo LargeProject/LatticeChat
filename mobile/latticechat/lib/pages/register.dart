@@ -93,7 +93,7 @@ class _RegisterPageState extends State<RegisterPage> {
           mainAxisSize: MainAxisSize.min,
           children: [
 
-            titleGradientText(context, 'Create Account'),
+            primaryGradientText(context, 'Create Account'),
 
             const SizedBox(height: 8),
 

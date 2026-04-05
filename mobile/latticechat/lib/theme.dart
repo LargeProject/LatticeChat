@@ -4,6 +4,7 @@ import 'package:animated_gradient_text/animated_gradient_text.dart';
 
 const focusedColor = Color(0xFF34C759);   // for active toggles
 final backgroundColor = TwColors.zinc.shade950; // trueblack
+final darkerForeground = TwColors.zinc.shade900.withAlpha(204); // TODO: THIS IS WRONG
 final foregroundColor = TwColors.zinc.shade900; // offblack
 final borderColor = TwColors.zinc.shade800;
 final fadedTextColor = TwColors.zinc.shade500;
@@ -166,10 +167,15 @@ final class AppContainerStyles {
     border: Border.fromBorderSide(BorderSide(color: borderColor)),
     borderRadius: BorderRadius.all(Radius.circular(8)),
   );
+    static final darkBox = BoxDecoration(
+    color: darkerForeground,
+    border: Border.fromBorderSide(BorderSide(color: borderColor)),
+    borderRadius: BorderRadius.all(Radius.circular(8)),
+  );
 }
 
-// Animated Gradient Title
-AnimatedGradientText titleGradientText(BuildContext context, String text) {
+// Animated Gradient Text Styles
+AnimatedGradientText primaryGradientText(BuildContext context, String text) {
   return AnimatedGradientText(
     text: text,
     textStyle: Theme.of(context).textTheme.headlineLarge, // fallback
@@ -179,6 +185,23 @@ AnimatedGradientText titleGradientText(BuildContext context, String text) {
       Colors.purple,
       Colors.blue,
       Colors.cyan,
+    ],
+  );
+}
+AnimatedGradientText secondaryGradientText(BuildContext context, String text) {
+  return AnimatedGradientText(
+    text: text,
+    textStyle: TextStyle(
+      color: primaryColor,
+      fontSize: 30,
+      fontWeight: FontWeight.w500,
+    ), // fallback
+    colors: [
+      // Title gradient
+      TwColors.green.shade400,
+      TwColors.teal.shade400,
+      TwColors.cyan.shade400,
+      TwColors.green.shade400,
     ],
   );
 }
