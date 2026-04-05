@@ -1,39 +1,60 @@
 import { useState, useRef, useEffect } from 'react'
-import { useNavigate } from '@tanstack/react-router'
-import { createFileRoute } from '@tanstack/react-router'
+import { useNavigate, createFileRoute } from '@tanstack/react-router'
 import { ShineBorder } from '@/components/ui/shine-border'
-import { motion } from 'framer-motion'
 import { authClient } from '#/lib/auth.ts';
 
 function VerifyEmail() {
   const [code, setCode] = useState<string[]>(['', '', '', '', '', ''])
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
-  // @ts-expect-error - unused variable
   const navigate = useNavigate()
-  const isLoading = false
+  const [isLoading, setIsLoading] = useState(false)
+  const isComplete = code.every(Boolean)
 
   const verifyCode = async () => {
-    const verificationCode = code.join('');
-    console.log('Code:', verificationCode);
+    if (isLoading || !isComplete) return
 
-    // example
-    // navigate({ to: "/dashboard" })
-    const email = localStorage.getItem("lastEmail");
+    setIsLoading(true)
+    const verificationCode = code.join('')
+    console.log('Code:', verificationCode)
 
-    const { data, error } = await authClient.emailOtp.verifyEmail({
-        email: email,
-        otp: verificationCode
-      },
-      {
-        onSuccess: (ctx) => {
-          navigate({ to: "/app" });
+    const email = localStorage.getItem("lastEmail") ?? "";
+
+    try {
+      await authClient.emailOtp.verifyEmail(
+        {
+          email,
+          otp: verificationCode,
         },
-        onError: (ctx) => {
-          alert(ctx.error.message);
+        {
+          onSuccess: () => {
+            navigate({ to: "/app" })
+          },
+          onError: (ctx) => {
+            alert(ctx.error.message)
+          },
         },
-      },
-    );
+      )
+    } finally {
+      setIsLoading(false)
+    }
   };
+  
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault()
+  
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, code.length)
+    if (!pasted) return
+  
+    const newCode = [...code]
+  
+    pasted.split('').forEach((char, i) => {
+      newCode[i] = char
+    })
+  
+    setCode(newCode)
+  
+    inputRefs.current[Math.min(pasted.length - 1, code.length - 1)]?.focus()
+  }
 
   const handleChange = (index: number, value: string) => {
     if (!/^\d*$/.test(value)) return
@@ -94,7 +115,7 @@ function VerifyEmail() {
           complete your sign up.
         </p>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} noValidate className="space-y-6">
           <div className="flex justify-between">
             {code.map((digit, index) => (
               <input
@@ -107,6 +128,7 @@ function VerifyEmail() {
                 inputMode="numeric"
                 pattern="[0-9]*"
                 value={digit}
+                onPaste={handlePaste}
                 onChange={(e) => handleChange(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(index, e)}
                 className="w-12 h-12 text-center text-xl border border-gray-300 rounded bg-black text-white"
@@ -114,15 +136,17 @@ function VerifyEmail() {
             ))}
           </div>
 
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+          <button
             type="submit"
-            disabled={isLoading || code.some((digit) => !digit)}
-            className="w-full bg-linear-to-r from-black via-cyan-500 to-black bg-size-[200%_200%] text-white font-bold py-3 px-4 rounded-lg shadow-lg hover:from-cyan-500 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 disabled:opacity-50 animate-gradient"
+            disabled={!isComplete || isLoading}
+            className={`w-full font-semibold py-3 rounded-lg transition active:translate-y-px ${
+              !isComplete || isLoading
+                ? 'bg-white/10 text-white/50 cursor-not-allowed'
+                : 'bg-white text-black hover:bg-zinc-200 hover:-translate-y-px shadow-lg shadow-white/10'
+            }`}
           >
-            {isLoading ? 'Verifying...' : 'Verify Email'}
-          </motion.button>
+            {isLoading ? 'Verifying...' : 'Verify code'}
+          </button>
         </form>
       </div>
     </main>

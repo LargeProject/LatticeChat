@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import type { ZXCVBNFeedback } from 'zxcvbn';
 import { authClient } from '#/lib/auth';
@@ -21,6 +20,8 @@ export function useDebounce<T>(value: T, delay: number): T {
 }
 
 export function useAuthLogic() {
+  // const { refreshUser } = useUser();
+  
   const [mode, setMode] = useState<'login' | 'signup'>('login');
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
@@ -48,26 +49,31 @@ export function useAuthLogic() {
   async function signup() {
     if (isPending) return;
 
-    const { data, error } = await authClient.signUp.email(
+    await authClient.signUp.email(
       {
-        name: "",
+        name: '',
         email,
         password,
-        username
+        username,
       },
       {
-        onRequest: (ctx) => {
+        onRequest: () => {
           setIsPending(true);
         },
         onSuccess: (ctx) => {
           setIsPending(false);
           sendVerificationCode();
           const jwt = ctx.response.headers.get('set-auth-token');
-          localStorage.setItem("lastEmail", email);
+          if (jwt !== null) {
+            localStorage.setItem('jwt', jwt);
+          }
+          localStorage.setItem('lastEmail', email);
 
           navigate({
-            to: '/verify-email'
+            to: '/verify-email',
           });
+
+          // refreshUser();
         },
         onError: (ctx) => {
           // display the error message
@@ -80,7 +86,7 @@ export function useAuthLogic() {
   }
 
   async function sendVerificationCode() {
-    const { data, error } = await authClient.emailOtp.sendVerificationOtp({
+    await authClient.emailOtp.sendVerificationOtp({
       email: email,
       type: 'email-verification',
     });
@@ -89,32 +95,60 @@ export function useAuthLogic() {
   async function signin() {
     if (isPending) return;
 
-    const { data, error } = await authClient.signIn.email(
+    await authClient.signIn.email(
       {
         email,
         password,
         callbackURL: '/app',
       },
       {
-        onRequest: (ctx) => {
+        onRequest: () => {
           setIsPending(true);
         },
         onSuccess: (ctx) => {
           setIsPending(false);
+          const jwt = ctx.response.headers.get('set-auth-token');
+          if (jwt !== null) {
+            localStorage.setItem('jwt', jwt);
+          }
         },
-        onError: (ctx) => {
+        onError: () => {
           setIsPending(false);
         },
       },
     );
   }
 
+  const validate = (): string | null => {
+    if (!email.trim()) return 'Email is required';
+    if (!email.includes('@')) return 'Enter a valid email address';
+
+    if (mode === 'signup') {
+      if (!username.trim()) return 'Username is required';
+      if (username.trim().length < 3)
+        return 'Username must be at least 3 characters';
+      if (username.trim().length > 20)
+        return 'Username must be at most 20 characters';
+    }
+
+    if (!password) return 'Password is required';
+    if (!isPasswordStrong) return 'Password is not strong enough';
+
+    if (mode === 'signup') {
+      if (!confirmPassword) return 'Confirm your password';
+      if (confirmPassword !== password) return 'Passwords do not match';
+    }
+
+    return null;
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
-    if (mode === 'signup' && password !== confirmPassword) {
-      setError('Passwords do not match');
+    const validationError = validate();
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
@@ -124,6 +158,12 @@ export function useAuthLogic() {
       signin();
     }
   };
+
+  useEffect(() => {
+    if (!error) return;
+    const timer = setTimeout(() => setError(null), 3000);
+    return () => clearTimeout(timer);
+  }, [error]);
 
   const [passwordStrength, setPasswordStrength] = useState<{
     score: number;
@@ -146,7 +186,7 @@ export function useAuthLogic() {
     }
 
     const timer = setTimeout(async () => {
-      const { default: zxcvbn } = await import('zxcvbn'); //heavy ass module
+      const { default: zxcvbn } = await import('zxcvbn'); // heavy module
 
       const { score, feedback } = zxcvbn(password);
 
@@ -190,12 +230,13 @@ export function useAuthLogic() {
       return;
     }
 
-    const looksTaken =
-      trimmed.endsWith('@taken.com') || trimmed.includes('taken@');
-    setEmailAvailability(
-      looksTaken ? 'Email appears taken.' : 'Email looks available.',
-    );
-    setIsCheckingEmail(false);
+    fetch(`${import.meta.env.VITE_BETTER_AUTH_BASE_URL || 'http://localhost:3001/api/auth'}/email-taken?email=${encodeURIComponent(trimmed)}`)
+      .then(res => res.json())
+      .then(data => {
+        setEmailAvailability(data.isTaken ? 'Email appears taken.' : 'Email looks available.');
+      })
+      .catch((err) => { console.error('Email check failed:', err); setEmailAvailability('Could not check availability.'); })
+      .finally(() => setIsCheckingEmail(false));
   }, [mode, email, debouncedEmail]);
 
   useEffect(() => {
@@ -210,11 +251,27 @@ export function useAuthLogic() {
       return;
     }
 
-    const looksTaken = debouncedUsername.trim().toLowerCase().includes('taken');
-    setUsernameAvailability(
-      looksTaken ? 'Username appears taken.' : 'Username looks available.',
-    );
-    setIsCheckingUsername(false);
+    const trimmedUsername = debouncedUsername.trim().toLowerCase();
+
+    if (trimmedUsername.length < 3) {
+      setUsernameAvailability('Username must be at least 3 characters.');
+      setIsCheckingUsername(false);
+      return;
+    }
+
+    if (trimmedUsername.length > 20) {
+      setUsernameAvailability('Username must be at most 20 characters.');
+      setIsCheckingUsername(false);
+      return;
+    }
+
+    fetch(`${import.meta.env.VITE_BETTER_AUTH_BASE_URL || 'http://localhost:3001/api/auth'}/username-taken?username=${encodeURIComponent(trimmedUsername)}`)
+      .then(res => res.json())
+      .then(data => {
+        setUsernameAvailability(data.isTaken ? 'Username appears taken.' : 'Username looks available.');
+      })
+      .catch((err) => { console.error('Username check failed:', err); setUsernameAvailability('Could not check availability.'); })
+      .finally(() => setIsCheckingUsername(false));
   }, [mode, username, debouncedUsername]);
 
   useEffect(() => {

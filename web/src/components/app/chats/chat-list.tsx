@@ -1,18 +1,18 @@
-import { memo, useDeferredValue, useMemo, useState } from 'react'
-import type { Chat } from './layout'
-import anonImage from '/anonymous.png'
-import { SearchField } from '@heroui/react'
-import { HiMagnifyingGlass } from 'react-icons/hi2'
+import { memo, useDeferredValue, useMemo, useState } from 'react';
+import type { Chat } from './layout';
+import anonImage from '/anonymous.png';
+import { SearchField } from '@heroui/react';
+import { HiMagnifyingGlass } from 'react-icons/hi2';
 
 type ChatListProps = {
-  onSelect: (chat: Chat) => void
-}
+  onSelect: (chat: Chat) => void;
+};
 
 type ChatRowProps = {
-  chat: Chat
-  isSelected: boolean
-  onSelect: (chat: Chat) => void
-}
+  chat: Chat;
+  isSelected: boolean;
+  onSelect: (chat: Chat) => void;
+};
 
 const chats: Chat[] = [
   {
@@ -36,7 +36,7 @@ const chats: Chat[] = [
       avatar: anonImage,
     },
   },
-]
+];
 
 const ChatRow = memo(function ChatRow({
   chat,
@@ -74,35 +74,33 @@ const ChatRow = memo(function ChatRow({
         </p>
       </div>
     </button>
-  )
-})
+  );
+});
 
 function normalize(value: string) {
-  return value.trim().toLowerCase()
+  return value.trim().toLowerCase();
 }
 
 export function ChatList({ onSelect }: ChatListProps) {
-  const [query, setQuery] = useState('')
-  const [selectedChatId, setSelectedChatId] = useState<string | null>(null)
+  const [query, setQuery] = useState('');
+  const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
 
-  const deferredQuery = useDeferredValue(query)
+  const deferredQuery = useDeferredValue(query);
 
   const filteredChats = useMemo(() => {
-    const q = normalize(deferredQuery)
-    if (!q) return chats
+    const q = normalize(deferredQuery);
+    if (!q) return chats;
 
-    return chats.filter((chat) => normalize(chat.user.name).includes(q))
-  }, [deferredQuery])
+    return chats.filter((chat) => normalize(chat.user.name).includes(q));
+  }, [deferredQuery]);
 
   const handleSelect = (chat: Chat) => {
-    setSelectedChatId(chat.id)
-    onSelect(chat)
-  }
+    setSelectedChatId(chat.id);
+    onSelect(chat);
+  };
 
   const resultCountLabel =
-    filteredChats.length === 1
-      ? '1 result'
-      : `${filteredChats.length} results`
+    filteredChats.length === 1 ? '1 result' : `${filteredChats.length} results`;
 
   return (
     <div className="flex h-full flex-col bg-(--surface)">
@@ -157,5 +155,5 @@ export function ChatList({ onSelect }: ChatListProps) {
         )}
       </div>
     </div>
-  )
+  );
 }

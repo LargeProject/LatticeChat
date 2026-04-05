@@ -26,11 +26,19 @@ jobs:
             git pull origin main
           "
 
+      - name: Deploy Shared Directory
+        run: |
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "
+            cd /rep/LatticeChat/packages/shared && \
+            yarn install --immutable && \
+            yarn build
+          "
+
       - name: Deploy API
         run: |
           ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "
             cd /rep/LatticeChat/server && \
-            yarn install && \
+            yarn install --immutable && \
             yarn build && \
             pm2 restart api
           "
@@ -39,8 +47,8 @@ jobs:
         run: |
           ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "
             cd /rep/LatticeChat/web && \
-            yarn install && \
-            export NODE_OPTIONS='--max-old-space-size=4096'
+            yarn install --immutable && \
+            export NODE_OPTIONS='--max-old-space-size=3072'
             yarn build && \
             pm2 restart web
           "

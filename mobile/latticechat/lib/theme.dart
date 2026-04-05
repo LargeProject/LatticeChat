@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:tailwind_flutter/tailwind_flutter.dart';
+import 'package:animated_gradient_text/animated_gradient_text.dart';
 
 const focusedColor = Color(0xFF34C759);   // for active toggles
 final backgroundColor = TwColors.zinc.shade950; // trueblack
 final foregroundColor = TwColors.zinc.shade900; // offblack
 final borderColor = TwColors.zinc.shade800;
+final fadedTextColor = TwColors.zinc.shade500;
 const primaryColor = Color(0xFFE1E1E1);   // offwhite
 const secondaryColor = Color(0xFFE2E2E2); // underwhite
 const tertiaryColor = Color(0xFFA3A3A3);  // concrete
@@ -52,9 +54,9 @@ final ThemeData darkTheme = ThemeData.dark().copyWith(
   // Text theme - choose the substyle depending on the situation
   textTheme: ThemeData.dark().textTheme.copyWith(
     // Your custom text styles
-    bodyLarge: const TextStyle(color: primaryColor),   // for large body text
-    bodyMedium: const TextStyle(color: secondaryColor), // for medium body text
-    bodySmall: const TextStyle(color: tertiaryColor),     // for small body text
+    bodyLarge: const TextStyle(color: primaryColor),  // for large body text
+    bodyMedium: TextStyle(color: fadedTextColor),       // for medium body text
+    bodySmall: const TextStyle(color: tertiaryColor), // for small body text
     // Additional text styles needed for login page
     headlineLarge: const TextStyle(
       fontSize: 36,
@@ -163,5 +165,20 @@ final class AppContainerStyles {
     color: foregroundColor,
     border: Border.fromBorderSide(BorderSide(color: borderColor)),
     borderRadius: BorderRadius.all(Radius.circular(8)),
+  );
+}
+
+// Animated Gradient Title
+AnimatedGradientText titleGradientText(BuildContext context, String text) {
+  return AnimatedGradientText(
+    text: text,
+    textStyle: Theme.of(context).textTheme.headlineLarge, // fallback
+    colors: [
+      // Title gradient
+      Colors.cyan,
+      Colors.purple,
+      Colors.blue,
+      Colors.cyan,
+    ],
   );
 }

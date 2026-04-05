@@ -36,6 +36,9 @@ dependencies:
   cupertino_icons: ^1.0.8
   animated_gradient_text: ^0.0.2
   tailwind_flutter: ^0.2.0
+  flutter_debouncer: ^2.1.1
+  http: ^1.6.0
+  flutter_dotenv: ^6.0.0
 
 dev_dependencies:
   flutter_test:
@@ -60,9 +63,8 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
+  assets:
+    - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

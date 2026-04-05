@@ -1,6 +1,10 @@
-import 'package:animated_gradient_text/animated_gradient_text.dart';
 import 'package:flutter/material.dart';
+import 'package:latticechat/pages/register.dart';
+import 'package:latticechat/logic/api.dart';
+import 'package:latticechat/logic/models/error.dart';
 import 'package:latticechat/theme.dart';
+
+import 'home.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -23,7 +27,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   // A function meant to be called by the Sign In button
-  void _handleLogin() {
+  void _handleLogin() async {
 
     final email = _emailController.text;
     final password = _passwordController.text;
@@ -31,22 +35,28 @@ class _LoginPageState extends State<LoginPage> {
     if (email.isEmpty || password.isEmpty) { // you forgot something
       debugPrint('Sign In button was pressed');
       return;
-    }; 
+    }
 
-    // Do something with the data – for now, just show a dialog
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Login Attempt'),
-        content: Text('Email: $email\nPassword: $password'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
+    try {
+      final api = ApiServices();
+      final response = await api.attemptSignIn(email, password);
+
+      print('Sign in successful!');
+
+      var user = response.user;
+      print('User-id: ${user.id}');
+      print("User-name: ${user.username}");
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => HomePage()),
+      );
+
+
+
+    } on ApiError catch (error) {
+      print(error);
+    }
   }
 
   // A function meant to be called by the Forgot Password button
@@ -57,6 +67,12 @@ class _LoginPageState extends State<LoginPage> {
   // A function meant to be called by the No Account button
   void _handleNoAccount() {
     debugPrint('No Account button was pressed');
+
+    // Temporary page navigation
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => RegisterPage()),
+    );
   }
 
   @override
@@ -67,16 +83,8 @@ class _LoginPageState extends State<LoginPage> {
           mainAxisSize: MainAxisSize.min,
           children: [
 
-            AnimatedGradientText(
-              text: 'Welcome Back',
-              textStyle: Theme.of(context).textTheme.headlineLarge, // fallback
-              colors: [
-                twCyan,
-                twPurple,
-                twBlue,
-                twCyan
-              ]
-            ),
+            // Animated Gradient Text title from theme.dart
+            titleGradientText(context, 'Welcome Back'),
 
             const SizedBox(height: 16),
 

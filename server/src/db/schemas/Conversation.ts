@@ -1,4 +1,5 @@
 import { Schema, Types } from 'mongoose';
+import { User } from '../models';
 
 export const messageSchema = new Schema({
   sender: {
@@ -27,7 +28,7 @@ export const conversationSchema = new Schema({
   owner: {
     type: Schema.Types.ObjectId,
     ref: 'User',
-    required: true,
+    required: false,
   },
   name: {
     type: String,
@@ -49,3 +50,27 @@ export const conversationSchema = new Schema({
     },
   },
 });
+
+conversationSchema.pre(
+  'save',
+  { document: true, query: true },
+  async function () {
+    if (!this.isNew) return;
+
+    await User.updateMany(
+      { _id: { $in: this.members } },
+      { $addToSet: { conversations: this._id } },
+    );
+  },
+);
+
+conversationSchema.pre(
+  'deleteOne',
+  { document: true, query: false },
+  async function () {
+    await User.updateMany(
+      { conversations: this._id },
+      { $pull: { conversations: this._id } },
+    );
+  },
+);

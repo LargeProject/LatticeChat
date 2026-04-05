@@ -19,12 +19,12 @@ const corsOptions = {
   allowedHeaders: ['Content-Type', 'Authorization'],
 };
 
-app.use(logger);
 app.use(cors(corsOptions));
 app.use(express.json());
+app.use(logger);
 app.use('/api', apiRouter);
 
 server.listen(ENV.PORT, () => {
   console.log(`Lattice backend now listening at ${ENV.HOST}:${ENV.PORT}`);
-  console.log('Hello Andrew >:)');
+  console.log('Aloha Noah! 😎');
 });
