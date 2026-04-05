@@ -19,10 +19,10 @@ class PasswordField extends StatefulWidget {
   });
 
   @override
-  PasswordFieldState createState() => PasswordFieldState();
+  State<PasswordField> createState() => _PasswordFieldState();
 }
 
-class PasswordFieldState extends State<PasswordField> {
+class _PasswordFieldState extends State<PasswordField> {
   final TextEditingController _controller = TextEditingController();
   final zxcvbnEvaluator = Zxcvbn();
   String _statusMessage = 'Password strength:';

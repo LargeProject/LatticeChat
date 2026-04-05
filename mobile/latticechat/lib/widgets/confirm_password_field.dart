@@ -15,10 +15,10 @@ class ConfirmPasswordField extends StatefulWidget {
   });
 
   @override
-  ConfirmPasswordFieldState createState() => ConfirmPasswordFieldState();
+  State<ConfirmPasswordField> createState() => _ConfirmPasswordFieldState();
 }
 
-class ConfirmPasswordFieldState extends State<ConfirmPasswordField> {
+class _ConfirmPasswordFieldState extends State<ConfirmPasswordField> {
   final TextEditingController _controller = TextEditingController();
   String _statusMessage = '';
 
