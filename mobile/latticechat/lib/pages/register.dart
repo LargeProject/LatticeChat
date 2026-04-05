@@ -53,7 +53,7 @@ class _RegisterPageState extends State<RegisterPage> {
   }
   
   // A function meant to be called by the Sign Up button
-  // TODO: Consider adding a flicker effect when submitted with an invalid field
+  // TODO: Make status messages flicker when submitted with an invalid field?
   void _handleSignUp() async {
     if (!_isFormValid) {
       debugPrint('Sign Up button was pressed with an invalid form. Do nothing');

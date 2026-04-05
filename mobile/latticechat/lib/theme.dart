@@ -182,3 +182,6 @@ AnimatedGradientText titleGradientText(BuildContext context, String text) {
     ],
   );
 }
+
+// TODO: Create a StatusMessage type made out of a Box and Text
+//  to be used in the register.dart page
