@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
 
-      title: 'LatticeChat Login',
+      title: 'LatticeChat',
       theme: darkTheme,
       home: const VerifyPage(), // <-- We swap this out when we're testing a page
     );

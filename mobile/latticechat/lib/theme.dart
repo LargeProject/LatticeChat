@@ -4,10 +4,10 @@ import 'package:animated_gradient_text/animated_gradient_text.dart';
 
 const focusedColor = Color(0xFF34C759);   // for active toggles
 final backgroundColor = TwColors.zinc.shade950; // trueblack
-final darkerForeground = TwColors.zinc.shade900.withAlpha(204); // TODO: THIS IS WRONG
 final foregroundColor = TwColors.zinc.shade900; // offblack
 final borderColor = TwColors.zinc.shade800;
 final fadedTextColor = TwColors.zinc.shade500;
+final medialTextColor = TwColors.zinc.shade300;
 const primaryColor = Color(0xFFE1E1E1);   // offwhite
 const secondaryColor = Color(0xFFE2E2E2); // underwhite
 const tertiaryColor = Color(0xFFA3A3A3);  // concrete
@@ -57,7 +57,7 @@ final ThemeData darkTheme = ThemeData.dark().copyWith(
     // Your custom text styles
     bodyLarge: const TextStyle(color: primaryColor),  // for large body text
     bodyMedium: TextStyle(color: fadedTextColor),       // for medium body text
-    bodySmall: const TextStyle(color: tertiaryColor), // for small body text
+    bodySmall: TextStyle(color: medialTextColor),       // for small body text
     // Additional text styles needed for login page
     headlineLarge: const TextStyle(
       fontSize: 36,
@@ -167,11 +167,6 @@ final class AppContainerStyles {
     border: Border.fromBorderSide(BorderSide(color: borderColor)),
     borderRadius: BorderRadius.all(Radius.circular(8)),
   );
-    static final darkBox = BoxDecoration(
-    color: darkerForeground,
-    border: Border.fromBorderSide(BorderSide(color: borderColor)),
-    borderRadius: BorderRadius.all(Radius.circular(8)),
-  );
 }
 
 // Animated Gradient Text Styles
@@ -194,7 +189,7 @@ AnimatedGradientText secondaryGradientText(BuildContext context, String text) {
     textStyle: TextStyle(
       color: primaryColor,
       fontSize: 30,
-      fontWeight: FontWeight.w500,
+      fontWeight: FontWeight.w700,
     ), // fallback
     colors: [
       // Title gradient

@@ -21,21 +21,26 @@ class _VerifyPageState extends State<VerifyPage> {
           children: [
             
             secondaryGradientText(context, 'Verify Your Email'),
+
+            SizedBox(height: 16),
+
+            Text(
+              'Enter the 6-digit code we emailed you to confirm your address and complete your sign up.',
+              style: Theme.of(context).textTheme.bodySmall,
+              textAlign: TextAlign.center,
+            ),
+
             SizedBox(height: 16),
 
             Container(  // Verify label
               width: 350,
               padding: EdgeInsets.fromLTRB(16, 32, 16, 8),
-              decoration: AppContainerStyles.darkBox,
+              decoration: AppContainerStyles.genericBox,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
 
-                  Text(
-                    'Enter the 6-digit code we emailed you to confirm your address and complete your sign up.',
-                    style: Theme.of(context).textTheme.bodySmall,
-                    textAlign: TextAlign.center,
-                  ),
+
 
 
                 ]
