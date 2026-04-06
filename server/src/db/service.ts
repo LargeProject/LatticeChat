@@ -184,6 +184,15 @@ export async function removeFriend(sourceId: string, targetId: string) {
   target.removeFriend(source._id);
 }
 
+export async function isEmailVerified(email: string) {
+  const user = await User.findOne({ email: email });
+  if (user == null) {
+    throw new HttpError('Email not found', 404);
+  }
+
+  return user.emailVerified;
+}
+
 export async function isEmailTaken(email: string) {
   const user = await User.findOne({ email: email });
   return user != null;

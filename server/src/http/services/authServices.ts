@@ -1,11 +1,10 @@
 import type { Service } from '../types';
-import { User } from '../../db/models';
-import { isEmailTaken, isUsernameTaken } from '../../db';
+import { isEmailTaken, isEmailVerified, isUsernameTaken } from '../../db';
 import { handleHttpError } from '../../util/error';
 
 const handleEmailTaken: Service = async (req, res) => {
-  const email = req.query?.email as string ?? '';
-  
+  const email = (req.body?.email as string) ?? '';
+
   try {
     const isTaken = await isEmailTaken(email);
     res.status(200).send({
@@ -17,7 +16,7 @@ const handleEmailTaken: Service = async (req, res) => {
 };
 
 const handleUsernameTaken: Service = async (req, res) => {
-  const username = req.query?.username as string ?? '';
+  const username = (req.query?.username as string) ?? '';
 
   try {
     const isTaken = await isUsernameTaken(username);
@@ -29,4 +28,17 @@ const handleUsernameTaken: Service = async (req, res) => {
   }
 };
 
-export { handleEmailTaken, handleUsernameTaken };
+const handleEmailVerified: Service = async (req, res) => {
+  const email = (req.body?.email as string) ?? '';
+
+  try {
+    const isVerified = await isEmailVerified(email);
+    res.status(200).send({
+      isVerified: isVerified,
+    });
+  } catch (error) {
+    handleHttpError(error, res);
+  }
+};
+
+export { handleEmailTaken, handleUsernameTaken, handleEmailVerified };
