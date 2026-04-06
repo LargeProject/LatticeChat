@@ -88,7 +88,6 @@ export async function removeFriendRequest(targetId: string, type: 'incoming' | '
     },
   );
 
-export async function removeFriend(userId: string) {}
   const body = await response.json();
   if (!response.ok) {
     throw new HttpError(response.status, body.code, body.message);
@@ -100,5 +99,14 @@ export async function removeFriend(userId: string) {
 }
 
 export async function fetchFriends(friendIds: string[]): Promise<BasicUserInfo[]> {
-  return [];
+  let friends: BasicUserInfo[] = [];
+  for (const friendId of friendIds) {
+    const friend = await fetchBasicUserInfo(friendId);
+
+    if(friend != null) {
+      friends.push(friend);
+    }
+  }
+
+  return friends;
 }
