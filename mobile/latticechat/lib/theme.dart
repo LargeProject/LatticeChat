@@ -146,7 +146,7 @@ class AppButtonStyles {
     minimumSize: const Size(double.infinity, 0),
     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.normal),
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),  // remove outline
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
     disabledForegroundColor: tertiaryColor,
     disabledBackgroundColor: quatenaryColor,
     
