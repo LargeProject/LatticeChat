@@ -64,21 +64,14 @@ export function useAuthLogic() {
         onRequest: () => {
           setIsPending(true);
         },
-        onSuccess: async (ctx) => {
+        onSuccess: async () => {
           setIsPending(false);
           sendVerificationCode();
-          const jwt = ctx.response.headers.get('set-auth-token');
-          if (jwt !== null) {
-            setLocalJWT(jwt);
-          }
           setLastUsedEmail(email);
-          setLocalUserId(ctx.data.user.id);
 
           navigate({ to: '/verify-email' });
         },
         onError: (ctx) => {
-          // display the error message
-          // if email is taken, setEmailAvailability(true)
           alert(ctx.error.message);
           setIsPending(false);
         },
@@ -289,7 +282,7 @@ export function useAuthLogic() {
       let isUsernameTaken = false;
       try {
         setIsCheckingUsername(true);
-        isUsernameTaken = await fetchIsUsernameTaken(email);
+        isUsernameTaken = await fetchIsUsernameTaken(username);
       } catch (error) {
         console.error(error);
         setUsernameAvailability('Could not check availability.');

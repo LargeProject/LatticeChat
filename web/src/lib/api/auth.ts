@@ -23,7 +23,7 @@ export async function fetchIsEmailTaken(email: string) {
 export async function fetchIsUsernameTaken(username: string) {
   const response = await fetch(
     import.meta.env.VITE_API_BASE_URL +
-      '/auth/email-taken?username=' +
+      '/auth/username-taken?username=' +
       username,
     {
       method: 'GET',
