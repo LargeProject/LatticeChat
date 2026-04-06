@@ -1,5 +1,3 @@
-// ignore_for_file: curly_braces_in_flow_control_structures
-
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
@@ -87,9 +85,10 @@ class ApiServices {
 
     if(type == "post") {
       return await http.post(Uri.parse(url), headers: headers, body: jsonBody);
-    } else if(type == "get")
+    } else if(type == "get") {
       return await http.get(Uri.parse(url), headers: headers);
-    else
+    } else {
       return http.Response("{}", 500);
+    }
   }
 }

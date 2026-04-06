@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:latticechat/pages/login.dart';
 import 'package:latticechat/theme.dart';
 import 'package:latticechat/logic/api.dart';
 import 'package:latticechat/logic/models/error.dart';
@@ -6,7 +7,8 @@ import 'package:pinput/pinput.dart';
 
 
 class VerifyPage extends StatefulWidget {
-  const VerifyPage({super.key});
+  final String email;
+  const VerifyPage({super.key, required this.email});
 
   @override
   State<VerifyPage> createState() => _VerifyPageState();
@@ -23,15 +25,37 @@ class _VerifyPageState extends State<VerifyPage> {
 
   // A function meant to be called by the PInput or Verify button
   Future<void> _handleVerify() async {
+
     final pin = _pinController.text;
 
     if (pin.length != 6) return;
 
-    // TODO: Replace with the actual API call
-    debugPrint('Verifying code: $pin');
+    debugPrint('Attempting to verify with code: $pin and email: ${widget.email}');
 
-    // On success, go to landing page
-    // TODO: Add landing page transfer (will need to pass session ID or smth)
+    try {
+      final api = ApiServices();
+
+      // This API call needs to be modified, because I want the session ID--not just a boolean
+      final response = await api.attemptVerifyEmail(widget.email, pin);
+      
+      // Switches to the Login page
+      if (response) {   
+        debugPrint("Verification successful. Proceeding to Login page...");
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => LoginPage(),
+          ),
+        );
+      } else {
+        debugPrint("Verification unsuccessful, ensure you have the correct code");
+        // TODO: Indicate to the user that it failed
+        return;
+      }
+      
+    } on ApiError catch (error) {
+      debugPrint(error.toString());
+    }
   }
   
   @override

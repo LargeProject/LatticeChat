@@ -47,12 +47,11 @@ class _LoginPageState extends State<LoginPage> {
       debugPrint('User-id: ${user.id}');
       debugPrint("User-name: ${user.username}");
 
+      // Switches to a temporary Home page
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => HomePage()),
       );
-
-
 
     } on ApiError catch (error) {
       debugPrint(error.toString());
