@@ -49,21 +49,20 @@ export async function fetchUserInfo(): Promise<UserInfo | undefined> {
 }
 
 export async function fetchBasicUserInfo(
-  userId: string,
+  userId: string, byName: boolean = false
 ): Promise<BasicUserInfo | undefined> {
   const response = await fetch(
-    import.meta.env.VITE_API_BASE_URL + '/users/' + userId,
+    import.meta.env.VITE_API_BASE_URL + '/users/' + userId + "?byName=" + byName,
     {
       method: 'GET',
     },
   );
   const body = await response.json();
-
   if (!response.ok) {
     throw new HttpError(response.status, body.code, body.message);
   }
 
-  return body as BasicUserInfo;
+  return body.data as BasicUserInfo;
 }
 
 export async function deleteUser() {
