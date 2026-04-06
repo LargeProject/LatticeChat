@@ -28,7 +28,8 @@ function VerifyEmail() {
         },
         {
           onSuccess: () => {
-            navigate({ to: '/app' });
+            alert('Verification successful')
+            navigate({ to: '/' });
           },
           onError: (ctx) => {
             alert(ctx.error.message);
