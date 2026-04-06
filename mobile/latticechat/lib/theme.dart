@@ -143,12 +143,13 @@ class AppButtonStyles {
   );
 
   static ButtonStyle secondaryElevated = ElevatedButton.styleFrom(
-    backgroundColor: Colors.transparent,
-    foregroundColor: TwColors.zinc.shade100,
-    side: BorderSide(color: TwColors.zinc.shade100),
     minimumSize: const Size(double.infinity, 0),
     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-    textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+    textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.normal),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),  // remove outline
+    disabledForegroundColor: tertiaryColor,
+    disabledBackgroundColor: quatenaryColor,
+    
   );
 
   static ButtonStyle dangerElevated = ElevatedButton.styleFrom(
