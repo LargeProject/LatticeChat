@@ -19,5 +19,5 @@ export const handleHttpError = (error: any, res: Response) => {
 
   res
     .status(500)
-    .send({ success: true, message: 'Unknown Error: ' + error.message });
+    .send({ success: false, message: 'Unknown Error: ' + error.message });
 };
