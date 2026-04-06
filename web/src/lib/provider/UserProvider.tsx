@@ -25,7 +25,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
     if (userInfo == null) return;
     setConversations(await fetchConversations(userInfo.conversationIds));
   };
-
   
   const refreshFriendRequests = async () => {
     console.log('Refreshing Friend Requests...');
@@ -33,13 +32,15 @@ export function UserProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    (async () => {
-      await refreshUser();
-      refreshFriends()
-      refreshConversations();
-      refreshFriendRequests();
-    })();
+    refreshUser();
   }, []);
+
+  useEffect(() => {
+    if(!userInfo) return;
+    refreshFriends();
+    refreshConversations();
+    refreshFriendRequests();
+  }, [!userInfo]);
 
   return (
     <UserContext.Provider value={{
