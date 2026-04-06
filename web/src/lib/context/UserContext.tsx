@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react';
-import { type UserInfo } from '#/lib/provider/UserProvider.tsx';
+import type { UserInfo } from '#/lib/api/user.ts';
 
 type UserContextType = {
   refreshUser: () => Promise<void>;
