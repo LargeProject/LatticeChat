@@ -1,63 +1,62 @@
-import { useState } from 'react'
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { ShineBorder } from '@/components/ui/shine-border'
-import { motion } from 'framer-motion'
-import { authClient } from '#/lib/auth.ts'
+import { useState } from 'react';
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
+import { ShineBorder } from '@/components/ui/shine-border';
+import { motion } from 'framer-motion';
+import { authClient } from '#/lib/auth.ts';
 
 function ForgotPassword() {
-  const [email, setEmail] = useState('')
-  const [step, setStep] = useState<1 | 2>(1)
-  const [otp, setOtp] = useState('')
-  const [newPassword, setNewPassword] = useState('')
-  const [message, setMessage] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const navigate = useNavigate()
+  const [email, setEmail] = useState('');
+  const [step, setStep] = useState<1 | 2>(1);
+  const [otp, setOtp] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [message, setMessage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
+  const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 
   const handleSendOtp = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (!isValidEmail) {
-      setMessage('Enter a valid email to reset.')
-      return
+      setMessage('Enter a valid email to reset.');
+      return;
     }
-    
-    setIsLoading(true)
-    const { error } = await authClient.emailOtp.sendVerificationOtp({
+
+    setIsLoading(true);
+    const { error } = await authClient.emailOtp.requestPasswordReset({
       email,
-      type: 'forget-password',
-    })
-    
-    setIsLoading(false)
+    });
+
+    setIsLoading(false);
     if (error) {
-      setMessage(error.message || 'Failed to send reset link.')
+      setMessage(error.message || 'Failed to send reset link.');
     } else {
-      setStep(2)
-      setMessage(null)
+      setStep(2);
+      setMessage(null);
     }
-  }
+  };
 
   const handleResetPassword = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (!otp || newPassword.length < 3) {
-      setMessage('Enter OTP and a valid new password.')
-      return
+      setMessage('Enter OTP and a valid new password.');
+      return;
     }
-    
-    setIsLoading(true)
+
+    setIsLoading(true);
     const { error } = await authClient.emailOtp.resetPassword({
       email,
       otp,
       password: newPassword,
-    })
-    
-    setIsLoading(false)
+    });
+
+    setIsLoading(false);
     if (error) {
-      setMessage(error.message || 'Failed to reset password.')
+      setMessage(error.message || 'Failed to reset password.');
     } else {
-      navigate({ to: '/' })
+      navigate({ to: '/' });
     }
-  }
+  };
 
   return (
     <main className="min-h-screen bg-black text-zinc-100 flex items-center justify-center px-4 py-16">
@@ -83,7 +82,11 @@ function ForgotPassword() {
           </div>
         )}
 
-        <form onSubmit={step === 1 ? handleSendOtp : handleResetPassword} noValidate className="space-y-4">
+        <form
+          onSubmit={step === 1 ? handleSendOtp : handleResetPassword}
+          noValidate
+          className="space-y-4"
+        >
           {step === 1 ? (
             <div className="space-y-2 text-left bg-transparent">
               <label className="text-sm text-zinc-400">Email</label>
@@ -124,7 +127,9 @@ function ForgotPassword() {
           )}
 
           {message && (
-            <p className={`text-xs ${message.includes('valid') || step === 2 ? 'text-amber-300' : 'text-red-300'}`}>
+            <p
+              className={`text-xs ${message.includes('valid') || step === 2 ? 'text-amber-300' : 'text-red-300'}`}
+            >
               {message}
             </p>
           )}
@@ -140,7 +145,11 @@ function ForgotPassword() {
                 : 'bg-white text-black hover:bg-zinc-200 hover:-translate-y-px shadow-lg shadow-white/10'
             }`}
           >
-            {isLoading ? 'Processing...' : step === 1 ? 'Send reset link' : 'Reset Password'}
+            {isLoading
+              ? 'Processing...'
+              : step === 1
+                ? 'Send reset link'
+                : 'Reset Password'}
           </motion.button>
         </form>
 
@@ -154,9 +163,9 @@ function ForgotPassword() {
         </div>
       </div>
     </main>
-  )
+  );
 }
 
 export const Route = createFileRoute('/forgot-password')({
   component: ForgotPassword,
-})
+});
