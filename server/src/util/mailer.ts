@@ -12,16 +12,12 @@ const sendForgetPasswordOTP = async (receiverEmail: string, otp: string) => {
 }
 
 const sendEmailOTP = async (receiverEmail: string, subject: string, otp: string, htmlCallback: (otp: string) => string) => {
-  try {
-    sendgridMailer.send({
-      from: `"No Reply" <lattice@cop4331site.com>`,
-      to: receiverEmail,
-      subject: subject,
-      html: htmlCallback(otp)
-    });
-  } catch (error) {
-    console.log(error);
-  }
+  sendgridMailer.send({
+    from: `"No Reply" <lattice@cop4331site.com>`,
+    to: receiverEmail,
+    subject: subject,
+    html: htmlCallback(otp)
+  });
 }
 
 const sendDuplicateEmailNotification = async (receiverEmail: string) => {
