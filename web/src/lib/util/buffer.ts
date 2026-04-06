@@ -1,7 +1,7 @@
 export function bufferToHexString(buffer: { [key: string]: number }) {
   let hexString = '';
   for (const num of Object.values(buffer)) {
-    hexString += num.toString(16);
+    hexString += num.toString(16).padStart(2, '0');
   }
   return hexString;
 }

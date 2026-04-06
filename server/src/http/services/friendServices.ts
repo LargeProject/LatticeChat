@@ -22,7 +22,7 @@ const handleGetFriendRequests: Service = async (req: UserRequest, res) => {
     res.status(200).send({
       success: true,
       message: 'Friend requests were successfully found',
-      friendrequests: friendRequests.map((friend) => friend.toObject()),
+      friendRequests: friendRequests.map((friend) => friend.toObject()),
     });
   } catch (error) {
     handleHttpError(error, res);
@@ -76,6 +76,7 @@ const handleRemoveFriendRequest: Service = async (req: UserRequest, res) => {
       success: false,
       message: 'Unknown friend request type: ' + type,
     });
+    return;
   }
 
   try {
