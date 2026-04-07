@@ -1,56 +1,54 @@
 import { type ReactNode, useEffect, useState } from 'react';
-import { authClient } from '#/lib/auth.ts';
-import { bufferArrayToHexStringArray } from '#/lib/utils.ts';
-import { UserContext } from '../context/UseContext';
-
-export type UserInfo = {
-  username: string;
-  usernameDisplay: string;
-  email: string;
-  biography: string;
-  friendIds: string[];
-  conversationIds: string[];
-  createdAt: Date;
-};
-
-export type FriendRequest = {
-  fromId: string;
-  toId: string;
-};
+import { UserContext } from '../context/UserContext.tsx';
+import { type BasicUserInfo, fetchUserInfo, type UserInfo } from '#/lib/api/user.ts';
+import { fetchFriendRequests, fetchFriends, type FriendRequest } from '#/lib/api/friend.ts';
+import { type Conversation, fetchConversations } from '#/lib/api/conversation.ts';
 
 export function UserProvider({ children }: { children: ReactNode }) {
   const [userInfo, setUserInfo] = useState<UserInfo | undefined>(undefined);
   const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [friends, setFriends] = useState<BasicUserInfo[]>([]);
 
   const refreshUser = async () => {
-    const { data } = await authClient.getSession({
-      fetchOptions: {
-        headers: {
-          Authorization: 'Bearer ' + localStorage.getItem('jwt'),
-        },
-      },
-    });
-    if (data == null) return;
+    console.log('Refreshing User Information...');
+    setUserInfo(await fetchUserInfo());
+  };
 
-    // TODO: move server auth.ts to shared dir to share auth user-schema
-    const userData = data.user as any;
-    setUserInfo({
-      email: userData.email,
-      username: userData.username,
-      usernameDisplay: userData.usernameDisplay,
-      biography: userData.biography,
-      friendIds: bufferArrayToHexStringArray(userData.friends),
-      conversationIds: bufferArrayToHexStringArray(userData.conversations),
-      createdAt: userData.createdAt,
-    });
+  const refreshFriends = async () => {
+    console.log('Refreshing Friends...');
+    if (userInfo == null) return;
+    setFriends(await fetchFriends(userInfo.friendIds));
+  }
+  const refreshConversations = async () => {
+    console.log('Refreshing Conversations...');
+    if (userInfo == null) return;
+    setConversations(await fetchConversations(userInfo.conversationIds));
+  };
+  
+  const refreshFriendRequests = async () => {
+    console.log('Refreshing Friend Requests...');
+    setFriendRequests(await fetchFriendRequests());
   };
 
   useEffect(() => {
     refreshUser();
   }, []);
 
+  useEffect(() => {
+    if(!userInfo) return;
+    refreshFriends();
+    refreshConversations();
+    refreshFriendRequests();
+  }, [!userInfo]);
+
   return (
-    <UserContext.Provider value={{ refreshUser, userInfo }}>
+    <UserContext.Provider value={{
+      refreshUser, userInfo,
+      refreshFriends, friends,
+      refreshConversations, conversations,
+      refreshFriendRequests, friendRequests,
+    }}>
       {children}
     </UserContext.Provider>
   );

@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Info, Phone, Video } from 'lucide-react';
 import type { Chat } from './layout';
-import { MessageList, type Message } from './messages';
+import { MessageList, type Message, type MessageRole } from './messages';
 import { ChatInput } from './chat-input';
 import { useWebsocket } from '#/lib/hooks/useWebsocket';
+import { useAsyncEffect } from '#/components/hooks/useAsyncEffect.ts';
+import { fetchConversationMessages } from '#/lib/api/conversation.ts';
+import { useUser } from '#/lib/context/UserContext.tsx';
 
 type ChatViewProps = {
   chat: Chat;
@@ -24,14 +27,40 @@ const createMessage = (role: Message['role'], content: string): Message => ({
 // test
 
 export function ChatView({ chat, onTogglePanel }: ChatViewProps) {
+  const { userInfo } = useUser();
   const { createMessage: sendMessage } = useWebsocket();
+  const [isLoaded, setIsLoaded] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     createMessage('assistant', INITIAL_GREETING),
   ]);
   const pendingReplyTimerRef = useRef<number | null>(null);
 
+  // fetch messages
+  useAsyncEffect(async () => {
+    const fetchedMessages = await fetchConversationMessages(chat.id);
+
+    const chatMessages: Message[] = [];
+    for (const fetchedMessage of fetchedMessages) {
+      let role: MessageRole = 'assistant';
+      if (fetchedMessage.senderId == userInfo?.id) {
+        role = 'user';
+      }
+
+      const chatMessage: Message = {
+        id: fetchedMessage.id,
+        role: role,
+        content: fetchedMessage.content,
+        createdAt: fetchedMessage.createdAt,
+      };
+      chatMessages.push(chatMessage);
+    }
+
+    setMessages(chatMessages);
+    setIsLoaded(true);
+  }, [chat.id, messages, isLoaded]);
+
   useEffect(() => {
-    setMessages([createMessage('assistant', INITIAL_GREETING)]);
+    //setMessages([createMessage('assistant', INITIAL_GREETING)]);
 
     if (pendingReplyTimerRef.current !== null) {
       window.clearTimeout(pendingReplyTimerRef.current);

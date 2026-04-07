@@ -1,4 +1,4 @@
-import { cn } from "../../lib/utils";
+import { cn } from '../../lib/utils';
 
 import React, {
   createContext,
@@ -6,7 +6,7 @@ import React, {
   useContext,
   useRef,
   useEffect,
-} from "react";
+} from 'react';
 
 const MouseEnterContext = createContext<
   [boolean, React.Dispatch<React.SetStateAction<boolean>>] | undefined
@@ -43,16 +43,16 @@ export const CardContainer = ({
     setIsMouseEntered(false);
     containerRef.current.style.transform = `rotateY(0deg) rotateX(0deg)`;
   };
-  
+
   return (
     <MouseEnterContext.Provider value={[isMouseEntered, setIsMouseEntered]}>
       <div
         className={cn(
-          "py-20 flex items-center justify-center",
-          containerClassName
+          'py-20 flex items-center justify-center',
+          containerClassName,
         )}
         style={{
-          perspective: "1000px",
+          perspective: '1000px',
         }}
       >
         <div
@@ -61,11 +61,11 @@ export const CardContainer = ({
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
           className={cn(
-            "flex items-center justify-center relative transition-all duration-200 ease-linear",
-            className
+            'flex items-center justify-center relative transition-all duration-200 ease-linear',
+            className,
           )}
           style={{
-            transformStyle: "preserve-3d",
+            transformStyle: 'preserve-3d',
           }}
         >
           {children}
@@ -83,19 +83,14 @@ export const CardBody = ({
   className?: string;
 }) => {
   return (
-    <div
-      className={cn(
-        "h-96 w-96 transform-3d  *:transform-3d",
-        className
-      )}
-    >
+    <div className={cn('h-96 w-96 transform-3d  *:transform-3d', className)}>
       {children}
     </div>
   );
 };
 
 export const CardItem = ({
-  as: Tag = "div",
+  as: Tag = 'div',
   children,
   className,
   translateX = 0,
@@ -132,13 +127,13 @@ export const CardItem = ({
       ref.current.style.transform = `translateX(0px) translateY(0px) translateZ(0px) rotateX(0deg) rotateY(0deg) rotateZ(0deg)`;
     }
   };
-  
+
   const Component = Tag as any;
 
   return (
     <Component
       ref={ref}
-      className={cn("w-fit transition duration-200 ease-linear", className)}
+      className={cn('w-fit transition duration-200 ease-linear', className)}
       {...rest}
     >
       {children}
@@ -150,7 +145,7 @@ export const CardItem = ({
 export const useMouseEnter = () => {
   const context = useContext(MouseEnterContext);
   if (context === undefined) {
-    throw new Error("useMouseEnter must be used within a MouseEnterProvider");
+    throw new Error('useMouseEnter must be used within a MouseEnterProvider');
   }
   return context;
 };

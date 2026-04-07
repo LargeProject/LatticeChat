@@ -30,15 +30,6 @@ export function EmptyState() {
           .
         </p>
 
-        <p className="text-black-500 text-sm leading-relaxed">
-          Key exchange uses the
-          <span className="text-purple-400 font-semibold">
-            {' '}
-            Kyber lattice algorithm
-          </span>
-          , designed to remain secure even against future quantum computers.
-        </p>
-
         <div className="flex gap-4 justify-center pt-2 text-[12px] font-mono text-black-500">
           <span className="border border-zinc-800 px-2 py-1 rounded">E2EE</span>
           <span className="border border-zinc-800 px-2 py-1 rounded">

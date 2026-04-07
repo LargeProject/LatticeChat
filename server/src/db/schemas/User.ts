@@ -1,9 +1,9 @@
-import { Schema } from 'mongoose';
+import { Schema, InferSchemaType, HydratedDocument } from 'mongoose';
 import * as z from 'zod';
 import validator from 'validator';
 import { DBFieldAttribute } from '@better-auth/core/db';
 import { ObjectId } from 'mongodb';
-import { FriendRequest } from '../models';
+import { Account, Conversation, FriendRequest, User } from '../models';
 
 export const userSchema = new Schema(
   {
@@ -82,6 +82,45 @@ export const userSchema = new Schema(
         });
       },
     },
+  },
+);
+
+type User = InferSchemaType<typeof userSchema>;
+export type UserDocument = HydratedDocument<User>;
+
+userSchema.pre(
+  'deleteOne',
+  { document: true, query: false },
+  async function () {
+    // remove account
+    await Account.deleteOne({
+      userId: this._id,
+    });
+
+    // remove this user from all users friends list
+    await User.updateMany(
+      { friends: this._id },
+      { $pull: { friends: this._id } },
+    );
+
+    // delete all friend requests associated connected to this user
+    await FriendRequest.deleteMany({
+      $or: [{ from: this._id }, { to: this._id }],
+    });
+
+    // delete all private conversations that only have this user
+    await Conversation.deleteMany({
+      members: {
+        $all: [this._id],
+      },
+      owner: null,
+    });
+
+    // remove this user from all conversations that include them
+    await Conversation.updateMany(
+      { members: this._id },
+      { $pull: { members: this._id } },
+    );
   },
 );
 

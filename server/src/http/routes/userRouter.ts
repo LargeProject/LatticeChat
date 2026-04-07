@@ -6,7 +6,10 @@ import {
   handleRemoveFriend,
   handleRemoveFriendRequest,
 } from '../services/friendServices';
-import { handleGetBasicUserInformation } from '../services/userServices';
+import {
+  handleDeleteUser,
+  handleGetBasicUserInformation,
+} from '../services/userServices';
 import conversationRouter from './conversationRouter';
 
 const userRouter = Router({ mergeParams: true });
@@ -20,5 +23,7 @@ userRouter.delete('/friend-requests', handleRemoveFriendRequest);
 userRouter.delete('/friends', handleRemoveFriend);
 
 userRouter.use('/conversations/:conversation_id', conversationRouter);
+
+userRouter.delete('/', handleDeleteUser);
 
 export default userRouter;

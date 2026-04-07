@@ -25,7 +25,10 @@ const validateUser: Middleware = async (req: UserRequest, res, next) => {
   const tokenUserId = userInfo?.id ?? '';
 
   if (requestedUserId != tokenUserId) {
-    res.status(401).send('Invalid token');
+    res.status(401).send({
+      success: false,
+      message: 'Invalid Token'
+    });
     return;
   }
 

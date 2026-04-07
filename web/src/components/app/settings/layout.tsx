@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { LogOut, ShieldCheck, Radiation, User } from 'lucide-react';
-import { useUser } from '#/lib/context/UseContext.tsx';
+import { useUser } from '#/lib/context/UserContext.tsx';
+import { setLocalJWT } from '#/lib/util/storage.ts';
+import { useNavigate } from '@tanstack/react-router';
+import { deleteUser } from '#/lib/api/user.ts';
 
 type PreferenceToggle = {
   key: string;
@@ -22,6 +25,7 @@ const preferenceToggles: PreferenceToggle[] = [
 
 export default function SettingsLayout() {
   const { userInfo } = useUser();
+  const navigate = useNavigate();
 
   const [toggles, setToggles] = useState<Record<string, boolean>>(() =>
     preferenceToggles.reduce(
@@ -37,6 +41,17 @@ export default function SettingsLayout() {
 
   const handleToggle = (key: string) => {
     setToggles((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const handleSignOut = () => {
+    setLocalJWT('');
+    navigate({ to: '/' });
+  };
+
+  const handleDeleteUser = () => {
+    deleteUser();
+    setLocalJWT('');
+    navigate({ to: '/' });
   };
 
   return (
@@ -159,6 +174,7 @@ export default function SettingsLayout() {
                 <button
                   type="button"
                   className="inline-flex items-center justify-center gap-2 rounded-lg border border-(--line) px-3 py-2 text-sm font-semibold text-emerald-500 transition hover:border-emerald-400 hover:bg-emerald-500/10"
+                  onClick={handleSignOut}
                 >
                   <LogOut size={16} />
                   Sign out
@@ -167,6 +183,7 @@ export default function SettingsLayout() {
                 <button
                   type="button"
                   className="inline-flex items-center justify-center gap-2 rounded-lg border border-(--line) px-3 py-2 text-sm font-semibold text-rose-500 transition hover:border-rose-400 hover:bg-rose-500/10"
+                  onClick={handleDeleteUser}
                 >
                   <Radiation size={16} />
                   Delete account
