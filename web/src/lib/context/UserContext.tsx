@@ -3,9 +3,14 @@ import type { BasicUserInfo, UserInfo } from '#/lib/api/user.ts';
 import type { Conversation } from '#/lib/api/conversation.ts';
 import type { FriendRequest } from '#/lib/api/friend.ts';
 
+export type UserInfoState = {
+  data: UserInfo | undefined;
+  isLoading: boolean;
+};
+
 type UserContextType = {
   refreshUser: () => Promise<void>;
-  userInfo: UserInfo | undefined;
+  userInfo: UserInfoState;
 
   refreshFriends: () => Promise<void>;
   friends: BasicUserInfo[];

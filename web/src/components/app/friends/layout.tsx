@@ -13,40 +13,6 @@ type FriendRequest = {
   avatarColor: string;
 };
 
-const initialIncomingRequests: FriendRequest[] = [
-  {
-    id: '1',
-    username: 'bread',
-    displayName: 'Bread',
-    mutualFriends: 4,
-    avatarColor: 'bg-amber-500',
-  },
-  {
-    id: '2',
-    username: 'toaster',
-    displayName: 'Toaster',
-    mutualFriends: 2,
-    avatarColor: 'bg-blue-500',
-  },
-];
-
-const initialSentRequests: FriendRequest[] = [
-  {
-    id: '4',
-    username: 'help',
-    displayName: 'Help',
-    mutualFriends: 1,
-    avatarColor: 'bg-rose-500',
-  },
-  {
-    id: '5',
-    username: 'avacado',
-    displayName: 'Avacado',
-    mutualFriends: 3,
-    avatarColor: 'bg-emerald-500',
-  },
-];
-
 function Avatar({ color }: { color: string }) {
   return (
     <div
@@ -66,30 +32,27 @@ export default function FriendsLayout() {
     setIsLoading(false);
   });
 
-  const [incomingRequests, setIncomingRequests] = useState<FriendRequest[]>(
-    [],
-  );
-  const [sentRequests, setSentRequests] =
-    useState<FriendRequest[]>([]);
+  const [incomingRequests, setIncomingRequests] = useState<FriendRequest[]>([]);
+  const [sentRequests, setSentRequests] = useState<FriendRequest[]>([]);
 
   useEffect(() => {
-    if(isLoading) return;
+    if (isLoading) return;
 
     const layoutOutgoingRequests: FriendRequest[] = [];
     const layoutIncomingRequests: FriendRequest[] = [];
 
-    for(const friendRequest of friendRequests) {
+    for (const friendRequest of friendRequests) {
       const layoutFriendRequest: FriendRequest = {
         id: friendRequest.associatedUser.id,
         username: friendRequest.associatedUser.username,
         displayName: friendRequest.associatedUser.displayUsername,
         mutualFriends: 0,
-        avatarColor: 'bg-blue-500'
-      }
+        avatarColor: 'bg-blue-500',
+      };
 
-      if(friendRequest.type === 'incoming') {
+      if (friendRequest.type === 'incoming') {
         layoutIncomingRequests.push(layoutFriendRequest);
-      } else if(friendRequest.type == 'outgoing') {
+      } else {
         layoutOutgoingRequests.push(layoutFriendRequest);
       }
     }
@@ -141,7 +104,7 @@ export default function FriendsLayout() {
     let targetUser = null;
     try {
       targetUser = await fetchBasicUserInfo(normalizedInput, true);
-      await sendFriendRequest(targetUser!.id);
+      await sendFriendRequest(targetUser.id);
     } catch (error: any) {
       // TODO: add specific http errors
       pushMessage(`Error Occurred: ${error.message}`, 'error');
