@@ -75,7 +75,7 @@ const auth = betterAuth({
         ctx.path == '/sign-up/email' ||
         ctx.path == '/email-otp/reset-password'
       ) {
-        let password = ctx.body.password;
+        const password = ctx.body.password;
 
         const { score, feedback } = zxcvbn(password);
         if (score < 3) {

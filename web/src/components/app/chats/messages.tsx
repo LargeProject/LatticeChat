@@ -1,87 +1,66 @@
-import { memo, useEffect, useMemo, useRef } from 'react'
+import { memo, useEffect, useMemo, useRef } from 'react';
+import type { Message } from '#/lib/api/conversation';
 
-export type MessageRole = 'user' | 'assistant'
-
-export type Message = {
-  id: string
-  role: MessageRole
-  content: string
-  createdAt?: string | number | Date
-}
+export type MessageRole = 'user' | 'assistant';
 
 type MessageBubbleProps = {
-  message: Message
-}
+  message: Message;
+};
 
 const bubbleBaseClass =
-  'max-w-[78%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed shadow-sm ring-1'
+  'max-w-[78%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed shadow-sm ring-1';
 const userBubbleClass =
-  'bg-[var(--accent,#14b8a6)] text-white ring-transparent rounded-br-md'
+  'bg-[var(--accent,#14b8a6)] text-white ring-transparent rounded-br-md';
 const assistantBubbleClass =
-  'bg-(--surface) text-(--text-primary) ring-(--line) rounded-bl-md'
-
-const rowClassByRole: Record<MessageRole, string> = {
-  user: 'justify-end',
-  assistant: 'justify-start',
-}
-
-const bubbleClassByRole: Record<MessageRole, string> = {
-  user: userBubbleClass,
-  assistant: assistantBubbleClass,
-}
+  'bg-(--surface) text-(--text-primary) ring-(--line) rounded-bl-md';
 
 export const MessageBubble = memo(function MessageBubble({
   message,
 }: MessageBubbleProps) {
-  const rowClass = rowClassByRole[message.role]
-  const bubbleClass = bubbleClassByRole[message.role]
-
+  // TODO: separate self from non self messages styling
   return (
-    <li className={`flex w-full ${rowClass}`}>
-      <article
-        className={`${bubbleBaseClass} ${bubbleClass}`}
-        aria-label={`${message.role} message`}
-      >
+    <li className={`flex w-full ${'justify-end'}`}>
+      <article className={userBubbleClass}>
         <p className="whitespace-pre-wrap wrap-break-word">{message.content}</p>
       </article>
     </li>
-  )
-})
+  );
+});
 
 type MessageListProps = {
-  messages: Message[]
-  className?: string
-  smoothScroll?: boolean
-}
+  messages: Message[];
+  className?: string;
+  smoothScroll?: boolean;
+};
 
-const SCROLL_THRESHOLD_PX = 80
+const SCROLL_THRESHOLD_PX = 80;
 
 export function MessageList({
   messages,
   className = '',
   smoothScroll = true,
 }: MessageListProps) {
-  const viewportRef = useRef<HTMLDivElement>(null)
+  const viewportRef = useRef<HTMLDivElement>(null);
   const lastMessageId = useMemo(
     () => messages[messages.length - 1]?.id,
-    [messages]
-  )
+    [messages],
+  );
 
   useEffect(() => {
-    const viewport = viewportRef.current
-    if (!viewport) return
+    const viewport = viewportRef.current;
+    if (!viewport) return;
 
     const distanceFromBottom =
-      viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight
-    const isNearBottom = distanceFromBottom <= SCROLL_THRESHOLD_PX
+      viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight;
+    const isNearBottom = distanceFromBottom <= SCROLL_THRESHOLD_PX;
 
-    if (!isNearBottom && messages.length > 1) return
+    if (!isNearBottom && messages.length > 1) return;
 
     viewport.scrollTo({
       top: viewport.scrollHeight,
       behavior: smoothScroll ? 'smooth' : 'auto',
-    })
-  }, [lastMessageId, messages.length, smoothScroll])
+    });
+  }, [lastMessageId, messages.length, smoothScroll]);
 
   return (
     <div
@@ -97,5 +76,5 @@ export function MessageList({
         ))}
       </ol>
     </div>
-  )
+  );
 }

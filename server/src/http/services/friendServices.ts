@@ -1,4 +1,4 @@
-import { Service, UserRequest } from '../types';
+import type { Service, UserRequest } from '../types';
 import {
   createConversation,
   createFriendRequest,
@@ -7,7 +7,7 @@ import {
   removeFriendRequest,
   removePrivateConversation,
 } from '../../db';
-import {
+import type {
   CreateConversation,
   RemovePrivateConversation,
 } from '@latticechat/shared';

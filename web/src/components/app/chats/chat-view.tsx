@@ -1,64 +1,32 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Info, Phone, Video } from 'lucide-react';
 import type * as layout from './layout';
 import { MessageList } from './messages';
-import type { Message, MessageRole } from './messages';
 import { ChatInput } from './chat-input';
 import { useWebsocket } from '#/lib/hooks/useWebsocket';
 import { useAsyncEffect } from '#/components/hooks/useAsyncEffect.ts';
 import { fetchConversationMessages } from '#/lib/api/conversation.ts';
 import { useUser } from '#/lib/context/UserContext.tsx';
+import { useConversation } from '#/components/hooks/useConversation';
 
 type ChatViewProps = {
-  chat: layout.Chat;
+  conversationId: string;
   onTogglePanel: () => void;
 };
 
-const INITIAL_GREETING = 'Hello 👋';
-
-const createMessage = (role: Message['role'], content: string): Message => ({
-  id:
-    typeof crypto !== 'undefined' && 'randomUUID' in crypto
-      ? crypto.randomUUID()
-      : `${Date.now()}-${Math.random().toString(36).slice(2)}`,
-  role,
-  content,
-});
-
-// test
-
-export function ChatView({ chat, onTogglePanel }: ChatViewProps) {
-  const { userInfo } = useUser();
+export function ChatView({ conversationId, onTogglePanel }: ChatViewProps) {
+  const { conversations } = useUser();
   const { createMessage: sendMessage } = useWebsocket();
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
-    createMessage('assistant', INITIAL_GREETING),
-  ]);
-  const pendingReplyTimerRef = useRef<number | null>(null);
 
-  // fetch messages
-  useAsyncEffect(async () => {
-    const fetchedMessages = await fetchConversationMessages(chat.id);
+  const conversation = useMemo(() => {
+    return conversations.find((c) => c.id == conversationId);
+  }, [conversations]);
 
-    const chatMessages: Message[] = [];
-    for (const fetchedMessage of fetchedMessages) {
-      let role: MessageRole = 'assistant';
-      if (fetchedMessage.senderId == userInfo?.id) {
-        role = 'user';
-      }
+  if (!conversation) {
+    return <>Conversation not found!</>;
+  }
 
-      const chatMessage: Message = {
-        id: fetchedMessage.id,
-        role: role,
-        content: fetchedMessage.content,
-        createdAt: fetchedMessage.createdAt,
-      };
-      chatMessages.push(chatMessage);
-    }
-
-    setMessages(chatMessages);
-    setIsLoaded(true);
-  }, [chat.id]);
+  const { name, messages } = useConversation(conversation);
 
   const handleSend = useCallback((text: string) => {
     const normalized = text.trim();
@@ -68,13 +36,13 @@ export function ChatView({ chat, onTogglePanel }: ChatViewProps) {
   return (
     <section
       className="flex flex-1 flex-col overflow-hidden"
-      aria-label={`Conversation with ${chat.user.name}`}
+      aria-label={`Conversation with ${name}`}
     >
       <header className="border-b border-(--line) bg-(--surface) px-4 py-3">
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
             <h2 className="truncate text-sm font-semibold text-(--text-primary)">
-              {chat.user.name}
+              {name}
             </h2>
             <p className="truncate text-xs text-(--text-secondary)">
               End-to-end encrypted conversation
