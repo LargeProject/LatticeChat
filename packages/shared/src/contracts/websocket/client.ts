@@ -14,6 +14,12 @@ export const createConversation = z.object({
 });
 export type CreateConversation = z.infer<typeof createConversation>;
 
+export const initHandshake = z.object({
+  jwt: z.string().nonempty(),
+  id: z.string().nonempty(),
+});
+export type InitHandshake = z.infer<typeof initHandshake>;
+
 export const removePrivateConversation = z.object({
   memberIds: z.tuple([z.string().nonempty(), z.string().nonempty()]),
 });
