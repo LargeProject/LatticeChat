@@ -136,8 +136,6 @@ export function ChatList({ onSelect }: ChatListProps) {
     onSelect(chat);
   };
 
-  console.log('e');
-
   const resultCountLabel =
     filteredChats.length === 1 ? '1 result' : `${filteredChats.length} results`;
 
