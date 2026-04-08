@@ -94,7 +94,7 @@ export function ChatList({ onSelect }: ChatListProps) {
   const { conversations, refreshConversations, refreshUser, friends } =
     useUser();
   const [isLoaded, setIsLoaded] = useState(false);
-  const [chats, setChats] = useState<Chat[]>();
+  const [chats, setChats] = useState<Chat[]>([]);
 
   useAsyncEffect(async () => {
     await refreshUser();
@@ -135,6 +135,8 @@ export function ChatList({ onSelect }: ChatListProps) {
     setSelectedChatId(chat.id);
     onSelect(chat);
   };
+
+  console.log('e');
 
   const resultCountLabel =
     filteredChats.length === 1 ? '1 result' : `${filteredChats.length} results`;
