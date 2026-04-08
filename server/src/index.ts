@@ -8,7 +8,7 @@ import { logger } from './http/middleware/loggerMiddleware';
 import { WebsocketServer } from './lib/websockets';
 import { events } from './websocketEvents';
 
-const app = express();
+export const app = express();
 const server = http.createServer(app);
 const io = new WebsocketServer(server).addEvents(events).start();
 
