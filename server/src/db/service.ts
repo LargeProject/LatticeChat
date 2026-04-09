@@ -262,3 +262,61 @@ async function getBasicUserInfo(
     createdAt: user.createdAt ?? Date.now(),
   };
 }
+
+export async function createKeyExchangeRequest(
+  fromId: string,
+  toId: string,
+  cipher: string,
+) {
+  const sender = await findUser(fromId, 'user');
+  const target = await findUser(toId, 'target');
+
+  const keyExchangeRequest = await KeyExchangeRequest.findOne({
+    $or: [
+      {
+        from: sender.id,
+        to: target.id,
+      },
+      {
+        from: target.id,
+        to: sender.id,
+      },
+    ],
+  });
+
+  if (keyExchangeRequest != null) {
+    throw new HttpError(
+      404,
+      ErrorCodes.KEY_EXCHANGE_REQUEST_EXISTS,
+      'Key exchange request exists',
+    );
+  }
+
+  await KeyExchangeRequest.create({
+    from: sender.id,
+    to: target.id,
+    cipher: cipher,
+  });
+}
+
+export async function findKeyExchangeRequestsTo(userId: string) {
+  const user = await findUser(userId);
+
+  const keyExchangeRequests = await KeyExchangeRequest.find({
+    to: user._id,
+  });
+
+  if (!keyExchangeRequests) {
+    return [];
+  }
+
+  return keyExchangeRequests;
+}
+
+export async function deleteKeyExchangeRequestsTo(userId: string) {
+  const user = await findUser(userId);
+
+  await KeyExchangeRequest.deleteMany({
+    to: user.id,
+  });
+}
