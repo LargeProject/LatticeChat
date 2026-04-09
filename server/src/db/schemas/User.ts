@@ -4,6 +4,7 @@ import validator from 'validator';
 import { DBFieldAttribute } from '@better-auth/core/db';
 import { ObjectId } from 'mongodb';
 import { Account, Conversation, FriendRequest, User } from '../models';
+import { ErrorCodes, HttpError } from '../../util/error';
 
 export const userSchema = new Schema(
   {
@@ -80,6 +81,21 @@ export const userSchema = new Schema(
           from: this._id,
           to: targetId._id,
         });
+      },
+      getAccount: async function () {
+        const account = await Account.findOne({
+          userId: this._id,
+        });
+
+        if (account == null) {
+          throw new HttpError(
+            404,
+            ErrorCodes.ACCOUNT_NOT_FOUND,
+            'Account not found',
+          );
+        }
+
+        return account;
       },
     },
   },
