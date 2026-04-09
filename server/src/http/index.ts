@@ -9,5 +9,6 @@ const apiRouter = Router();
 apiRouter.use('/auth', authRouter);
 apiRouter.all('/auth/*any', toNodeHandler(auth));
 apiRouter.use('/users/:user_id', userRouter);
+apiRouter.use('/status', (req, res) => res.status(200).json({ok: true}))
 
 export default apiRouter;

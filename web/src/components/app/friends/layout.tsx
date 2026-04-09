@@ -1,5 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Check, X, User, UserPlus, Inbox, Send } from 'lucide-react';
+import { useUser } from '#/lib/context/UserContext.tsx';
+import { removeFriendRequest, sendFriendRequest } from '#/lib/api/friend.ts';
+import { fetchBasicUserInfo } from '#/lib/api/user.ts';
+import { useAsyncEffect } from '#/components/hooks/useAsyncEffect.ts';
 
 type FriendRequest = {
   id: string;
@@ -8,40 +12,6 @@ type FriendRequest = {
   mutualFriends: number;
   avatarColor: string;
 };
-
-const initialIncomingRequests: FriendRequest[] = [
-  {
-    id: '1',
-    username: 'bread',
-    displayName: 'Bread',
-    mutualFriends: 4,
-    avatarColor: 'bg-amber-500',
-  },
-  {
-    id: '2',
-    username: 'toaster',
-    displayName: 'Toaster',
-    mutualFriends: 2,
-    avatarColor: 'bg-blue-500',
-  },
-];
-
-const initialSentRequests: FriendRequest[] = [
-  {
-    id: '4',
-    username: 'help',
-    displayName: 'Help',
-    mutualFriends: 1,
-    avatarColor: 'bg-rose-500',
-  },
-  {
-    id: '5',
-    username: 'avacado',
-    displayName: 'Avacado',
-    mutualFriends: 3,
-    avatarColor: 'bg-emerald-500',
-  },
-];
 
 function Avatar({ color }: { color: string }) {
   return (
@@ -54,11 +24,42 @@ function Avatar({ color }: { color: string }) {
 }
 
 export default function FriendsLayout() {
-  const [incomingRequests, setIncomingRequests] = useState<FriendRequest[]>(
-    initialIncomingRequests,
-  );
-  const [sentRequests, setSentRequests] =
-    useState<FriendRequest[]>(initialSentRequests);
+  const { friendRequests, refreshFriendRequests, refreshUser } = useUser();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useAsyncEffect(async () => {
+    await refreshFriendRequests();
+    setIsLoading(false);
+  });
+
+  const [incomingRequests, setIncomingRequests] = useState<FriendRequest[]>([]);
+  const [sentRequests, setSentRequests] = useState<FriendRequest[]>([]);
+
+  useEffect(() => {
+    if (isLoading) return;
+
+    const layoutOutgoingRequests: FriendRequest[] = [];
+    const layoutIncomingRequests: FriendRequest[] = [];
+
+    for (const friendRequest of friendRequests) {
+      const layoutFriendRequest: FriendRequest = {
+        id: friendRequest.associatedUser.id,
+        username: friendRequest.associatedUser.username,
+        displayName: friendRequest.associatedUser.displayUsername,
+        mutualFriends: 0,
+        avatarColor: 'bg-blue-500',
+      };
+
+      if (friendRequest.type === 'incoming') {
+        layoutIncomingRequests.push(layoutFriendRequest);
+      } else {
+        layoutOutgoingRequests.push(layoutFriendRequest);
+      }
+    }
+
+    setIncomingRequests(layoutIncomingRequests);
+    setSentRequests(layoutOutgoingRequests);
+  }, [friendRequests, isLoading]);
 
   const [friendInput, setFriendInput] = useState('');
   const [uiMessage, setUiMessage] = useState<{
@@ -77,7 +78,7 @@ export default function FriendsLayout() {
     }, 3000);
   };
 
-  const handleSendRequest = (e: React.FormEvent) => {
+  const handleSendRequest = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!canSend) return;
 
@@ -100,12 +101,23 @@ export default function FriendsLayout() {
       return;
     }
 
+    let targetUser = null;
+    try {
+      targetUser = await fetchBasicUserInfo(normalizedInput, true);
+      await sendFriendRequest(targetUser.id);
+    } catch (error: any) {
+      // TODO: add specific http errors
+      pushMessage(`Error Occurred: ${error.message}`, 'error');
+      return;
+    }
+    if (targetUser == null) return;
+
     const newRequest: FriendRequest = {
-      id: `manual-${Date.now()}`,
-      username: normalizedInput,
-      displayName: normalizedInput,
+      id: targetUser.id,
+      username: targetUser.username,
+      displayName: targetUser.displayUsername,
       mutualFriends: 0,
-      avatarColor: 'bg-indigo-500',
+      avatarColor: 'bg-blue-500',
     };
 
     setSentRequests((prev) => [newRequest, ...prev]);
@@ -116,15 +128,33 @@ export default function FriendsLayout() {
     setFriendInput('');
   };
 
-  const handleAccept = (id: string) => {
+  const handleAccept = async (id: string) => {
+    try {
+      await sendFriendRequest(id);
+    } catch (error: any) {
+      pushMessage(`Error Occurred: ${error.message}`, 'error');
+      return;
+    }
     setIncomingRequests((prev) => prev.filter((r) => r.id !== id));
   };
 
-  const handleDecline = (id: string) => {
+  const handleDecline = async (id: string) => {
+    try {
+      await removeFriendRequest(id, 'incoming');
+    } catch (error: any) {
+      pushMessage(`Error Occurred: ${error.message}`, 'error');
+      return;
+    }
     setIncomingRequests((prev) => prev.filter((r) => r.id !== id));
   };
 
-  const handleCancelSent = (id: string) => {
+  const handleCancelSent = async (id: string) => {
+    try {
+      await removeFriendRequest(id, 'outgoing');
+    } catch (error: any) {
+      pushMessage(`Error Occurred: ${error.message}`, 'error');
+      return;
+    }
     setSentRequests((prev) => prev.filter((r) => r.id !== id));
   };
 

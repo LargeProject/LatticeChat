@@ -1,8 +1,17 @@
-import { memo, useDeferredValue, useMemo, useState } from 'react';
+import {
+  memo,
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import type { Chat } from './layout';
 import anonImage from '/anonymous.png';
 import { SearchField } from '@heroui/react';
 import { HiMagnifyingGlass } from 'react-icons/hi2';
+import { useUser } from '#/lib/context/UserContext.tsx';
+import { useAsyncEffect } from '#/components/hooks/useAsyncEffect.ts';
 
 type ChatListProps = {
   onSelect: (chat: Chat) => void;
@@ -14,7 +23,7 @@ type ChatRowProps = {
   onSelect: (chat: Chat) => void;
 };
 
-const chats: Chat[] = [
+const testData: Chat[] = [
   {
     id: '1',
     user: {
@@ -82,6 +91,34 @@ function normalize(value: string) {
 }
 
 export function ChatList({ onSelect }: ChatListProps) {
+  const { conversations, refreshConversations, refreshUser, friends } =
+    useUser();
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [chats, setChats] = useState<Chat[]>([]);
+
+  useAsyncEffect(async () => {
+    await refreshUser();
+    await refreshConversations();
+    setIsLoaded(true);
+  });
+
+  useEffect(() => {
+    if (!isLoaded) return;
+
+    const newChats: Chat[] = [];
+    for (const conversation of conversations) {
+      const chat = {
+        id: conversation.id,
+        user: {
+          name: conversation.name,
+          avatar: anonImage,
+        },
+      };
+      newChats.push(chat);
+    }
+    setChats(newChats);
+  }, [isLoaded, conversations]);
+
   const [query, setQuery] = useState('');
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
 
@@ -92,7 +129,7 @@ export function ChatList({ onSelect }: ChatListProps) {
     if (!q) return chats;
 
     return chats.filter((chat) => normalize(chat.user.name).includes(q));
-  }, [deferredQuery]);
+  }, [deferredQuery, chats]);
 
   const handleSelect = (chat: Chat) => {
     setSelectedChatId(chat.id);

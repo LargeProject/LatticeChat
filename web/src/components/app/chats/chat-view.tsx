@@ -1,12 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Info, Phone, Video } from 'lucide-react';
-import type { Chat } from './layout';
-import { MessageList, type Message } from './messages';
+import type * as layout from './layout';
+import { MessageList } from './messages';
+import type { Message, MessageRole } from './messages';
 import { ChatInput } from './chat-input';
 import { useWebsocket } from '#/lib/hooks/useWebsocket';
+import { useAsyncEffect } from '#/components/hooks/useAsyncEffect.ts';
+import { fetchConversationMessages } from '#/lib/api/conversation.ts';
+import { useUser } from '#/lib/context/UserContext.tsx';
 
 type ChatViewProps = {
-  chat: Chat;
+  chat: layout.Chat;
   onTogglePanel: () => void;
 };
 
@@ -24,42 +28,41 @@ const createMessage = (role: Message['role'], content: string): Message => ({
 // test
 
 export function ChatView({ chat, onTogglePanel }: ChatViewProps) {
+  const { userInfo } = useUser();
   const { createMessage: sendMessage } = useWebsocket();
+  const [isLoaded, setIsLoaded] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     createMessage('assistant', INITIAL_GREETING),
   ]);
   const pendingReplyTimerRef = useRef<number | null>(null);
 
-  useEffect(() => {
-    setMessages([createMessage('assistant', INITIAL_GREETING)]);
+  // fetch messages
+  useAsyncEffect(async () => {
+    const fetchedMessages = await fetchConversationMessages(chat.id);
 
-    if (pendingReplyTimerRef.current !== null) {
-      window.clearTimeout(pendingReplyTimerRef.current);
-      pendingReplyTimerRef.current = null;
+    const chatMessages: Message[] = [];
+    for (const fetchedMessage of fetchedMessages) {
+      let role: MessageRole = 'assistant';
+      if (fetchedMessage.senderId == userInfo?.id) {
+        role = 'user';
+      }
+
+      const chatMessage: Message = {
+        id: fetchedMessage.id,
+        role: role,
+        content: fetchedMessage.content,
+        createdAt: fetchedMessage.createdAt,
+      };
+      chatMessages.push(chatMessage);
     }
 
-    return () => {
-      if (pendingReplyTimerRef.current !== null) {
-        window.clearTimeout(pendingReplyTimerRef.current);
-        pendingReplyTimerRef.current = null;
-      }
-    };
+    setMessages(chatMessages);
+    setIsLoaded(true);
   }, [chat.id]);
 
   const handleSend = useCallback((text: string) => {
     const normalized = text.trim();
     if (!normalized) return;
-
-    setMessages((prev) => [...prev, createMessage('user', normalized)]);
-
-    if (pendingReplyTimerRef.current !== null) {
-      window.clearTimeout(pendingReplyTimerRef.current);
-    }
-
-    pendingReplyTimerRef.current = window.setTimeout(() => {
-      setMessages((prev) => [...prev, createMessage('assistant', 'Bread.')]);
-      pendingReplyTimerRef.current = null;
-    }, 800);
   }, []);
 
   return (

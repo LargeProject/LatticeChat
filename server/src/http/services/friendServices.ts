@@ -22,7 +22,7 @@ const handleGetFriendRequests: Service = async (req: UserRequest, res) => {
     res.status(200).send({
       success: true,
       message: 'Friend requests were successfully found',
-      friendrequests: friendRequests.map((friend) => friend.toObject()),
+      friendRequests: friendRequests.map((friend) => friend.toObject()),
     });
   } catch (error) {
     handleHttpError(error, res);
@@ -36,12 +36,6 @@ const handleAddFriendRequest: Service = async (req: UserRequest, res) => {
   try {
     const friendRequest = await createFriendRequest(senderId, targetId);
     if (!friendRequest) {
-      // create conversation
-      const createConversationData: CreateConversation = {
-        memberIds: [senderId, targetId],
-      };
-      await createConversation(createConversationData);
-
       res.status(200).send({
         success: true,
         message: 'Friend successfully added',
@@ -76,6 +70,7 @@ const handleRemoveFriendRequest: Service = async (req: UserRequest, res) => {
       success: false,
       message: 'Unknown friend request type: ' + type,
     });
+    return;
   }
 
   try {

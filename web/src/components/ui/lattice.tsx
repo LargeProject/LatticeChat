@@ -12,7 +12,7 @@ function CryptoLattice({
 }) {
   const group = useRef<THREE.Group>(null!)
 
-  const { positions, colors, lines } = useMemo(() => {
+  const { positions, colors, lines } = useMemo(() => { 
     const pointCount = 180
     const spread = 11
     const threshold = 2

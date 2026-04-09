@@ -2,6 +2,12 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import type { ZXCVBNFeedback } from 'zxcvbn';
 import { authClient } from '#/lib/auth';
+import {
+  setLastUsedEmail,
+  setLocalJWT,
+  setLocalUserId,
+} from '#/lib/util/storage.ts';
+import { fetchIsEmailTaken, fetchIsUsernameTaken } from '#/lib/api/auth.ts';
 
 export function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
@@ -20,8 +26,6 @@ export function useDebounce<T>(value: T, delay: number): T {
 }
 
 export function useAuthLogic() {
-  // const { refreshUser } = useUser();
-  
   const [mode, setMode] = useState<'login' | 'signup'>('login');
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
@@ -60,24 +64,14 @@ export function useAuthLogic() {
         onRequest: () => {
           setIsPending(true);
         },
-        onSuccess: (ctx) => {
+        onSuccess: async () => {
           setIsPending(false);
           sendVerificationCode();
-          const jwt = ctx.response.headers.get('set-auth-token');
-          if (jwt !== null) {
-            localStorage.setItem('jwt', jwt);
-          }
-          localStorage.setItem('lastEmail', email);
+          setLastUsedEmail(email);
 
-          navigate({
-            to: '/verify-email',
-          });
-
-          // refreshUser();
+          navigate({ to: '/verify-email' });
         },
         onError: (ctx) => {
-          // display the error message
-          // if email is taken, setEmailAvailability(true)
           alert(ctx.error.message);
           setIsPending(false);
         },
@@ -109,11 +103,20 @@ export function useAuthLogic() {
           setIsPending(false);
           const jwt = ctx.response.headers.get('set-auth-token');
           if (jwt !== null) {
-            localStorage.setItem('jwt', jwt);
+            setLocalJWT(jwt);
           }
+          setLastUsedEmail(email);
+          setLocalUserId(ctx.data.user.id);
         },
-        onError: () => {
-          setIsPending(false);
+        onError: (ctx) => {
+          if (ctx.error.code === 'EMAIL_NOT_VERIFIED') {
+            setLastUsedEmail(email);
+            sendVerificationCode();
+            navigate({ to: '/verify-email' });
+          } else {
+            alert(ctx.error.message);
+            setIsPending(false);
+          }
         },
       },
     );
@@ -230,13 +233,23 @@ export function useAuthLogic() {
       return;
     }
 
-    fetch(`${import.meta.env.VITE_BETTER_AUTH_BASE_URL || 'http://localhost:3001/api/auth'}/email-taken?email=${encodeURIComponent(trimmed)}`)
-      .then(res => res.json())
-      .then(data => {
-        setEmailAvailability(data.isTaken ? 'Email appears taken.' : 'Email looks available.');
-      })
-      .catch((err) => { console.error('Email check failed:', err); setEmailAvailability('Could not check availability.'); })
-      .finally(() => setIsCheckingEmail(false));
+    (async () => {
+      let isEmailTaken = false;
+      try {
+        setIsCheckingEmail(true);
+        isEmailTaken = await fetchIsEmailTaken(email);
+      } catch (error) {
+        console.error(error);
+        setEmailAvailability('Could not check availability.');
+      }
+      setIsCheckingEmail(false);
+
+      if (isEmailTaken) {
+        setEmailAvailability('Email is taken.');
+      } else {
+        setEmailAvailability('Email is available.');
+      }
+    })();
   }, [mode, email, debouncedEmail]);
 
   useEffect(() => {
@@ -265,13 +278,23 @@ export function useAuthLogic() {
       return;
     }
 
-    fetch(`${import.meta.env.VITE_BETTER_AUTH_BASE_URL || 'http://localhost:3001/api/auth'}/username-taken?username=${encodeURIComponent(trimmedUsername)}`)
-      .then(res => res.json())
-      .then(data => {
-        setUsernameAvailability(data.isTaken ? 'Username appears taken.' : 'Username looks available.');
-      })
-      .catch((err) => { console.error('Username check failed:', err); setUsernameAvailability('Could not check availability.'); })
-      .finally(() => setIsCheckingUsername(false));
+    (async () => {
+      let isUsernameTaken = false;
+      try {
+        setIsCheckingUsername(true);
+        isUsernameTaken = await fetchIsUsernameTaken(username);
+      } catch (error) {
+        console.error(error);
+        setUsernameAvailability('Could not check availability.');
+      }
+      setIsCheckingUsername(false);
+
+      if (isUsernameTaken) {
+        setUsernameAvailability('Username is taken.');
+      } else {
+        setUsernameAvailability('Username is available.');
+      }
+    })();
   }, [mode, username, debouncedUsername]);
 
   useEffect(() => {

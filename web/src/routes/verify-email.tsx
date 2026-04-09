@@ -1,23 +1,24 @@
-import { useState, useRef, useEffect } from 'react'
-import { useNavigate, createFileRoute } from '@tanstack/react-router'
-import { ShineBorder } from '@/components/ui/shine-border'
+import { useState, useRef, useEffect } from 'react';
+import { useNavigate, createFileRoute } from '@tanstack/react-router';
+import { ShineBorder } from '@/components/ui/shine-border';
 import { authClient } from '#/lib/auth.ts';
+import { getLastUsedEmail } from '#/lib/util/storage.ts';
 
 function VerifyEmail() {
-  const [code, setCode] = useState<string[]>(['', '', '', '', '', ''])
-  const inputRefs = useRef<(HTMLInputElement | null)[]>([])
-  const navigate = useNavigate()
-  const [isLoading, setIsLoading] = useState(false)
-  const isComplete = code.every(Boolean)
+  const [code, setCode] = useState<string[]>(['', '', '', '', '', '']);
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+  const isComplete = code.every(Boolean);
 
   const verifyCode = async () => {
-    if (isLoading || !isComplete) return
+    if (isLoading || !isComplete) return;
 
-    setIsLoading(true)
-    const verificationCode = code.join('')
-    console.log('Code:', verificationCode)
+    setIsLoading(true);
+    const verificationCode = code.join('');
+    console.log('Code:', verificationCode);
 
-    const email = localStorage.getItem("lastEmail") ?? "";
+    const email = getLastUsedEmail() ?? '';
 
     try {
       await authClient.emailOtp.verifyEmail(
@@ -27,89 +28,93 @@ function VerifyEmail() {
         },
         {
           onSuccess: () => {
-            navigate({ to: "/app" })
+            alert('Verification successful')
+            navigate({ to: '/' });
           },
           onError: (ctx) => {
-            alert(ctx.error.message)
+            alert(ctx.error.message);
           },
         },
-      )
+      );
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   };
-  
+
   const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
-    e.preventDefault()
-  
-    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, code.length)
-    if (!pasted) return
-  
-    const newCode = [...code]
-  
+    e.preventDefault();
+
+    const pasted = e.clipboardData
+      .getData('text')
+      .replace(/\D/g, '')
+      .slice(0, code.length);
+    if (!pasted) return;
+
+    const newCode = [...code];
+
     pasted.split('').forEach((char, i) => {
-      newCode[i] = char
-    })
-  
-    setCode(newCode)
-  
-    inputRefs.current[Math.min(pasted.length - 1, code.length - 1)]?.focus()
-  }
+      newCode[i] = char;
+    });
+
+    setCode(newCode);
+
+    inputRefs.current[Math.min(pasted.length - 1, code.length - 1)]?.focus();
+  };
 
   const handleChange = (index: number, value: string) => {
-    if (!/^\d*$/.test(value)) return
+    if (!/^\d*$/.test(value)) return;
 
-    const newCode = [...code]
+    const newCode = [...code];
 
     // paste support
     if (value.length > 1) {
-      const pasted = value.slice(0, code.length).split('')
+      const pasted = value.slice(0, code.length).split('');
 
       pasted.forEach((char, i) => {
-        newCode[i] = char
-      })
+        newCode[i] = char;
+      });
 
-      setCode(newCode)
-      inputRefs.current[Math.min(pasted.length, code.length - 1)]?.focus()
-      return
+      setCode(newCode);
+      inputRefs.current[Math.min(pasted.length, code.length - 1)]?.focus();
+      return;
     }
 
-    newCode[index] = value
-    setCode(newCode)
+    newCode[index] = value;
+    setCode(newCode);
 
     if (value && index < code.length - 1) {
-      inputRefs.current[index + 1]?.focus()
+      inputRefs.current[index + 1]?.focus();
     }
-  }
+  };
 
   const handleKeyDown = (
     index: number,
     e: React.KeyboardEvent<HTMLInputElement>,
   ) => {
     if (e.key === 'Backspace' && !code[index] && index > 0) {
-      inputRefs.current[index - 1]?.focus()
+      inputRefs.current[index - 1]?.focus();
     }
-  }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    verifyCode()
-  }
+    e.preventDefault();
+    verifyCode();
+  };
 
   useEffect(() => {
     if (code.every(Boolean)) {
-      verifyCode()
+      verifyCode();
     }
-  }, [code])
+  }, [code]);
 
   return (
     <main className="bg-black min-h-screen flex items-center justify-center">
       <div className="w-full max-w-lg rounded-2xl border border-zinc-800 bg-zinc-950/80 backdrop-blur-lg p-8 shadow-2xl space-y-6">
-      <ShineBorder shineColor={['#34d399', '#22d3ee']}/>
+        <ShineBorder shineColor={['#34d399', '#22d3ee']} />
         <h2 className="text-3xl md:text-3xl font-extrabold bg-linear-to-r from-green-400 via-teal-400 to-cyan-500 animate-gradient bg-clip-text text-transparent text-center">
           Verify Your Email
         </h2>
-        
+
         <p className="text-sm text-zinc-400 text-center">
           Enter the 6-digit code we emailed you to confirm your address and
           complete your sign up.
@@ -121,7 +126,7 @@ function VerifyEmail() {
               <input
                 key={index}
                 ref={(el) => {
-                  inputRefs.current[index] = el
+                  inputRefs.current[index] = el;
                 }}
                 type="text"
                 maxLength={1}
@@ -150,9 +155,9 @@ function VerifyEmail() {
         </form>
       </div>
     </main>
-  )
+  );
 }
 
 export const Route = createFileRoute('/verify-email')({
   component: VerifyEmail,
-})
+});

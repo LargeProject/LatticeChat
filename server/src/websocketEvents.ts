@@ -1,8 +1,14 @@
 import * as handlers from './db';
-import { EventType } from './lib/websockets';
+import type { EventType } from './lib/websockets';
 import * as payload from '@latticechat/shared';
+import { validateWSHandshake } from './util/ws';
 
 export const events: EventType[] = [
+  {
+    name: 'initHandshake',
+    payloadSchema: payload.initHandshake,
+    handler: validateWSHandshake,
+  },
   {
     name: 'createMessage',
     payloadSchema: payload.createMessage,

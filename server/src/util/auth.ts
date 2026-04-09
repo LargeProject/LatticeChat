@@ -67,14 +67,9 @@ const auth = betterAuth({
       // password validation middleware
       if (
         ctx.path == '/sign-up/email' ||
-        ctx.path == '/email-otp/request-password-reset'
+        ctx.path == '/email-otp/reset-password'
       ) {
-        let password = '';
-        if (ctx.path == '/sign-up/email') {
-          password = ctx.body.password;
-        } else if (ctx.path == '/email-otp/request-password-reset') {
-          password = ctx.body.newPassword;
-        }
+        let password = ctx.body.password;
 
         const { score, feedback } = zxcvbn(password);
         if (score < 3) {
@@ -102,14 +97,3 @@ const auth = betterAuth({
 });
 
 export default auth;
-
-async function attemptGetSession(token: string) {
-  return await auth.api.getSession({
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    asResponse: true,
-  });
-}
-
-export { attemptGetSession };
