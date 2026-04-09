@@ -1,8 +1,15 @@
-import {Conversation, FriendRequest, Message, User} from './models';
+import {
+  Account,
+  Conversation,
+  FriendRequest,
+  KeyExchangeRequest,
+  Message,
+  User,
+} from './models';
 import actions, { CreateConversation } from '@latticechat/shared';
-import {ErrorCodes, HttpError} from '../util/error';
-import {BasicUserInfo} from "../http/types";
-import {UserDocument} from "./schemas/User";
+import { ErrorCodes, HttpError } from '../util/error';
+import { BasicUserInfo } from '../http/types';
+import { UserDocument } from './schemas/User';
 
 function createConversationName(memberNames: string[]) {
   return memberNames.join(', ');
@@ -12,7 +19,11 @@ export async function getConversation(conversationId: string) {
   const conversation = await Conversation.findById(conversationId);
 
   if (!conversation) {
-    throw new HttpError(404, ErrorCodes.CONVERSATION_NOT_FOUND, 'Conversation not found');
+    throw new HttpError(
+      404,
+      ErrorCodes.CONVERSATION_NOT_FOUND,
+      'Conversation not found',
+    );
   }
 
   return conversation;
@@ -86,20 +97,37 @@ export async function createMessage(data: actions.CreateMessage) {
   return message;
 }
 
+export async function findUser(
+  userId: string,
+  type: 'user' | 'target' = 'user',
+) {
+  const user = await User.findById(userId);
+  if (user == null) {
+    switch (type) {
+      case 'target':
+        throw new HttpError(
+          404,
+          ErrorCodes.TARGET_NOT_FOUND,
+          'Target not found',
+        );
+      case 'user':
+        throw new HttpError(404, ErrorCodes.USER_NOT_FOUND, 'User not found');
+    }
+  }
+
+  return user;
+}
+
 export async function createFriendRequest(senderId: string, targetId: string) {
-  const sender = await User.findById(senderId);
-  const target = await User.findById(targetId);
-
-  if (sender == null) {
-    throw new HttpError(404, ErrorCodes.USER_NOT_FOUND, 'User not found');
-  }
-
-  if (target == null) {
-    throw new HttpError(404, ErrorCodes.TARGET_NOT_FOUND, 'Target not found');
-  }
+  const sender = await findUser(senderId, 'user');
+  const target = await findUser(targetId, 'target');
 
   if (sender.hasFriend(target._id)) {
-    throw new HttpError(409, ErrorCodes.FRIEND_EXISTS, 'Already friends with this user');
+    throw new HttpError(
+      409,
+      ErrorCodes.FRIEND_EXISTS,
+      'Already friends with this user',
+    );
   }
 
   const friendRequest = await FriendRequest.findOne({
@@ -107,7 +135,11 @@ export async function createFriendRequest(senderId: string, targetId: string) {
     to: target._id,
   });
   if (friendRequest != null) {
-    throw new HttpError(409, ErrorCodes.FRIEND_REQUEST_EXISTS, 'Friend request already exists');
+    throw new HttpError(
+      409,
+      ErrorCodes.FRIEND_REQUEST_EXISTS,
+      'Friend request already exists',
+    );
   }
 
   const targetFriendRequest = await target.getFriendRequestTo(sender._id);
@@ -134,16 +166,8 @@ export async function createFriendRequest(senderId: string, targetId: string) {
 }
 
 export async function removeFriendRequest(fromId: string, toId: string) {
-  const sender = await User.findById(fromId);
-  const target = await User.findById(toId);
-
-  if (sender == null) {
-    throw new HttpError(404, ErrorCodes.USER_NOT_FOUND, 'User not found');
-  }
-
-  if (target == null) {
-    throw new HttpError(404, ErrorCodes.TARGET_NOT_FOUND, 'Target not found');
-  }
+  const sender = await findUser(fromId, 'user');
+  const target = await findUser(toId, 'target');
 
   const friendRequest = await FriendRequest.findOne({
     from: sender._id,
@@ -151,7 +175,11 @@ export async function removeFriendRequest(fromId: string, toId: string) {
   });
 
   if (friendRequest == null) {
-    throw new HttpError(404, ErrorCodes.FRIEND_REQUEST_NOT_FOUND, 'Friend request not found');
+    throw new HttpError(
+      404,
+      ErrorCodes.FRIEND_REQUEST_NOT_FOUND,
+      'Friend request not found',
+    );
   }
 
   await friendRequest.deleteOne();
@@ -170,16 +198,8 @@ export async function getFriendRequests(userId: string) {
 }
 
 export async function removeFriend(sourceId: string, targetId: string) {
-  const source = await User.findById(sourceId);
-  const target = await User.findById(targetId);
-
-  if (source == null) {
-    throw new HttpError(404, ErrorCodes.USER_NOT_FOUND, 'User not found');
-  }
-
-  if (target == null) {
-    throw new HttpError(404, ErrorCodes.TARGET_NOT_FOUND, 'Target not found');
-  }
+  const source = await findUser(sourceId, 'user');
+  const target = await findUser(targetId, 'target');
 
   if (!source.hasFriend(target._id)) {
     throw new HttpError(404, ErrorCodes.FRIEND_NOT_FOUND, 'Friend not found');
@@ -227,7 +247,9 @@ export async function getBasicUserInfoById(userId: string) {
   return await getBasicUserInfo(user);
 }
 
-async function getBasicUserInfo(user: UserDocument | null): Promise<BasicUserInfo> {
+async function getBasicUserInfo(
+  user: UserDocument | null,
+): Promise<BasicUserInfo> {
   if (user == null) {
     throw new HttpError(404, ErrorCodes.USER_NOT_FOUND, 'User not found');
   }
