@@ -56,6 +56,12 @@ const auth = betterAuth({
 
   account: {
     modelName: 'accounts',
+    additionalFields: {
+      publicKey: {
+        type: 'string',
+        required: false,
+      },
+    },
   },
   user: {
     modelName: 'users',

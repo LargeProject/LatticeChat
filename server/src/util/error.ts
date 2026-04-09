@@ -21,10 +21,15 @@ export const handleHttpError = (error: any, res: Response) => {
 
   res
     .status(500)
-    .send({ success: false, code: 'INTERNAL_ERROR', message: 'Unknown Error: ' + error.message });
+    .send({
+      success: false,
+      code: 'INTERNAL_ERROR',
+      message: 'Unknown Error: ' + error.message,
+    });
 };
 
 export class ErrorCodes {
+  static readonly ACCOUNT_NOT_FOUND = 'ACCOUNT_NOT_FOUND';
   static readonly USER_NOT_FOUND = 'USER_NOT_FOUND';
   static readonly TARGET_NOT_FOUND = 'TARGET_NOT_FOUND';
   static readonly FRIEND_NOT_FOUND = 'FRIEND_NOT_FOUND';
