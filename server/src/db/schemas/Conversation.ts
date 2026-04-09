@@ -22,6 +22,17 @@ export const messageSchema = new Schema({
     required: true,
     default: Date.now,
   },
+  keys: [
+    {
+      id: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+      },
+      encryptedKey: {
+        type: String,
+      },
+    },
+  ],
 });
 
 export const conversationSchema = new Schema({
