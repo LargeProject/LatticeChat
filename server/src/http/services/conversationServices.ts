@@ -9,8 +9,7 @@ const handleGetConversation: Service = async (req: UserRequest, res) => {
 
   try {
     const conversation = await getConversation(conversationId);
-    const userObjectId = new mongoose.Types.ObjectId(userId);
-    if (!conversation.memberIds.includes(userObjectId)) {
+    if (!conversation.hasMember(userId)) {
       res.status(401).send({
         success: false,
         message: 'Not a member of the conversation',
