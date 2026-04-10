@@ -1,7 +1,7 @@
 import express from 'express';
 import http from 'node:http';
 import { WebsocketServer } from './lib/websocket';
-import { events } from './websocketEvents';
+import { events } from './websocket/clientEvents';
 import { ENV } from './util/env';
 import cors from 'cors';
 import { logger } from './http/middleware/loggerMiddleware';

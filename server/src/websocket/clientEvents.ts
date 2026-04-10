@@ -1,7 +1,7 @@
-import { WebsocketHandlers } from './websocket/handlers';
-import type { RegisteredEvent } from './lib/websocket/types';
+import { WebsocketHandlers } from './handlers';
+import type { RegisteredEvent } from '../lib/websocket/types';
 import * as payload from '@latticechat/shared';
-import { validateWSHandshake } from './util/ws';
+import { validateWSHandshake } from '../util/ws';
 
 export const events: RegisteredEvent[] = [
   {

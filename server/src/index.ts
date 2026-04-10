@@ -3,6 +3,6 @@ import { io, server } from './server';
 
 server.listen(ENV.PORT, () => {
   console.log(`Lattice backend now listening at ${ENV.HOST}:${ENV.PORT}`);
-  console.log('Aloha Noah! 😎');
+  console.log('Hi Andrew! 😎');
 });
 io.start();
