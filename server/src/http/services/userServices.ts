@@ -51,21 +51,19 @@ const handleGetCurrentUser: types.Service = async (req, res) => {
           ownerId: conv.ownerId?.toString(),
           members: members.map((m) => ({
             id: m._id.toString(),
-            username: m.username,
-            displayUsername: m.displayUsername,
+            name: m.name,
             biography: m.biography,
             createdAt: m.createdAt,
           })),
         };
-      })
+      }),
     );
 
     // Fetch and hydrate friends
     const friends = await User.find({ _id: { $in: user.friendIds } });
     const friendList = friends.map((f) => ({
       id: f._id.toString(),
-      username: f.username,
-      displayUsername: f.displayUsername,
+      name: f.name,
       biography: f.biography,
       createdAt: f.createdAt,
     }));
@@ -73,8 +71,7 @@ const handleGetCurrentUser: types.Service = async (req, res) => {
     const response: contracts.CurrentUserResponse = {
       user: {
         id: user._id.toString(),
-        username: user.username,
-        displayUsername: user.displayUsername,
+        name: user.name,
         email: user.email,
         biography: user.biography,
         createdAt: user.createdAt,

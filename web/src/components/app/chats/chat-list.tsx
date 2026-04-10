@@ -58,8 +58,7 @@ function normalize(value: string) {
 }
 
 export function ChatList() {
-  const { conversations, refreshConversations, refreshUser, friends } =
-    useUser();
+  const { conversations, refreshUser } = useUser();
   const [isLoaded, setIsLoaded] = useState(false);
 
   useAsyncEffect(async () => {
