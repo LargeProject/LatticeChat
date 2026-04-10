@@ -17,7 +17,7 @@ export type Chat = {
 const PANEL_BREAKPOINT = 1280;
 
 export default function ChatLayout() {
-  const { convoId } = useAppState();
+  const { convoId, setConvoId } = useAppState();
   const [isPanelOpen, setIsPanelOpen] = useState(true);
   const [userToggled, setUserToggled] = useState(false);
   const [isWideScreen, setIsWideScreen] = useState(() =>
@@ -42,7 +42,7 @@ export default function ChatLayout() {
   }, []);
 
   useEffect(() => {
-    if (!selectedChatId) return;
+    if (!convoId) return;
 
     if (!isWideScreen) {
       setIsPanelOpen(false);
@@ -52,10 +52,10 @@ export default function ChatLayout() {
     if (!userToggled) {
       setIsPanelOpen(true);
     }
-  }, [isWideScreen, selectedChatId, userToggled]);
+  }, [isWideScreen, convoId, userToggled]);
 
   const handleSelectChat = (conversationId: string) => {
-    setSelectedChatId(conversationId);
+    setConvoId(conversationId);
 
     if (isWideScreen && !userToggled) {
       setIsPanelOpen(true);
@@ -68,7 +68,7 @@ export default function ChatLayout() {
     setUserToggled(true);
   };
 
-  const showPanel = Boolean(selectedChatId && isWideScreen && isPanelOpen);
+  const showPanel = Boolean(convoId && isWideScreen && isPanelOpen);
 
   return (
     <div className="flex h-full min-h-0 flex-1 overflow-hidden">
@@ -78,18 +78,15 @@ export default function ChatLayout() {
         </div>
       </aside>
 
-      {selectedChatId ? 'HIIHIH' : 'NONONOON'}
+      {convoId ? 'HIIHIH' : 'NONONOON'}
 
       <main className="flex min-w-0 flex-1 overflow-hidden">
-        {!selectedChatId ? (
+        {!convoId ? (
           <EmptyState />
         ) : (
           <>
             <section className="flex min-w-0 flex-1 flex-col overflow-hidden">
-              <ChatView
-                conversationId={selectedChatId}
-                onTogglePanel={togglePanel}
-              />
+              <ChatView conversationId={convoId} onTogglePanel={togglePanel} />
             </section>
 
             <aside
@@ -120,4 +117,3 @@ export default function ChatLayout() {
     </div>
   );
 }
-
