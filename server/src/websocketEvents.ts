@@ -1,5 +1,5 @@
 import { MessageHandlers } from './websocket/MessageService';
-import { handleCreateMessage } from './websocketHandlers';
+import { handleCreateMessage } from './websocket/websocketHandlers';
 import type { RegisteredEvent } from './lib/websocket/types';
 import * as payload from '@latticechat/shared';
 import { validateWSHandshake } from './util/ws';

@@ -1,7 +1,7 @@
-import { User, Conversation, Message } from '../models';
-import type actions from '@latticechat/shared';
+import type * as actions from '@latticechat/shared';
+import { Conversation, Message, User } from '../models';
 
-const errors = {
+export const ConversationServiceErrors = {
   CONVERSATION_NOT_FOUND: 'Conversation not found',
 };
 
@@ -20,7 +20,7 @@ export class ConversationService {
     const conversation = await Conversation.findById(conversationId);
 
     if (!conversation) {
-      throw new Error(errors.CONVERSATION_NOT_FOUND);
+      throw new Error(ConversationServiceErrors.CONVERSATION_NOT_FOUND);
     }
 
     return conversation;
@@ -54,7 +54,7 @@ export class ConversationService {
     });
 
     if (!conversation) {
-      throw new Error('Conversation not found');
+      throw new Error(ConversationServiceErrors.CONVERSATION_NOT_FOUND);
     }
 
     await conversation.deleteOne();
