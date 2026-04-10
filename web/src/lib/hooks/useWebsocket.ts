@@ -1,64 +1,68 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { io } from 'socket.io-client';
+import { useCallback, useRef } from 'react';
+import { useWebsocketContext } from '../context/WebsocketContext';
 import type * as contracts from '@latticechat/shared';
-import type { UserInfo } from '../api/user';
-import { useUser } from '../context/UserContext';
-import { getLocalJWT } from '../util/storage';
-
-export const socket = io(import.meta.env.VITE_WS_BASE_URL, {
-  autoConnect: true,
-});
 
 export function useWebsocket() {
-  const { userInfo } = useUser();
-  const [isConnected, setIsConnected] = useState(socket.connected);
-  const [handshakeComplete, setHandshakeComplete] = useState(socket.connected);
+  const context = useWebsocketContext();
+  const messageQueueRef = useRef<contracts.CreateMessage[]>([]);
 
-  useEffect(() => {
-    const jwt = getLocalJWT() || '';
+  const createMessage = useCallback(
+    async (data: contracts.CreateMessage) => {
+      if (!context.socket || !context.isAuthenticated) {
+        console.warn('Socket not connected or not authenticated, queuing message');
+        messageQueueRef.current.push(data);
+        return { success: false, queued: true };
+      }
 
-    if (userInfo.data && !handshakeComplete && jwt) {
-      const data: contracts.InitHandshake = {
-        jwt,
-        id: userInfo.data.id,
-      };
+      try {
+        const ack: boolean = await context.emitWithAck<boolean>('createMessage', data);
+        return { success: ack };
+      } catch (error) {
+        console.error('Error sending message:', error);
+        messageQueueRef.current.push(data);
+        return { success: false, queued: true };
+      }
+    },
+    [context.emitWithAck, context.socket, context.isAuthenticated]
+  );
 
-      socket.emitWithAck('initHandshake', data).then((response) => {
-        if (response) {
-          setHandshakeComplete(true);
-        } else {
-          setHandshakeComplete(false);
-        }
-      });
-    }
+  const createConversation = useCallback(
+    async (data: contracts.CreateConversation) => {
+      if (!context.socket || !context.isAuthenticated) {
+        console.warn('Socket not connected or not authenticated');
+        return { success: false };
+      }
 
-    function onConnect() {
-      setIsConnected(true);
-    }
-    function onDisconnect() {
-      setIsConnected(false);
-    }
+      try {
+        const ack: boolean = await context.emitWithAck<boolean>('createConversation', data);
+        return { success: ack };
+      } catch (error) {
+        console.error('Error creating conversation:', error);
+        return { success: false };
+      }
+    },
+    [context.emitWithAck, context.socket, context.isAuthenticated]
+  );
 
-    socket.on('connect', onConnect);
-    socket.on('disconnect', onDisconnect);
+  const getMessageQueue = useCallback(() => {
+    return messageQueueRef.current;
+  }, []);
 
-    return () => {
-      socket.off('connect', onConnect);
-      socket.off('disconnect', onDisconnect);
-      socket.close();
-    };
-  }, [userInfo]);
-
-  async function createMessage(data: contracts.CreateMessage) {
-    const ack: boolean = await socket.emitWithAck('createMessage', data);
-    return {
-      success: ack,
-    };
-  }
+  const clearMessageQueue = useCallback(() => {
+    messageQueueRef.current = [];
+  }, []);
 
   return {
-    isConnected,
-    socket,
+    isConnected: context.isConnected,
+    isAuthenticated: context.isAuthenticated,
+    connectionState: context.connectionState,
+    error: context.error,
+    userId: context.userId,
+    socket: context.socket,
     createMessage,
+    createConversation,
+    getMessageQueue,
+    clearMessageQueue,
   };
 }
+

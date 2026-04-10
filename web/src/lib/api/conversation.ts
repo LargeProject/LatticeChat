@@ -63,7 +63,7 @@ export async function fetchConversation(
   }
 
   return {
-    id: rawConversation.id,
+    id: rawConversation._id,
     name: privateName ?? rawConversation.name,
     ownerId: rawConversation.ownerId,
     members: members,
@@ -109,16 +109,16 @@ export async function fetchConversationMessages(
     throw new HttpError(response.status, body.code, body.message);
   }
 
-  const rawMessages = body.message;
+  const rawMessages = body.messages;
 
   const messages: Message[] = [];
   for (const rawMessage of rawMessages) {
     const message: Message = {
-      id: rawMessage.id,
-      senderId: rawMessage.sender,
-      conversationId: rawMessage.conversation,
+      id: rawMessage._id,
+      senderId: rawMessage.senderId,
+      conversationId: rawMessage.conversationId,
       content: rawMessage.content,
-      createdAt: rawMessage.createdAt,
+      createdAt: new Date(rawMessage.createdAt),
     };
     messages.push(message);
   }

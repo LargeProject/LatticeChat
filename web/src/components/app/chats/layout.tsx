@@ -1,18 +1,8 @@
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ChatList } from './chat-list';
 import { ChatView } from './chat-view';
-import { UserInfoPanel } from './user-info';
 import { EmptyState } from './empty-state';
-import type { Conversation } from '#/lib/api/conversation';
-import { AppStateContext, useAppState } from '#/lib/context/AppStateContext';
-
-export type Chat = {
-  id: string;
-  user: {
-    name: string;
-    avatar: string;
-  };
-};
+import { useAppState } from '#/lib/context/AppStateContext';
 
 const PANEL_BREAKPOINT = 1280;
 
@@ -54,14 +44,6 @@ export default function ChatLayout() {
     }
   }, [isWideScreen, convoId, userToggled]);
 
-  const handleSelectChat = (conversationId: string) => {
-    setConvoId(conversationId);
-
-    if (isWideScreen && !userToggled) {
-      setIsPanelOpen(true);
-    }
-  };
-
   const togglePanel = () => {
     if (!isWideScreen) return;
     setIsPanelOpen((prev) => !prev);
@@ -74,11 +56,9 @@ export default function ChatLayout() {
     <div className="flex h-full min-h-0 flex-1 overflow-hidden">
       <aside className="hidden h-full min-h-0 w-72 shrink-0 border-r border-(--line) bg-(--surface) md:flex lg:w-80">
         <div className="flex h-full min-h-0 w-full flex-col overflow-hidden">
-          <ChatList onSelect={handleSelectChat} />
+          <ChatList />
         </div>
       </aside>
-
-      {convoId ? 'HIIHIH' : 'NONONOON'}
 
       <main className="flex min-w-0 flex-1 overflow-hidden">
         {!convoId ? (

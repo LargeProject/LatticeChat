@@ -1,11 +1,9 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Info, Phone, Video } from 'lucide-react';
-import type * as layout from './layout';
 import { MessageList } from './messages';
 import { ChatInput } from './chat-input';
 import { useWebsocket } from '#/lib/hooks/useWebsocket';
-import { useAsyncEffect } from '#/components/hooks/useAsyncEffect.ts';
-import { fetchConversationMessages } from '#/lib/api/conversation.ts';
+import { type Message } from '#/lib/api/conversation.ts';
 import { useUser } from '#/lib/context/UserContext.tsx';
 import { useConversation } from '#/components/hooks/useConversation';
 
@@ -17,6 +15,8 @@ type ChatViewProps = {
 export function ChatView({ conversationId, onTogglePanel }: ChatViewProps) {
   const { conversations } = useUser();
   const { createMessage: sendMessage } = useWebsocket();
+  const { userInfo } = useUser();
+  const [pendingMessages, setPendingMessages] = useState<Array<Message & { optimistic: true }>>([]);
 
   const conversation = useMemo(() => {
     return conversations.find((c) => c.id == conversationId);
@@ -28,10 +28,36 @@ export function ChatView({ conversationId, onTogglePanel }: ChatViewProps) {
 
   const { name, messages } = useConversation(conversation);
 
-  const handleSend = useCallback((text: string) => {
+  // Optimistic UI: merge pending messages with confirmed messages
+  const allMessages = [...messages, ...pendingMessages];
+
+  const handleSend = useCallback(async (text: string) => {
     const normalized = text.trim();
-    if (!normalized) return;
-  }, []);
+    if (!normalized || !userInfo.data) return;
+    const tempId = `pending-${Date.now()}`;
+    const optimisticMsg = {
+      id: tempId,
+      senderId: userInfo.data.id,
+      conversationId: conversation.id,
+      content: normalized,
+      createdAt: new Date(),
+      optimistic: true as const,
+    };
+    setPendingMessages((msgs) => [...msgs, optimisticMsg]);
+    const result = await sendMessage({
+      conversationId: conversation.id,
+      senderId: userInfo.data.id,
+      content: normalized,
+    });
+    if (!result.success) {
+      // Remove optimistic message and show error
+      setPendingMessages((msgs) => msgs.filter((m) => m.id !== tempId));
+      alert('Failed to send message.');
+    } else {
+      // Remove optimistic message (will be replaced by real one from server)
+      setPendingMessages((msgs) => msgs.filter((m) => m.id !== tempId));
+    }
+  }, [conversation, userInfo]);
 
   return (
     <section
@@ -83,7 +109,7 @@ export function ChatView({ conversationId, onTogglePanel }: ChatViewProps) {
         </div>
       </header>
 
-      <MessageList messages={messages} />
+      <MessageList messages={allMessages} currentUserId={userInfo.data?.id || ''} />
 
       <div className="border-t border-(--line) bg-(--surface)">
         <ChatInput onSend={handleSend} />

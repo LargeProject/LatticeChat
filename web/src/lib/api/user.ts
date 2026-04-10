@@ -1,48 +1,32 @@
-import { authClient } from '#/lib/auth.ts';
-import { bufferArrayToHexStringArray } from '#/lib/util/buffer.ts';
 import { getLocalJWT, getLocalUserId } from '#/lib/util/storage.ts';
 import { HttpError } from '#/lib/util/error.ts';
+import type { CurrentUserResponse, BasicUserInfo, UserInfo } from '@latticechat/shared';
 
-export type UserInfo = {
-  id: string;
-  name: string;
-  email: string;
-  biography: string;
-  friendIds: string[];
-  conversationIds: string[];
-  createdAt: Date;
-};
+export type { CurrentUserResponse, BasicUserInfo, UserInfo };
 
-export type BasicUserInfo = {
-  id: string;
-  name: string;
-  biography: string;
-  createdAt: Date;
-};
-
-export async function fetchUserInfo(): Promise<UserInfo | undefined> {
+export async function fetchUserInfo(): Promise<CurrentUserResponse | undefined> {
   const jwt = getLocalJWT();
-  const { data } = await authClient.getSession({
-    fetchOptions: {
+  
+  const response = await fetch(
+    import.meta.env.VITE_API_BASE_URL + '/users/me',
+    {
+      method: 'GET',
       headers: {
         Authorization: 'Bearer ' + jwt,
       },
     },
-  });
+  );
+  
+  const body = await response.json();
+  
+  if (!response.ok) {
+    if (response.status === 404) {
+      return undefined;
+    }
+    throw new HttpError(response.status, body.code, body.message);
+  }
 
-  // TODO: move server auth.ts to shared dir to share auth user-schema
-  const userData = (data?.user as any) ?? null;
-  if (userData == null) return undefined;
-
-  return {
-    id: userData.id,
-    email: userData.email,
-    name: userData.name,
-    biography: userData.biography,
-    friendIds: bufferArrayToHexStringArray(userData.friendIds),
-    conversationIds: bufferArrayToHexStringArray(userData.conversationIds),
-    createdAt: userData.createdAt,
-  };
+  return body as CurrentUserResponse;
 }
 
 export async function fetchBasicUserInfo(

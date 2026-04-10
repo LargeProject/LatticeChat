@@ -13,10 +13,9 @@ type AppContextValue = {
   setConvoId: (id: string) => void;
 };
 
-export const AppStateContext = createContext<AppContextValue | undefined>({
-  convoId: null,
-  setConvoId: () => {},
-});
+export const AppStateContext = createContext<AppContextValue | undefined>(
+  undefined,
+);
 
 export const useAppState = () => {
   const context = useContext(AppStateContext);

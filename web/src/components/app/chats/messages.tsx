@@ -5,6 +5,7 @@ export type MessageRole = 'user' | 'assistant';
 
 type MessageBubbleProps = {
   message: Message;
+  isOwnMessage: boolean;
 };
 
 const bubbleBaseClass =
@@ -16,11 +17,13 @@ const assistantBubbleClass =
 
 export const MessageBubble = memo(function MessageBubble({
   message,
+  isOwnMessage,
 }: MessageBubbleProps) {
-  // TODO: separate self from non self messages styling
+  const bubbleClass = isOwnMessage ? userBubbleClass : assistantBubbleClass;
+  const alignment = isOwnMessage ? 'justify-end' : 'justify-start';
   return (
-    <li className={`flex w-full ${'justify-end'}`}>
-      <article className={userBubbleClass}>
+    <li className={`flex w-full ${alignment}`}>
+      <article className={`${bubbleBaseClass} ${bubbleClass}`}>
         <p className="whitespace-pre-wrap wrap-break-word">{message.content}</p>
       </article>
     </li>
@@ -29,6 +32,7 @@ export const MessageBubble = memo(function MessageBubble({
 
 type MessageListProps = {
   messages: Message[];
+  currentUserId: string;
   className?: string;
   smoothScroll?: boolean;
 };
@@ -37,6 +41,7 @@ const SCROLL_THRESHOLD_PX = 80;
 
 export function MessageList({
   messages,
+  currentUserId,
   className = '',
   smoothScroll = true,
 }: MessageListProps) {
@@ -72,7 +77,11 @@ export function MessageList({
     >
       <ol className="mx-auto flex w-full max-w-3xl flex-col gap-3">
         {messages.map((message) => (
-          <MessageBubble key={message.id} message={message} />
+          <MessageBubble
+            key={message.id}
+            message={message}
+            isOwnMessage={message.senderId === currentUserId}
+          />
         ))}
       </ol>
     </div>

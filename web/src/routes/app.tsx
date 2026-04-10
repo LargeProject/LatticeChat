@@ -21,10 +21,10 @@ function RouteComponent() {
     return <ChatLayout />;
   }, [activeSection]);
 
-  if (userInfo.isLoading) {
+  if (!userInfo || userInfo.isLoading) {
     return <div>Loading!</div>;
   } else if (!userInfo.data) {
-    navigate({ to: '/' });
+    // navigate({ to: '/' });
   }
 
   return (
@@ -34,8 +34,8 @@ function RouteComponent() {
           activeSection={activeSection}
           onSelectSection={setActiveSection}
         />
+        <div className="flex-1">{content}</div>
       </AppStateProvider>
-      <div className="flex-1">{content}</div>
     </main>
   );
 }

@@ -1,61 +1,23 @@
-import {
-  memo,
-  useDeferredValue,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
-import type { Chat } from './layout';
-import anonImage from '/anonymous.png';
+import { memo, useDeferredValue, useMemo, useState } from 'react';
 import { SearchField } from '@heroui/react';
 import { HiMagnifyingGlass } from 'react-icons/hi2';
 import { useUser } from '#/lib/context/UserContext.tsx';
 import { useAsyncEffect } from '#/components/hooks/useAsyncEffect.ts';
 import type { Conversation } from '#/lib/api/conversation';
-import { useConversation } from '#/components/hooks/useConversation';
-
-type ChatListProps = {
-  onSelect: (conversationId: string) => void;
-};
+import { useAppState } from '#/lib/context/AppStateContext';
 
 type ChatRowProps = {
   conversation: Conversation;
   isSelected: boolean;
-  onSelect: (conversationId: string) => void;
 };
-
-const testData: Chat[] = [
-  {
-    id: '1',
-    user: {
-      name: 'Anonymous',
-      avatar: anonImage,
-    },
-  },
-  {
-    id: '2',
-    user: {
-      name: 'Cipher',
-      avatar: anonImage,
-    },
-  },
-  {
-    id: '3',
-    user: {
-      name: 'Echo',
-      avatar: anonImage,
-    },
-  },
-];
 
 const ChatRow = memo(function ChatRow({
   conversation,
   isSelected,
-  onSelect,
 }: ChatRowProps) {
+  const { setConvoId } = useAppState();
   function onClick() {
-    onSelect(conversation.id);
+    setConvoId(conversation.id);
   }
   return (
     <button
@@ -95,8 +57,9 @@ function normalize(value: string) {
   return value.trim().toLowerCase();
 }
 
-export function ChatList({ onSelect }: ChatListProps) {
-  const { conversations, refreshUser } = useUser();
+export function ChatList() {
+  const { conversations, refreshConversations, refreshUser, friends } =
+    useUser();
   const [isLoaded, setIsLoaded] = useState(false);
 
   useAsyncEffect(async () => {
@@ -112,7 +75,9 @@ export function ChatList({ onSelect }: ChatListProps) {
     const q = normalize(deferredQuery);
     if (!q) return conversations;
 
-    return conversations.filter((chat) => normalize(chat.name).includes(q));
+    return conversations.filter((conversation) =>
+      normalize(conversation.name).includes(q),
+    );
   }, [deferredQuery, conversations]);
 
   const resultCountLabel =
@@ -160,13 +125,9 @@ export function ChatList({ onSelect }: ChatListProps) {
           </div>
         ) : (
           <ul className="space-y-1">
-            {filteredConversations.map((chat) => (
-              <li key={chat.id}>
-                <ChatRow
-                  conversation={chat}
-                  onSelect={onSelect}
-                  isSelected={false}
-                />
+            {filteredConversations.map((conversation) => (
+              <li key={conversation.id}>
+                <ChatRow conversation={conversation} isSelected={false} />
               </li>
             ))}
           </ul>

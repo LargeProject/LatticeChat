@@ -2,12 +2,10 @@ import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { UserContext } from '../context/UserContext.tsx';
 import type { UserInfoState } from '../context/UserContext.tsx';
-import { fetchUserInfo, type UserInfo } from '#/lib/api/user.ts';
-import type { BasicUserInfo } from '#/lib/api/user.ts';
-import { fetchFriendRequests, fetchFriends } from '#/lib/api/friend.ts';
+import { fetchUserInfo, type BasicUserInfo } from '#/lib/api/user.ts';
+import { fetchFriendRequests } from '#/lib/api/friend.ts';
 import type { FriendRequest } from '#/lib/api/friend.ts';
-import { fetchConversations } from '#/lib/api/conversation.ts';
-import type { Conversation } from '#/lib/api/conversation.ts';
+import type { Conversation } from '@latticechat/shared';
 
 export function UserProvider({ children }: { children: ReactNode }) {
   const [userInfo, setUserInfo] = useState<UserInfoState>({
@@ -31,27 +29,14 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }
 
     setUserInfo({
-      data,
+      data: data.user,
       isLoading: false,
     });
 
-    refreshFriends(data);
-    refreshConversations(data);
+    // Set conversations and friends from the response directly
+    setConversations(data.conversations);
+    setFriends(data.friends);
     refreshFriendRequests();
-  };
-
-  const refreshFriends = async (data: UserInfo | undefined = userInfo.data) => {
-    console.log('Refreshing Friends...');
-    if (data == null) return;
-    setFriends(await fetchFriends(data.friendIds));
-  };
-
-  const refreshConversations = async (
-    data: UserInfo | undefined = userInfo.data,
-  ) => {
-    console.log('Refreshing Conversations...');
-    if (data == null) return;
-    setConversations(await fetchConversations(data.conversationIds));
   };
 
   const refreshFriendRequests = async () => {

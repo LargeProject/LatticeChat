@@ -6,6 +6,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import appCss from '../styles.css?url';
 import { UserProvider } from '#/lib/provider/UserProvider';
+import { WebsocketProvider } from '#/lib/context/WebsocketProvider';
+import { WebsocketStatus } from '#/components/websocket/WebsocketStatus';
 
 const THEME_INIT_SCRIPT = `(function(){try{var stored=window.localStorage.getItem('theme');var mode=(stored==='light'||stored==='dark')?stored:(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');var root=document.documentElement;root.classList.remove('light','dark');root.classList.add(mode);root.setAttribute('data-theme',mode);root.style.colorScheme=mode;}catch(e){}})();`;
 
@@ -43,22 +45,25 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body className="font-sans antialiased wrap-anywhere selection:bg-[rgba(79,184,178,0.24)]">
-        <UserProvider>
-          <QueryClientProvider client={queryClient}>
-            {children}
-            <TanStackDevtools
-              config={{
-                position: 'bottom-right',
-              }}
-              plugins={[
-                {
-                  name: 'Tanstack Router',
-                  render: <TanStackRouterDevtoolsPanel />,
-                },
-              ]}
-            />
-          </QueryClientProvider>
-        </UserProvider>
+        <WebsocketProvider wsUrl={import.meta.env.VITE_WS_BASE_URL}>
+          <UserProvider>
+            <QueryClientProvider client={queryClient}>
+              {children}
+              <WebsocketStatus />
+              <TanStackDevtools
+                config={{
+                  position: 'bottom-right',
+                }}
+                plugins={[
+                  {
+                    name: 'Tanstack Router',
+                    render: <TanStackRouterDevtoolsPanel />,
+                  },
+                ]}
+              />
+            </QueryClientProvider>
+          </UserProvider>
+        </WebsocketProvider>
         <Scripts />
       </body>
     </html>
