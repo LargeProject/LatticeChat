@@ -24,7 +24,7 @@ function Avatar({ color }: { color: string }) {
 }
 
 export default function FriendsLayout() {
-  const { friendRequests, refreshFriendRequests, refreshUser } = useUser();
+  const { friendRequests, refreshFriendRequests } = useUser();
   const [isLoading, setIsLoading] = useState(true);
 
   useAsyncEffect(async () => {

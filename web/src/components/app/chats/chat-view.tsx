@@ -43,7 +43,10 @@ export function ChatView({ chat, onTogglePanel }: ChatViewProps) {
     const chatMessages: Message[] = [];
     for (const fetchedMessage of fetchedMessages) {
       let role: MessageRole = 'assistant';
-      if (fetchedMessage.senderId == userInfo?.id) {
+      if (
+        userInfo.data != null &&
+        fetchedMessage.senderId == userInfo?.data.id
+      ) {
         role = 'user';
       }
 

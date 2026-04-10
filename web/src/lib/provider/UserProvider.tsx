@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { UserContext } from '../context/UserContext.tsx';
 import type { UserInfoState } from '../context/UserContext.tsx';
-import { fetchUserInfo } from '#/lib/api/user.ts';
+import { fetchUserInfo, type UserInfo } from '#/lib/api/user.ts';
 import type { BasicUserInfo } from '#/lib/api/user.ts';
 import { fetchFriendRequests, fetchFriends } from '#/lib/api/friend.ts';
 import type { FriendRequest } from '#/lib/api/friend.ts';
@@ -37,18 +37,25 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
     refreshFriends();
     refreshConversations();
+    refreshFriends(data);
+    refreshConversations(data);
     refreshFriendRequests();
   };
 
-  const refreshFriends = async () => {
+  const refreshFriends = async (data: UserInfo | undefined = userInfo.data) => {
     console.log('Refreshing Friends...');
     if (userInfo.data == null) return;
     setFriends(await fetchFriends(userInfo.data.friendIds));
+    if (data == null) return;
+    setFriends(await fetchFriends(data.friendIds));
   };
-  const refreshConversations = async () => {
+
+  const refreshConversations = async (
+    data: UserInfo | undefined = userInfo.data,
+  ) => {
     console.log('Refreshing Conversations...');
-    if (userInfo.data == null) return;
-    setConversations(await fetchConversations(userInfo.data.conversationIds));
+    if (data == null) return;
+    setConversations(await fetchConversations(data.conversationIds));
   };
 
   const refreshFriendRequests = async () => {
@@ -65,9 +72,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       value={{
         refreshUser,
         userInfo,
-        refreshFriends,
         friends,
-        refreshConversations,
         conversations,
         refreshFriendRequests,
         friendRequests,

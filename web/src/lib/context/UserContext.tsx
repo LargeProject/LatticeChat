@@ -11,13 +11,8 @@ export type UserInfoState = {
 type UserContextType = {
   refreshUser: () => Promise<void>;
   userInfo: UserInfoState;
-
-  refreshFriends: () => Promise<void>;
   friends: BasicUserInfo[];
-
-  refreshConversations: () => Promise<void>;
   conversations: Conversation[];
-
   refreshFriendRequests: () => Promise<void>;
   friendRequests: FriendRequest[];
 };

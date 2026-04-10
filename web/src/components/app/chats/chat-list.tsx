@@ -91,14 +91,12 @@ function normalize(value: string) {
 }
 
 export function ChatList({ onSelect }: ChatListProps) {
-  const { conversations, refreshConversations, refreshUser, friends } =
-    useUser();
+  const { conversations, refreshUser } = useUser();
   const [isLoaded, setIsLoaded] = useState(false);
   const [chats, setChats] = useState<Chat[]>([]);
 
   useAsyncEffect(async () => {
     await refreshUser();
-    await refreshConversations();
     setIsLoaded(true);
   });
 
