@@ -100,6 +100,10 @@ export async function createFriendRequest(senderId: string, targetId: string) {
   const sender = await findUser(senderId, 'user');
   const target = await findUser(targetId, 'target');
 
+  if (sender._id.equals(target._id)) {
+    throw new HttpError(409, ErrorCodes.SELF_FRIEND_REQUEST, "Friend requests to one's own account are not allowed");
+  }
+
   if (sender.hasFriend(target._id)) {
     throw new HttpError(409, ErrorCodes.FRIEND_EXISTS, 'Already friends with this user');
   }
