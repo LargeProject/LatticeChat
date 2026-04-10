@@ -3,6 +3,7 @@ import { X, UserPlus, AlertCircle } from 'lucide-react';
 import { fetchFriends } from '#/lib/api/friend';
 import { useWebsocket } from '#/lib/hooks/useWebsocket';
 import type { BasicUserInfo } from '#/lib/api/friend';
+import { fetchUserInfo } from '#/lib/api/user';
 
 type AddMembersModalProps = {
   conversationId: string;
@@ -34,8 +35,16 @@ export function AddMembersModal({
       try {
         setLoading(true);
         setError(null);
-        const friendsList = await fetchFriends();
-        setFriends(friendsList);
+        const current = await fetchUserInfo();
+        // current.friends is an array of BasicUserInfo (hydrated)
+        const ids = (current?.friends ?? []).map((f: any) => f.id);
+        // If current.friends already contains BasicUserInfo, use it directly to avoid extra fetches
+        if (current?.friends && current.friends.length > 0) {
+          setFriends(current.friends);
+        } else {
+          const friendsList = await fetchFriends(ids);
+          setFriends(friendsList);
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load friends');
       } finally {

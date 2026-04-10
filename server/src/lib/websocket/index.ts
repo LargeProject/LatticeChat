@@ -47,7 +47,7 @@ export class WebsocketServer {
       try {
         const initHandshakeEvent = this.events.find((e) => e.name === 'initHandshake');
         if (!initHandshakeEvent) {
-          ack?.(null, { success: false, error: 'Auth handler not configured' });
+          ack?.({ success: false, error: 'Auth handler not configured' });
           socket.disconnect(true);
           return;
         }
@@ -55,7 +55,7 @@ export class WebsocketServer {
         const parsed = initHandshakeEvent.payloadSchema.safeParse(data);
         if (parsed.error) {
           console.error('Handshake validation failed:', z.prettifyError(parsed.error));
-          ack?.(null, { success: false, error: 'Invalid handshake payload' });
+          ack?.({ success: false, error: 'Invalid handshake payload' });
           socket.disconnect(true);
           return;
         }
@@ -74,16 +74,16 @@ export class WebsocketServer {
           } catch (e) {
             console.error('Failed to join user room', e);
           }
-          ack?.(null, { success: true, userId: result });
+          ack?.({ success: true, userId: result });
           console.log(`User ${result} authenticated (socket: ${socket.id}) and joined room ${result}`);
         } else {
-          ack?.(null, { success: false, error: 'Authentication failed' });
+          ack?.({ success: false, error: 'Authentication failed' });
           socket.disconnect(true);
         }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         console.error('Handshake error:', errorMessage);
-        ack?.(null, { success: false, error: errorMessage });
+        ack?.({ success: false, error: errorMessage });
         socket.disconnect(true);
       }
     });

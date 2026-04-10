@@ -39,12 +39,13 @@ const handleGetCurrentUser: types.Service = async (req, res) => {
     }
 
     // Fetch and hydrate conversations
+    const conversationIds = user.conversationIds ?? [];
     const conversations = await Promise.all(
-      user.conversationIds.map(async (convId) => {
+      conversationIds.map(async (convId) => {
         const conv = await Conversation.findById(convId);
         if (!conv) return null;
 
-        const members = await User.find({ _id: { $in: conv.memberIds } });
+        const members = await User.find({ _id: { $in: conv.memberIds ?? [] } });
         return {
           id: conv._id.toString(),
           name: conv.name,
@@ -60,7 +61,8 @@ const handleGetCurrentUser: types.Service = async (req, res) => {
     );
 
     // Fetch and hydrate friends
-    const friends = await User.find({ _id: { $in: user.friendIds } });
+    const friendIds = user.friendIds ?? [];
+    const friends = friendIds.length > 0 ? await User.find({ _id: { $in: friendIds } }) : [];
     const friendList = friends.map((f) => ({
       id: f._id.toString(),
       name: f.name,

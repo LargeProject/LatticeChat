@@ -12,7 +12,7 @@ export class EventDispatcher {
     socket.on(eventName, async (payload: any, ack?: (response: any) => void) => {
       if (!socket.data.userId) {
         console.warn(`Event ${eventName} received from unauthenticated socket`);
-        ack?.(null, { success: false });
+        ack?.({ success: false });
         return;
       }
 
@@ -23,14 +23,14 @@ export class EventDispatcher {
           userId: socket.data.userId,
         };
         const result = await handler(context, payload);
-        ack?.(null, { success: result !== false ? true : false });
+        ack?.({ success: result !== false });
       } catch (error) {
         if (error instanceof WebsocketError) {
           console.error(`[${eventName}] ${error.code}: ${error.message}`);
         } else {
           console.error(`[${eventName}] Unexpected error:`, error);
         }
-        ack?.(null, { success: false });
+        ack?.({ success: false });
       }
     });
   }
