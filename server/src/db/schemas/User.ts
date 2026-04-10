@@ -115,6 +115,9 @@ userSchema.pre('deleteOne', { document: true, query: false }, async function () 
     ownerId: null,
   });
 
+  // Delete all direct messages
+  await Conversation.deleteMany({ memberIds: this._id, isDirectMessage: true }, { $pull: { memberIds: this._id } });
+
   // remove this user from all conversations that include them
   await Conversation.updateMany({ memberIds: this._id }, { $pull: { memberIds: this._id } });
 });

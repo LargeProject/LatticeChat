@@ -1,4 +1,5 @@
-import mongoose, { Schema, Types } from 'mongoose';
+import type { Types } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 import { User } from '../models';
 
 export const messageSchema = new Schema({
@@ -41,6 +42,10 @@ export const conversationSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: 'User',
       required: false,
+    },
+    isDirectMessage: {
+      type: Boolean,
+      required: true,
     },
     name: {
       type: String,

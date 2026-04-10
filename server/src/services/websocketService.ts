@@ -62,6 +62,11 @@ export class MessageService {
 
       const conversation = await db.getConversation(conversationId);
 
+      // Can't add members to a DM, instead create a new conversation
+      if (conversation.isDirectMessage) {
+        throw new WebsocketError('Cannot add members to a direct message.', 'CANNOT_ADD_TO_DM', 403);
+      }
+
       // Ensure requester is a member of the conversation
       const isRequesterMember = conversation.memberIds.some((m: any) => m.toString() === adderId);
       if (!isRequesterMember) {
