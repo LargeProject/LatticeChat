@@ -54,10 +54,7 @@ export async function removePrivateConversation(data: actions.RemovePrivateConve
 
 export async function getConversationMessages(conversationId: string) {
   const messages = await Message.find({ conversationId: conversationId });
-  if (!messages) {
-    return [];
-  }
-
+  if (!messages) return [];
   return messages;
 }
 
@@ -108,10 +105,7 @@ export async function createFriendRequest(senderId: string, targetId: string) {
     throw new HttpError(409, ErrorCodes.FRIEND_EXISTS, 'Already friends with this user');
   }
 
-  const friendRequest = await FriendRequest.findOne({
-    fromId: sender._id,
-    toId: target._id,
-  });
+  const friendRequest = await FriendRequest.findOne({ fromId: sender._id, toId: target._id });
   if (friendRequest != null) {
     throw new HttpError(409, ErrorCodes.FRIEND_REQUEST_EXISTS, 'Friend request already exists');
   }
@@ -124,10 +118,7 @@ export async function createFriendRequest(senderId: string, targetId: string) {
     sender.addFriend(target._id);
     target.addFriend(sender._id);
 
-    // create conversation
-    const createConversationData: CreateConversation = {
-      memberIds: [senderId, targetId],
-    };
+    const createConversationData: CreateConversation = { memberIds: [senderId, targetId] };
     await createConversation(createConversationData);
 
     return null;
@@ -143,11 +134,7 @@ export async function removeFriendRequest(fromId: string, toId: string) {
   const sender = await findUser(fromId, 'user');
   const target = await findUser(toId, 'target');
 
-  const friendRequest = await FriendRequest.findOne({
-    fromId: sender._id,
-    toId: target._id,
-  });
-
+  const friendRequest = await FriendRequest.findOne({ fromId: sender._id, toId: target._id });
   if (friendRequest == null) {
     throw new HttpError(404, ErrorCodes.FRIEND_REQUEST_NOT_FOUND, 'Friend request not found');
   }
@@ -160,10 +147,7 @@ export async function getFriendRequests(userId: string) {
     $or: [{ fromId: userId }, { toId: userId }],
   });
 
-  if (!friendRequests) {
-    return [];
-  }
-
+  if (!friendRequests) return [];
   return friendRequests;
 }
 
@@ -256,21 +240,14 @@ export async function createKeyExchangeRequest(fromId: string, toId: string, cip
 export async function findKeyExchangeRequestsTo(userId: string) {
   const user = await findUser(userId);
 
-  const keyExchangeRequests = await KeyExchangeRequest.find({
-    toId: user._id,
-  });
+  const keyExchangeRequests = await KeyExchangeRequest.find({ toId: user._id });
 
-  if (!keyExchangeRequests) {
-    return [];
-  }
-
+  if (!keyExchangeRequests) return [];
   return keyExchangeRequests;
 }
 
 export async function deleteKeyExchangeRequestsTo(userId: string) {
   const user = await findUser(userId);
 
-  await KeyExchangeRequest.deleteMany({
-    toId: user.id,
-  });
+  await KeyExchangeRequest.deleteMany({ toId: user.id });
 }
