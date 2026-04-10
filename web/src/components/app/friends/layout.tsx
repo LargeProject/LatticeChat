@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { Check, X, User, UserPlus, Inbox, Send } from 'lucide-react';
+import { Check, X, User, UserPlus, Inbox, Send, UserMinus, Users } from 'lucide-react';
 import { useUser } from '#/lib/context/UserContext.tsx';
-import { removeFriendRequest, sendFriendRequest } from '#/lib/api/friend.ts';
+import { removeFriendRequest, sendFriendRequest, removeFriend } from '#/lib/api/friend.ts';
 import { fetchBasicUserInfo } from '#/lib/api/user.ts';
 import { useAsyncEffect } from '#/components/hooks/useAsyncEffect.ts';
 
@@ -24,7 +24,7 @@ function Avatar({ color }: { color: string }) {
 }
 
 export default function FriendsLayout() {
-  const { friendRequests, refreshFriendRequests } = useUser();
+  const { friendRequests, refreshFriendRequests, friends, refreshUser } = useUser();
   const [isLoading, setIsLoading] = useState(true);
 
   useAsyncEffect(async () => {
@@ -158,6 +158,15 @@ export default function FriendsLayout() {
     setSentRequests((prev) => prev.filter((r) => r.id !== id));
   };
 
+  const handleRemoveFriend = async (id: string) => {
+    try {
+      await removeFriend(id);
+      await refreshUser();
+    } catch (error: any) {
+      pushMessage(`Error Occurred: ${error.message}`, 'error');
+    }
+  };
+
   return (
     <section
       className="flex h-full min-h-0 flex-1 flex-col bg-(--bg-base)"
@@ -213,6 +222,53 @@ export default function FriendsLayout() {
 
           {/* Requests Lists */}
           <div className="flex flex-col gap-10">
+            {/* Friends List */}
+            <div>
+              <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-(--text-secondary)">
+                <Users size={16} />
+                <h2>All Friends — {friends.length}</h2>
+              </div>
+
+              {friends.length === 0 ? (
+                <div className="flex h-24 items-center justify-center rounded-lg border border-dashed border-(--line) text-sm text-(--text-secondary)">
+                  No friends yet
+                </div>
+              ) : (
+                <div className="flex flex-col gap-1">
+                  {friends.map((friend) => (
+                    <div
+                      key={friend.id}
+                      className="group flex items-center justify-between rounded-lg p-2 transition-colors hover:bg-(--surface-strong)"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Avatar color="bg-blue-500" />
+                        <div className="flex flex-col">
+                          <div className="flex items-baseline gap-1">
+                            <span className="text-base font-semibold text-(--text-primary)">
+                              {friend.name}
+                            </span>
+                          </div>
+                          <span className="text-xs text-(--text-secondary)">
+                            Friend
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 opacity-100 transition-opacity">
+                        <button
+                          onClick={() => handleRemoveFriend(friend.id)}
+                          className="flex size-9 items-center justify-center rounded-full bg-(--surface) text-(--text-secondary) transition-colors hover:bg-rose-500 hover:text-white"
+                          title="Remove Friend"
+                        >
+                          <UserMinus size={20} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* Incoming Requests */}
             <div>
               <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-(--text-secondary)">
