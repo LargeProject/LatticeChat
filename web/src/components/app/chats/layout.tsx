@@ -1,75 +1,74 @@
-import { useEffect, useState } from 'react'
-import { ChatList } from './chat-list'
-import { ChatView } from './chat-view'
-import { UserInfoPanel } from './user-info'
-import { EmptyState } from './empty-state'
+import { useContext, useEffect, useState } from 'react';
+import { ChatList } from './chat-list';
+import { ChatView } from './chat-view';
+import { UserInfoPanel } from './user-info';
+import { EmptyState } from './empty-state';
+import type { Conversation } from '#/lib/api/conversation';
+import { AppStateContext, useAppState } from '#/lib/context/AppStateContext';
 
 export type Chat = {
-  id: string
+  id: string;
   user: {
-    name: string
-    avatar: string
-  }
-}
+    name: string;
+    avatar: string;
+  };
+};
 
-const PANEL_BREAKPOINT = 1280
+const PANEL_BREAKPOINT = 1280;
 
 export default function ChatLayout() {
-  const [selectedChat, setSelectedChat] = useState<Chat | null>(null)
-  const [isPanelOpen, setIsPanelOpen] = useState(true)
-  const [userToggled, setUserToggled] = useState(false)
+  const { convoId } = useAppState();
+  const [isPanelOpen, setIsPanelOpen] = useState(true);
+  const [userToggled, setUserToggled] = useState(false);
   const [isWideScreen, setIsWideScreen] = useState(() =>
-    typeof window !== 'undefined' ? window.innerWidth >= PANEL_BREAKPOINT : true
-  )
+    typeof window !== 'undefined'
+      ? window.innerWidth >= PANEL_BREAKPOINT
+      : true,
+  );
 
   useEffect(() => {
-    if (typeof window === 'undefined') return
+    if (typeof window === 'undefined') return;
 
-    const mediaQuery = window.matchMedia(`(min-width: ${PANEL_BREAKPOINT}px)`)
+    const mediaQuery = window.matchMedia(`(min-width: ${PANEL_BREAKPOINT}px)`);
 
     const handleMediaChange = (event: MediaQueryListEvent) => {
-      setIsWideScreen(event.matches)
-    }
+      setIsWideScreen(event.matches);
+    };
 
-    setIsWideScreen(mediaQuery.matches)
+    setIsWideScreen(mediaQuery.matches);
 
-    if (mediaQuery.addEventListener) {
-      mediaQuery.addEventListener('change', handleMediaChange)
-      return () => mediaQuery.removeEventListener('change', handleMediaChange)
-    }
-
-    mediaQuery.addListener(handleMediaChange)
-    return () => mediaQuery.removeListener(handleMediaChange)
-  }, [])
+    mediaQuery.addEventListener('change', handleMediaChange);
+    return () => mediaQuery.removeEventListener('change', handleMediaChange);
+  }, []);
 
   useEffect(() => {
-    if (!selectedChat) return
+    if (!selectedChatId) return;
 
     if (!isWideScreen) {
-      setIsPanelOpen(false)
-      return
+      setIsPanelOpen(false);
+      return;
     }
 
     if (!userToggled) {
-      setIsPanelOpen(true)
+      setIsPanelOpen(true);
     }
-  }, [isWideScreen, selectedChat, userToggled])
+  }, [isWideScreen, selectedChatId, userToggled]);
 
-  const handleSelectChat = (chat: Chat) => {
-    setSelectedChat(chat)
+  const handleSelectChat = (conversationId: string) => {
+    setSelectedChatId(conversationId);
 
     if (isWideScreen && !userToggled) {
-      setIsPanelOpen(true)
+      setIsPanelOpen(true);
     }
-  }
+  };
 
   const togglePanel = () => {
-    if (!isWideScreen) return
-    setIsPanelOpen((prev) => !prev)
-    setUserToggled(true)
-  }
+    if (!isWideScreen) return;
+    setIsPanelOpen((prev) => !prev);
+    setUserToggled(true);
+  };
 
-  const showPanel = Boolean(selectedChat && isWideScreen && isPanelOpen)
+  const showPanel = Boolean(selectedChatId && isWideScreen && isPanelOpen);
 
   return (
     <div className="flex h-full min-h-0 flex-1 overflow-hidden">
@@ -79,13 +78,18 @@ export default function ChatLayout() {
         </div>
       </aside>
 
+      {selectedChatId ? 'HIIHIH' : 'NONONOON'}
+
       <main className="flex min-w-0 flex-1 overflow-hidden">
-        {!selectedChat ? (
+        {!selectedChatId ? (
           <EmptyState />
         ) : (
           <>
             <section className="flex min-w-0 flex-1 flex-col overflow-hidden">
-              <ChatView chat={selectedChat} onTogglePanel={togglePanel} />
+              <ChatView
+                conversationId={selectedChatId}
+                onTogglePanel={togglePanel}
+              />
             </section>
 
             <aside
@@ -93,22 +97,27 @@ export default function ChatLayout() {
                 'hidden h-full shrink-0 border-l border-(--line) bg-(--surface)',
                 'xl:block',
                 'transition-[width,opacity] duration-300 ease-out',
-                showPanel ? 'w-72 opacity-100' : 'w-0 opacity-0 pointer-events-none',
+                showPanel
+                  ? 'w-72 opacity-100'
+                  : 'w-0 opacity-0 pointer-events-none',
               ].join(' ')}
               aria-hidden={!showPanel}
             >
-              <div
+              {/* <div
                 className={[
                   'h-full w-72 transition-transform duration-300 ease-out',
                   showPanel ? 'translate-x-0' : 'translate-x-4',
                 ].join(' ')}
               >
-                {selectedChat ? <UserInfoPanel user={selectedChat.user} /> : null}
-              </div>
+                {selectedChatId ? (
+                  <UserInfoPanel user={selectedChatId.user} />
+                ) : null}
+              </div> */}
             </aside>
           </>
         )}
       </main>
     </div>
-  )
+  );
 }
+

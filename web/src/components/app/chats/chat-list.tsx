@@ -12,15 +12,17 @@ import { SearchField } from '@heroui/react';
 import { HiMagnifyingGlass } from 'react-icons/hi2';
 import { useUser } from '#/lib/context/UserContext.tsx';
 import { useAsyncEffect } from '#/components/hooks/useAsyncEffect.ts';
+import type { Conversation } from '#/lib/api/conversation';
+import { useConversation } from '#/components/hooks/useConversation';
 
 type ChatListProps = {
-  onSelect: (chat: Chat) => void;
+  onSelect: (conversationId: string) => void;
 };
 
 type ChatRowProps = {
-  chat: Chat;
+  conversation: Conversation;
   isSelected: boolean;
-  onSelect: (chat: Chat) => void;
+  onSelect: (conversationId: string) => void;
 };
 
 const testData: Chat[] = [
@@ -48,14 +50,17 @@ const testData: Chat[] = [
 ];
 
 const ChatRow = memo(function ChatRow({
-  chat,
+  conversation,
   isSelected,
   onSelect,
 }: ChatRowProps) {
+  function onClick() {
+    onSelect(conversation.id);
+  }
   return (
     <button
       type="button"
-      onClick={() => onSelect(chat)}
+      onClick={onClick}
       className={[
         'group relative flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition-all duration-150',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--line) focus-visible:ring-offset-2 focus-visible:ring-offset-(--surface)',
@@ -64,11 +69,11 @@ const ChatRow = memo(function ChatRow({
           : 'hover:bg-(--link-bg-hover) active:scale-[0.995]',
       ].join(' ')}
       aria-current={isSelected ? 'page' : undefined}
-      aria-label={`Open chat with ${chat.user.name}`}
     >
       <img
-        src={chat.user.avatar}
-        alt={`${chat.user.name} avatar`}
+        // TODO: pull these in from use conversation, not chat
+        // src={chat.user.avatar}
+        // alt={`${chat.user.name} avatar`}
         className="size-10 shrink-0 rounded-full object-cover ring-1 ring-black/5 dark:ring-white/10"
         loading="lazy"
         decoding="async"
@@ -76,7 +81,7 @@ const ChatRow = memo(function ChatRow({
 
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium text-(--text-primary)">
-          {chat.user.name}
+          {conversation.name}
         </p>
         <p className="truncate text-xs text-(--text-secondary)">
           Tap to open conversation
@@ -93,49 +98,27 @@ function normalize(value: string) {
 export function ChatList({ onSelect }: ChatListProps) {
   const { conversations, refreshUser } = useUser();
   const [isLoaded, setIsLoaded] = useState(false);
-  const [chats, setChats] = useState<Chat[]>([]);
 
   useAsyncEffect(async () => {
     await refreshUser();
     setIsLoaded(true);
   });
 
-  useEffect(() => {
-    if (!isLoaded) return;
-
-    const newChats: Chat[] = [];
-    for (const conversation of conversations) {
-      const chat = {
-        id: conversation.id,
-        user: {
-          name: conversation.name,
-          avatar: anonImage,
-        },
-      };
-      newChats.push(chat);
-    }
-    setChats(newChats);
-  }, [isLoaded, conversations]);
-
   const [query, setQuery] = useState('');
-  const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
 
   const deferredQuery = useDeferredValue(query);
 
-  const filteredChats = useMemo(() => {
+  const filteredConversations = useMemo(() => {
     const q = normalize(deferredQuery);
-    if (!q) return chats;
+    if (!q) return conversations;
 
-    return chats.filter((chat) => normalize(chat.user.name).includes(q));
-  }, [deferredQuery, chats]);
-
-  const handleSelect = (chat: Chat) => {
-    setSelectedChatId(chat.id);
-    onSelect(chat);
-  };
+    return conversations.filter((chat) => normalize(chat.name).includes(q));
+  }, [deferredQuery, conversations]);
 
   const resultCountLabel =
-    filteredChats.length === 1 ? '1 result' : `${filteredChats.length} results`;
+    filteredConversations.length === 1
+      ? '1 result'
+      : `${filteredConversations.length} results`;
 
   return (
     <div className="flex h-full flex-col bg-(--surface)">
@@ -164,7 +147,7 @@ export function ChatList({ onSelect }: ChatListProps) {
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto p-2">
-        {filteredChats.length === 0 ? (
+        {filteredConversations.length === 0 ? (
           <div className="flex h-full items-center justify-center px-4 text-center">
             <div>
               <p className="text-sm font-medium text-(--text-primary)">
@@ -177,12 +160,12 @@ export function ChatList({ onSelect }: ChatListProps) {
           </div>
         ) : (
           <ul className="space-y-1">
-            {filteredChats.map((chat) => (
+            {filteredConversations.map((chat) => (
               <li key={chat.id}>
                 <ChatRow
-                  chat={chat}
-                  isSelected={selectedChatId === chat.id}
-                  onSelect={handleSelect}
+                  conversation={chat}
+                  onSelect={onSelect}
+                  isSelected={false}
                 />
               </li>
             ))}

@@ -1,4 +1,4 @@
-import { Service, UserRequest } from '../types';
+import type { Service, UserRequest } from '../types';
 import {
   createFriendRequest,
   getFriendRequests,
@@ -6,7 +6,10 @@ import {
   removeFriendRequest,
   removePrivateConversation,
 } from '../../db';
-import { RemovePrivateConversation } from '@latticechat/shared';
+import type {
+  CreateConversation,
+  RemovePrivateConversation,
+} from '@latticechat/shared';
 import { handleHttpError } from '../../util/error';
 
 const handleGetFriendRequests: Service = async (req: UserRequest, res) => {

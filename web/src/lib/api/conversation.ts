@@ -1,4 +1,5 @@
-import { type BasicUserInfo, fetchBasicUserInfo } from '#/lib/api/user.ts';
+import { fetchBasicUserInfo } from '#/lib/api/user.ts';
+import type { BasicUserInfo } from '#/lib/api/user.ts';
 import { HttpError } from '#/lib/util/error.ts';
 import { getLocalJWT, getLocalUserId } from '#/lib/util/storage.ts';
 
@@ -43,7 +44,7 @@ export async function fetchConversation(
 
   const rawConversation = body.conversation;
 
-  let members: BasicUserInfo[] = [];
+  const members: BasicUserInfo[] = [];
   for (const memberId of rawConversation.memberIds) {
     const member = await fetchBasicUserInfo(memberId);
     if (member != null) {
@@ -110,7 +111,7 @@ export async function fetchConversationMessages(
 
   const rawMessages = body.message;
 
-  let messages: Message[] = [];
+  const messages: Message[] = [];
   for (const rawMessage of rawMessages) {
     const message: Message = {
       id: rawMessage.id,
