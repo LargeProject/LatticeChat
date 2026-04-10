@@ -58,7 +58,7 @@ export async function fetchConversation(
     // if conversation is private
     const receivingMember = members.find((user) => user.id != userId);
     if (receivingMember != null) {
-      privateName = receivingMember.displayUsername;
+      privateName = receivingMember.name;
     }
   }
 

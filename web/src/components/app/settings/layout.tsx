@@ -78,7 +78,7 @@ export default function SettingsLayout() {
                       Username
                     </dt>
                     <dd className="mt-1 text-sm font-medium text-(--text-primary)">
-                      {userInfo?.data?.username}
+                      {userInfo?.data?.name}
                     </dd>
                   </div>
                   <div className="rounded-xl border border-(--line) bg-(--surface) px-3 py-3">

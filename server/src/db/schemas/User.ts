@@ -8,14 +8,9 @@ import { HttpErrors } from '../../util/error';
 
 export const userSchema = new Schema(
   {
-    username: {
+    name: {
       type: String,
       required: true,
-      unique: true,
-    },
-    displayUsername: {
-      type: String,
-      required: false,
       unique: true,
     },
     email: {

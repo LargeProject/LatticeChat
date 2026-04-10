@@ -5,8 +5,7 @@ import { HttpError } from '#/lib/util/error.ts';
 
 export type UserInfo = {
   id: string;
-  username: string;
-  usernameDisplay: string;
+  name: string;
   email: string;
   biography: string;
   friendIds: string[];
@@ -16,8 +15,7 @@ export type UserInfo = {
 
 export type BasicUserInfo = {
   id: string;
-  username: string;
-  displayUsername: string;
+  name: string;
   biography: string;
   createdAt: Date;
 };
@@ -39,8 +37,7 @@ export async function fetchUserInfo(): Promise<UserInfo | undefined> {
   return {
     id: userData.id,
     email: userData.email,
-    username: userData.username,
-    usernameDisplay: userData.usernameDisplay,
+    name: userData.name,
     biography: userData.biography,
     friendIds: bufferArrayToHexStringArray(userData.friendIds),
     conversationIds: bufferArrayToHexStringArray(userData.conversationIds),

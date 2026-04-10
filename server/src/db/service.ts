@@ -24,7 +24,7 @@ export async function createConversation(data: actions.CreateConversation) {
   const owner = await User.findById(ownerId);
 
   const members = await User.find({ _id: { $in: memberIds } });
-  const name = data.name ?? createConversationName(members.map((m) => m.displayUsername ?? m.username));
+  const name = data.name ?? createConversationName(members.map((m) => m.name));
 
   const conversation = await Conversation.create({
     ...(owner != null && { owner: owner._id }),
@@ -54,7 +54,7 @@ export async function removePrivateConversation(data: actions.RemovePrivateConve
 }
 
 export async function getConversationMessages(conversationId: string) {
-  const messages = await Message.find({ conversation: conversationId });
+  const messages = await Message.find({ conversationId: conversationId });
 
   return messages;
 }
@@ -178,21 +178,17 @@ export async function isEmailTaken(email: string) {
 }
 
 export async function isUsernameTaken(username: string) {
-  const user = await User.findOne({ username: username });
+  const user = await User.findOne({ name: username });
   return user != null;
 }
 
 export async function deleteUser(userId: string) {
-  const user = await User.findById(userId);
-  if (user == null) {
-    throw HttpErrors.USER_NOT_FOUND;
-  }
-
+  const user = await findUser(userId);
   await user.deleteOne();
 }
 
 export async function getBasicUserInfoByName(name: string) {
-  const user = await User.findOne({ username: name });
+  const user = await User.findOne({ name: name });
   return await getBasicUserInfo(user);
 }
 
@@ -208,8 +204,7 @@ async function getBasicUserInfo(user: UserDocument | null): Promise<BasicUserInf
 
   return {
     id: user._id.toString(),
-    username: user.username ?? '',
-    displayUsername: user.displayUsername ?? '',
+    name: user.name,
     biography: user.biography ?? '',
     createdAt: user.createdAt ?? Date.now(),
   };
@@ -241,7 +236,7 @@ export async function findKeyExchangeRequestsTo(userId: string) {
   const user = await findUser(userId);
 
   const keyExchangeRequests = await KeyExchangeRequest.find({
-    to: user._id,
+    toId: user._id,
   });
 
   return keyExchangeRequests;

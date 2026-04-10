@@ -2,14 +2,10 @@ import { ENV } from './env';
 import zxcvbn from 'zxcvbn';
 import mongoose from 'mongoose';
 import { betterAuth } from 'better-auth';
-import { bearer, emailOTP, username } from 'better-auth/plugins';
+import { bearer, emailOTP } from 'better-auth/plugins';
 import { mongodbAdapter } from '@better-auth/mongo-adapter';
-import { connectMongoDB, isEmailTaken } from '../db';
-import {
-  sendDuplicateEmailNotification,
-  sendEmailVerificationOTP,
-  sendForgetPasswordOTP,
-} from './mailer';
+import { connectMongoDB, isEmailTaken, isUsernameTaken } from '../db';
+import { sendDuplicateEmailNotification, sendEmailVerificationOTP, sendForgetPasswordOTP } from './mailer';
 import { createAuthMiddleware } from '@better-auth/core/api';
 import { authUserAdditionalFields } from '../db/schemas/User';
 
@@ -22,13 +18,6 @@ const baseURL = ENV.HOST + ':' + ENV.PORT;
 const auth = betterAuth({
   plugins: [
     bearer(),
-    username({
-      minUsernameLength: 3,
-      maxUsernameLength: 20,
-      usernameValidator: (username) => {
-        return /^[a-zA-Z0-9_-]+$/.test(username);
-      },
-    }),
     emailOTP({
       async sendVerificationOTP({ email, otp, type }) {
         if (type === 'email-verification') {
@@ -71,10 +60,7 @@ const auth = betterAuth({
   hooks: {
     before: createAuthMiddleware(async (ctx) => {
       // password validation middleware
-      if (
-        ctx.path == '/sign-up/email' ||
-        ctx.path == '/email-otp/reset-password'
-      ) {
+      if (ctx.path == '/sign-up/email' || ctx.path == '/email-otp/reset-password') {
         const password = ctx.body.password;
 
         const { score, feedback } = zxcvbn(password);
@@ -86,15 +72,38 @@ const auth = betterAuth({
         }
       }
 
-      // email validation middleware
+      // email and name validation middleware
       if (ctx.path == '/sign-up/email') {
+        // email validation
         const email = ctx.body.email;
-
-        const isTaken = await isEmailTaken(email);
-        if (isTaken) {
+        if (await isEmailTaken(email)) {
           throw ctx.error(400, {
             code: 'EMAIL_TAKEN',
             message: 'Email is taken',
+          });
+        }
+
+        // username validation
+        const name = ctx.body.name;
+
+        if (name.length < 3 || name.length > 20) {
+          throw ctx.error(400, {
+            code: 'INVALID_USERNAME_LENGTH',
+            message: 'Username length must be between 3 and 20 characters',
+          });
+        }
+
+        if (!/^[a-zA-Z0-9_-]+$/.test(name)) {
+          throw ctx.error(400, {
+            code: 'INVALID_USERNAME_LENGTH',
+            message: 'Username must only contain letters and numbers',
+          });
+        }
+
+        if (await isUsernameTaken(name)) {
+          throw ctx.error(400, {
+            code: 'USERNAME_TAKEN',
+            message: 'Username is taken',
           });
         }
       }

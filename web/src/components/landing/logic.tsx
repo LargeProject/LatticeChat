@@ -55,10 +55,9 @@ export function useAuthLogic() {
 
     await authClient.signUp.email(
       {
-        name: '',
+        name: username,
         email,
         password,
-        username,
       },
       {
         onRequest: () => {

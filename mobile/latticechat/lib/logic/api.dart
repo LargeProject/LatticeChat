@@ -9,8 +9,7 @@ class ApiServices {
 
   Future<bool> attemptSignUp(String username, String email, String password) async {
     final response = await _post('$_baseUrl/auth/sign-up/email', {
-      'name': '',
-      'username': username,
+      'name': username,
       'email': email,
       'password': password
     });
