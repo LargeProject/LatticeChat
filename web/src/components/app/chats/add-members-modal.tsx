@@ -7,13 +7,16 @@ import { fetchUserInfo } from '#/lib/api/user';
 
 type AddMembersModalProps = {
   conversationId: string;
+  members?: BasicUserInfo[];
   isOpen: boolean;
   onClose: () => void;
   onMemberAdded: () => void;
 };
 
+
 export function AddMembersModal({
   conversationId,
+  members,
   isOpen,
   onClose,
   onMemberAdded,
@@ -26,6 +29,7 @@ export function AddMembersModal({
   const { addMember, isAuthenticated } = useWebsocket();
   const modalRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const memberIds = (members ?? []).map((m) => m.id);
 
   // Load friends on modal open
   useEffect(() => {
@@ -165,31 +169,39 @@ export function AddMembersModal({
             </div>
           ) : (
             <div className="space-y-2 max-h-64 overflow-y-auto">
-              {friends.map((friend) => (
-                <label
-                  key={friend.id}
-                  className="flex items-center gap-3 rounded-lg p-2 hover:bg-(--link-bg-hover) cursor-pointer transition-colors"
-                >
-                  <input
-                    type="radio"
-                    name="friend"
-                    value={friend.id}
-                    checked={selectedFriend === friend.id}
-                    onChange={(e) => setSelectedFriend(e.target.value)}
-                    className="h-4 w-4"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-(--text-primary) truncate">
-                      {friend.name}
-                    </p>
-                    {friend.biography && (
-                      <p className="text-xs text-(--text-secondary) truncate">
-                        {friend.biography}
+              {friends.map((friend) => {
+                const isMember = memberIds.includes(friend.id);
+                return (
+                  <label
+                    key={friend.id}
+                    className={`flex items-center gap-3 rounded-lg p-2 transition-colors ${isMember ? 'cursor-default bg-(--surface) opacity-70' : 'hover:bg-(--link-bg-hover) cursor-pointer'}`}
+                    title={isMember ? 'Already a member' : `Add ${friend.name}`}
+                  >
+                    <input
+                      type="radio"
+                      name="friend"
+                      value={friend.id}
+                      checked={selectedFriend === friend.id}
+                      onChange={(e) => !isMember && setSelectedFriend(e.target.value)}
+                      disabled={isMember}
+                      className="h-4 w-4"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-(--text-primary) truncate">
+                        {friend.name}
                       </p>
+                      {friend.biography && (
+                        <p className="text-xs text-(--text-secondary) truncate">
+                          {friend.biography}
+                        </p>
+                      )}
+                    </div>
+                    {isMember && (
+                      <div className="text-xs text-(--text-secondary)">Already in conversation</div>
                     )}
-                  </div>
-                </label>
-              ))}
+                  </label>
+                );
+              })}
             </div>
           )}
         </div>

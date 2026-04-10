@@ -20,4 +20,9 @@ export const events: RegisteredEvent[] = [
     payloadSchema: payload.createConversation,
     handler: async (data, context) => MessageService.handleCreateConversation(data, context),
   },
+  {
+    name: 'addMember',
+    payloadSchema: payload.addMember,
+    handler: async (data, context) => MessageService.handleAddMember(data, context),
+  },
 ];

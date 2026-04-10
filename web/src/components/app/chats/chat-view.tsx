@@ -127,6 +127,7 @@ export function ChatView({ conversationId, onTogglePanel }: ChatViewProps) {
 
       <AddMembersModal
         conversationId={conversationId}
+        members={conversation.members}
         isOpen={isAddMembersOpen}
         onClose={() => setIsAddMembersOpen(false)}
         onMemberAdded={handleMemberAdded}
