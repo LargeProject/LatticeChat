@@ -1,6 +1,6 @@
 import express from 'express';
-import http from 'http';
-import { WebsocketServer } from './lib/websockets';
+import http from 'node:http';
+import { WebsocketServer } from './lib/websocket';
 import { events } from './websocketEvents';
 import { ENV } from './util/env';
 import cors from 'cors';
@@ -21,4 +21,4 @@ app.use(logger);
 app.use('/api', apiRouter);
 
 export const server = http.createServer(app);
-export const io = new WebsocketServer(server).addEvents(events);
+export const io = new WebsocketServer(server).registerEvents(events);

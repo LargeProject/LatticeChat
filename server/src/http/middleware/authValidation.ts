@@ -11,7 +11,8 @@ const attachSession: Middleware = async (req: UserRequest, res, next) => {
   const requestedUserId = req.params.user_id ?? '';
   const tokenUserId = session?.user.id ?? '';
 
-  if (requestedUserId == tokenUserId) {
+  // For /me endpoint, always attach session if it exists
+  if (!requestedUserId || requestedUserId === 'me' || requestedUserId === tokenUserId) {
     req.userInfo = session?.user ?? null;
   } else {
     req.userInfo = null;
@@ -23,10 +24,18 @@ const attachSession: Middleware = async (req: UserRequest, res, next) => {
 const validateUser: Middleware = async (req: UserRequest, res, next) => {
   const userInfo = req.userInfo;
 
-  const requestedUserId = req.params.user_id ?? '';
-  const tokenUserId = userInfo?.id ?? '';
+  if (!userInfo || !userInfo.id) {
+    res.status(401).send({
+      success: false,
+      message: 'Invalid Token',
+    });
+    return;
+  }
 
-  if (requestedUserId != tokenUserId) {
+  const requestedUserId = req.params.user_id ?? '';
+  
+  // For /me endpoint, any authenticated user is allowed
+  if (requestedUserId && requestedUserId !== 'me' && requestedUserId !== userInfo.id) {
     res.status(401).send({
       success: false,
       message: 'Invalid Token',

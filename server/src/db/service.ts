@@ -54,7 +54,7 @@ export async function removePrivateConversation(data: actions.RemovePrivateConve
 }
 
 export async function getConversationMessages(conversationId: string) {
-  const messages = await Message.find({ conversationId: conversationId });
+  const messages = await Message.find({ conversationId });
 
   return messages;
 }
@@ -63,12 +63,14 @@ export async function createMessage(data: actions.CreateMessage) {
   const { senderId, conversationId, content } = data;
   const sender = await User.findById(senderId);
   if (!sender) {
-    return new Error('User not found');
+    console.error(`createMessage: sender ${senderId} not found`);
+    throw new Error('User not found');
   }
 
   const conversation = await Conversation.findById(conversationId);
   if (!conversation) {
-    return new Error('Conversation not found');
+    console.error(`createMessage: conversation ${conversationId} not found`);
+    throw new Error('Conversation not found');
   }
 
   const message = await Message.create({

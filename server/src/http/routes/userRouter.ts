@@ -9,6 +9,7 @@ import {
 import {
   handleDeleteUser,
   handleGetBasicUserInformation,
+  handleGetCurrentUser,
 } from '../services/userServices';
 import conversationRouter from './conversationRouter';
 import {
