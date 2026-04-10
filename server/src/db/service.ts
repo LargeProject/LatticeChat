@@ -1,6 +1,6 @@
 import { Conversation, FriendRequest, KeyExchangeRequest, Message, User } from './models';
 import actions, { CreateConversation } from '@latticechat/shared';
-import { ErrorCodes, HttpError } from '../util/error';
+import { HttpErrors } from '../util/error';
 import { BasicUserInfo } from '../http/types';
 import { UserDocument } from './schemas/User';
 
@@ -12,7 +12,7 @@ export async function getConversation(conversationId: string) {
   const conversation = await Conversation.findById(conversationId);
 
   if (!conversation) {
-    throw new HttpError(404, ErrorCodes.CONVERSATION_NOT_FOUND, 'Conversation not found');
+    throw HttpErrors.CONVERSATION_NOT_FOUND;
   }
 
   return conversation;
@@ -84,9 +84,9 @@ export async function findUser(userId: string, type: 'user' | 'target' = 'user')
   if (user == null) {
     switch (type) {
       case 'target':
-        throw new HttpError(404, ErrorCodes.TARGET_NOT_FOUND, 'Target not found');
+        throw HttpErrors.TARGET_NOT_FOUND;
       case 'user':
-        throw new HttpError(404, ErrorCodes.USER_NOT_FOUND, 'User not found');
+        throw HttpErrors.USER_NOT_FOUND;
     }
   }
 
@@ -98,16 +98,16 @@ export async function createFriendRequest(senderId: string, targetId: string) {
   const target = await findUser(targetId, 'target');
 
   if (sender._id.equals(target._id)) {
-    throw new HttpError(409, ErrorCodes.SELF_FRIEND_REQUEST, "Friend requests to one's own account are not allowed");
+    throw HttpErrors.SELF_FRIEND_REQUEST;
   }
 
   if (sender.hasFriend(target._id)) {
-    throw new HttpError(409, ErrorCodes.FRIEND_EXISTS, 'Already friends with this user');
+    throw HttpErrors.FRIEND_EXISTS;
   }
 
   const friendRequest = await FriendRequest.findOne({ fromId: sender._id, toId: target._id });
   if (friendRequest != null) {
-    throw new HttpError(409, ErrorCodes.FRIEND_REQUEST_EXISTS, 'Friend request already exists');
+    throw HttpErrors.FRIEND_REQUEST_EXISTS;
   }
 
   const targetFriendRequest = await target.getFriendRequestTo(sender._id);
@@ -123,10 +123,7 @@ export async function createFriendRequest(senderId: string, targetId: string) {
 
     return null;
   } else {
-    return await FriendRequest.create({
-      fromId: sender.id,
-      toId: target.id,
-    });
+    return await FriendRequest.create({ fromId: sender.id, toId: target.id });
   }
 }
 
@@ -136,7 +133,7 @@ export async function removeFriendRequest(fromId: string, toId: string) {
 
   const friendRequest = await FriendRequest.findOne({ fromId: sender._id, toId: target._id });
   if (friendRequest == null) {
-    throw new HttpError(404, ErrorCodes.FRIEND_REQUEST_NOT_FOUND, 'Friend request not found');
+    throw HttpErrors.FRIEND_REQUEST_NOT_FOUND;
   }
 
   await friendRequest.deleteOne();
@@ -156,7 +153,7 @@ export async function removeFriend(sourceId: string, targetId: string) {
   const target = await findUser(targetId, 'target');
 
   if (!source.hasFriend(target._id)) {
-    throw new HttpError(404, ErrorCodes.FRIEND_NOT_FOUND, 'Friend not found');
+    throw HttpErrors.FRIEND_NOT_FOUND;
   }
 
   source.removeFriend(target._id);
@@ -166,7 +163,7 @@ export async function removeFriend(sourceId: string, targetId: string) {
 export async function isEmailVerified(email: string) {
   const user = await User.findOne({ email: email });
   if (user == null) {
-    throw new HttpError(404, ErrorCodes.EMAIL_NOT_FOUND, 'Email not found');
+    throw HttpErrors.EMAIL_NOT_FOUND;
   }
 
   return user.emailVerified;
@@ -183,11 +180,7 @@ export async function isUsernameTaken(username: string) {
 }
 
 export async function deleteUser(userId: string) {
-  const user = await User.findById(userId);
-  if (user == null) {
-    throw new HttpError(404, ErrorCodes.USER_NOT_FOUND, 'User not found');
-  }
-
+  const user = await findUser(userId);
   await user.deleteOne();
 }
 
@@ -203,7 +196,7 @@ export async function getBasicUserInfoById(userId: string) {
 
 async function getBasicUserInfo(user: UserDocument | null): Promise<BasicUserInfo> {
   if (user == null) {
-    throw new HttpError(404, ErrorCodes.USER_NOT_FOUND, 'User not found');
+    throw HttpErrors.USER_NOT_FOUND;
   }
 
   return {
@@ -227,7 +220,7 @@ export async function createKeyExchangeRequest(fromId: string, toId: string, cip
   });
 
   if (keyExchangeRequest != null) {
-    throw new HttpError(404, ErrorCodes.KEY_EXCHANGE_REQUEST_EXISTS, 'Key exchange request exists');
+    throw HttpErrors.KEY_EXCHANGE_REQUEST_EXISTS;
   }
 
   await KeyExchangeRequest.create({

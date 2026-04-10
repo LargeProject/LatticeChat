@@ -10,7 +10,4 @@ export const FriendRequest = model('FriendRequest', friendRequestSchema);
 export const Message = model('Message', messageSchema);
 export const Conversation = model('Conversation', conversationSchema);
 export const Account = model('Account', accountSchema);
-export const KeyExchangeRequest = model(
-  'KeyExchangeRequest',
-  keyExchangeRequestSchema,
-);
+export const KeyExchangeRequest = model('KeyExchangeRequest', keyExchangeRequestSchema);
