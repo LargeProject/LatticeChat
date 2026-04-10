@@ -3,11 +3,7 @@ import { useWebsocketContext } from '../context/WebsocketContext';
 
 type EventCallback<T = any> = (data: T) => void;
 
-export function useWebsocketListener<T = any>(
-  eventName: string,
-  callback: EventCallback<T>,
-  enabled: boolean = true
-) {
+export function useWebsocketListener<T = any>(eventName: string, callback: EventCallback<T>, enabled: boolean = true) {
   const context = useWebsocketContext();
   const callbackRef = useRef(callback);
 
@@ -38,10 +34,7 @@ export function useWebsocketListener<T = any>(
   }, [eventName, enabled, context.socket, context.isAuthenticated]);
 }
 
-export function useWebsocketListeners(
-  listeners: Record<string, EventCallback>,
-  enabled: boolean = true
-) {
+export function useWebsocketListeners(listeners: Record<string, EventCallback>, enabled: boolean = true) {
   const context = useWebsocketContext();
   const listenersRef = useRef(listeners);
 

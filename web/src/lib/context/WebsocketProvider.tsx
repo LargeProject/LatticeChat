@@ -3,15 +3,8 @@ import type { ReactNode } from 'react';
 import type { Socket } from 'socket.io-client';
 import { io } from 'socket.io-client';
 import { WebsocketContext } from './WebsocketContext';
-import type {
-  WebsocketConnectionState,
-  WebsocketContextType,
-} from './WebsocketContext';
-import {
-  getLocalJWT,
-  getLocalUserId,
-  setLocalUserId,
-} from '#/lib/util/storage';
+import type { WebsocketConnectionState, WebsocketContextType } from './WebsocketContext';
+import { getLocalJWT, getLocalUserId, setLocalUserId } from '#/lib/util/storage';
 import { fetchUserInfo } from '#/lib/api/user';
 import type * as contracts from '@latticechat/shared';
 
@@ -37,13 +30,8 @@ type ServerEventMap = {
 
 type AckResponse = contracts.AckResponse;
 
-export function WebsocketProvider({
-  children,
-  wsUrl,
-  onError,
-}: WebsocketProviderProps) {
-  const [connectionState, setConnectionState] =
-    useState<WebsocketConnectionState>('disconnected');
+export function WebsocketProvider({ children, wsUrl, onError }: WebsocketProviderProps) {
+  const [connectionState, setConnectionState] = useState<WebsocketConnectionState>('disconnected');
   const [error, setError] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const socketRef = useRef<Socket | null>(null);
@@ -119,12 +107,9 @@ export function WebsocketProvider({
     [],
   );
 
-  const emit = useCallback(
-    <K extends keyof ServerEventMap>(event: K, data: ServerEventMap[K]) => {
-      socketRef.current?.emit(event, data);
-    },
-    [],
-  );
+  const emit = useCallback(<K extends keyof ServerEventMap>(event: K, data: ServerEventMap[K]) => {
+    socketRef.current?.emit(event, data);
+  }, []);
 
   const performHandshake = useCallback(
     async (socket: Socket) => {
@@ -172,8 +157,7 @@ export function WebsocketProvider({
           socket.disconnect();
         }
       } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : JSON.stringify(err);
+        const errorMessage = err instanceof Error ? err.message : JSON.stringify(err);
         setError(errorMessage);
         setConnectionState('error');
         console.error('[Websocket] Handshake failed:', errorMessage);
@@ -194,9 +178,5 @@ export function WebsocketProvider({
     emitWithAck,
   };
 
-  return (
-    <WebsocketContext.Provider value={value}>
-      {children}
-    </WebsocketContext.Provider>
-  );
+  return <WebsocketContext.Provider value={value}>{children}</WebsocketContext.Provider>;
 }

@@ -31,7 +31,7 @@ export type WebsocketContextType = {
   emitWithAck: <K extends keyof ClientEventMap>(
     event: K,
     data: ClientEventMap[K],
-    timeoutMs?: number
+    timeoutMs?: number,
   ) => Promise<AckResponse>;
 };
 
@@ -39,8 +39,7 @@ export const WebsocketContext = createContext<WebsocketContextType | undefined>(
 
 export const useWebsocketContext = () => {
   const context = useContext(WebsocketContext);
-  if (!context) {
-    throw new Error('useWebsocketContext must be used within a WebsocketProvider');
-  }
+  if (!context) throw new Error('useWebsocketContext must be used within a WebsocketProvider');
+
   return context;
 };

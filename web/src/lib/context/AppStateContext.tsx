@@ -13,13 +13,11 @@ type AppContextValue = {
   setConvoId: (id: string) => void;
 };
 
-export const AppStateContext = createContext<AppContextValue | undefined>(
-  undefined,
-);
+export const AppStateContext = createContext<AppContextValue | undefined>(undefined);
 
 export const useAppState = () => {
   const context = useContext(AppStateContext);
-  if (!context)
-    throw new Error('useAppState must be used within a AppStateProvider');
+  if (!context) throw new Error('useAppState must be used within a AppStateProvider');
+
   return context;
 };
