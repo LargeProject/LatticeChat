@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { Check, X, User, UserPlus, Inbox, Send, UserMinus, Users } from 'lucide-react';
 import { useUser } from '#/lib/context/UserContext.tsx';
-import { removeFriendRequest, sendFriendRequest, removeFriend } from '#/lib/api/friend.ts';
+import { removeFriendRequest, sendFriendRequest, removeFriend, type FriendRequest } from '#/lib/api/friend.ts';
 import { fetchBasicUserInfo } from '#/lib/api/user.ts';
 import { useAsyncEffect } from '#/components/hooks/useAsyncEffect.ts';
 
-type FriendRequest = {
+type LayoutFriendRequest = {
   id: string;
   username: string;
   displayName: string;
@@ -15,12 +15,36 @@ type FriendRequest = {
 
 function Avatar({ color }: { color: string }) {
   return (
-    <div
-      className={`flex size-10 shrink-0 items-center justify-center rounded-full ${color} text-white`}
-    >
+    <div className={`flex size-10 shrink-0 items-center justify-center rounded-full ${color} text-white`}>
       <User size={20} />
     </div>
   );
+}
+
+function toLayoutFriendRequests(friendRequests: FriendRequest[]) {
+  const layoutOutgoingRequests: LayoutFriendRequest[] = [];
+  const layoutIncomingRequests: LayoutFriendRequest[] = [];
+
+  for (const friendRequest of friendRequests) {
+    const layoutFriendRequest: LayoutFriendRequest = {
+      id: friendRequest.associatedUser.id,
+      username: friendRequest.associatedUser.name,
+      displayName: friendRequest.associatedUser.name,
+      mutualFriends: 0,
+      avatarColor: 'bg-blue-500',
+    };
+
+    if (friendRequest.type === 'incoming') {
+      layoutIncomingRequests.push(layoutFriendRequest);
+    } else {
+      layoutOutgoingRequests.push(layoutFriendRequest);
+    }
+  }
+
+  return {
+    incoming: layoutIncomingRequests,
+    outgoing: layoutOutgoingRequests,
+  };
 }
 
 export default function FriendsLayout() {
@@ -28,37 +52,22 @@ export default function FriendsLayout() {
   const [isLoading, setIsLoading] = useState(true);
 
   useAsyncEffect(async () => {
-    await refreshFriendRequests();
+    await refreshUser();
     setIsLoading(false);
   });
 
-  const [incomingRequests, setIncomingRequests] = useState<FriendRequest[]>([]);
-  const [sentRequests, setSentRequests] = useState<FriendRequest[]>([]);
+  const [incomingRequests, setIncomingRequests] = useState<LayoutFriendRequest[]>(
+    toLayoutFriendRequests(friendRequests).incoming,
+  );
+  const [sentRequests, setSentRequests] = useState<LayoutFriendRequest[]>(
+    toLayoutFriendRequests(friendRequests).outgoing,
+  );
 
   useEffect(() => {
     if (isLoading) return;
 
-    const layoutOutgoingRequests: FriendRequest[] = [];
-    const layoutIncomingRequests: FriendRequest[] = [];
-
-    for (const friendRequest of friendRequests) {
-      const layoutFriendRequest: FriendRequest = {
-        id: friendRequest.associatedUser.id,
-        username: friendRequest.associatedUser.name,
-        displayName: friendRequest.associatedUser.name,
-        mutualFriends: 0,
-        avatarColor: 'bg-blue-500',
-      };
-
-      if (friendRequest.type === 'incoming') {
-        layoutIncomingRequests.push(layoutFriendRequest);
-      } else {
-        layoutOutgoingRequests.push(layoutFriendRequest);
-      }
-    }
-
-    setIncomingRequests(layoutIncomingRequests);
-    setSentRequests(layoutOutgoingRequests);
+    setIncomingRequests(toLayoutFriendRequests(friendRequests).incoming);
+    setSentRequests(toLayoutFriendRequests(friendRequests).outgoing);
   }, [friendRequests, isLoading]);
 
   const [friendInput, setFriendInput] = useState('');
@@ -82,22 +91,15 @@ export default function FriendsLayout() {
     e.preventDefault();
     if (!canSend) return;
 
-    const alreadySent = sentRequests.some(
-      (r) => r.username.toLowerCase() === normalizedInput,
-    );
-    const alreadyIncoming = incomingRequests.some(
-      (r) => r.username.toLowerCase() === normalizedInput,
-    );
+    const alreadySent = sentRequests.some((r) => r.username.toLowerCase() === normalizedInput);
+    const alreadyIncoming = incomingRequests.some((r) => r.username.toLowerCase() === normalizedInput);
 
     if (alreadySent) {
       pushMessage(`You already sent a request to @${normalizedInput}`, 'error');
       return;
     }
     if (alreadyIncoming) {
-      pushMessage(
-        `@${normalizedInput} already sent you a request! Check incoming.`,
-        'error',
-      );
+      pushMessage(`@${normalizedInput} already sent you a request! Check incoming.`, 'error');
       return;
     }
 
@@ -112,7 +114,7 @@ export default function FriendsLayout() {
     }
     if (targetUser == null) return;
 
-    const newRequest: FriendRequest = {
+    const newRequest: LayoutFriendRequest = {
       id: targetUser.id,
       username: targetUser.name,
       displayName: targetUser.name,
@@ -121,10 +123,7 @@ export default function FriendsLayout() {
     };
 
     setSentRequests((prev) => [newRequest, ...prev]);
-    pushMessage(
-      `Success! Your friend request to @${normalizedInput} was sent.`,
-      'success',
-    );
+    pushMessage(`Success! Your friend request to @${normalizedInput} was sent.`, 'success');
     setFriendInput('');
   };
 
@@ -168,21 +167,15 @@ export default function FriendsLayout() {
   };
 
   return (
-    <section
-      className="flex h-full min-h-0 flex-1 flex-col bg-(--bg-base)"
-      aria-label="Friends"
-    >
+    <section className="flex h-full min-h-0 flex-1 flex-col bg-(--bg-base)" aria-label="Friends">
       {/* Content Area */}
       <div className="min-h-0 flex-1 overflow-y-auto">
         <div className="mx-auto max-w-3xl px-6 py-8">
           {/* Add Friend Banner */}
           <div className="mb-10">
-            <h2 className="mb-2 text-base font-bold uppercase tracking-wide text-(--text-primary)">
-              Add Friend
-            </h2>
+            <h2 className="mb-2 text-base font-bold uppercase tracking-wide text-(--text-primary)">Add Friend</h2>
             <p className="mb-4 text-sm text-(--text-secondary)">
-              You can add friends with their Lattice username. It's case
-              sensitive!
+              You can add friends with their Lattice username. It's case sensitive!
             </p>
 
             <form
@@ -210,9 +203,7 @@ export default function FriendsLayout() {
 
             {/* Feedback Message */}
             {uiMessage && (
-              <p
-                className={`mt-2 text-sm ${uiMessage.type === 'success' ? 'text-emerald-500' : 'text-rose-500'}`}
-              >
+              <p className={`mt-2 text-sm ${uiMessage.type === 'success' ? 'text-emerald-500' : 'text-rose-500'}`}>
                 {uiMessage.text}
               </p>
             )}
@@ -244,13 +235,9 @@ export default function FriendsLayout() {
                         <Avatar color="bg-blue-500" />
                         <div className="flex flex-col">
                           <div className="flex items-baseline gap-1">
-                            <span className="text-base font-semibold text-(--text-primary)">
-                              {friend.name}
-                            </span>
+                            <span className="text-base font-semibold text-(--text-primary)">{friend.name}</span>
                           </div>
-                          <span className="text-xs text-(--text-secondary)">
-                            Friend
-                          </span>
+                          <span className="text-xs text-(--text-secondary)">Friend</span>
                         </div>
                       </div>
 
@@ -291,16 +278,10 @@ export default function FriendsLayout() {
                         <Avatar color={request.avatarColor} />
                         <div className="flex flex-col">
                           <div className="flex items-baseline gap-1">
-                            <span className="text-base font-semibold text-(--text-primary)">
-                              {request.displayName}
-                            </span>
-                            <span className="text-sm font-medium text-(--text-secondary)">
-                              {request.username}
-                            </span>
+                            <span className="text-base font-semibold text-(--text-primary)">{request.displayName}</span>
+                            <span className="text-sm font-medium text-(--text-secondary)">{request.username}</span>
                           </div>
-                          <span className="text-xs text-(--text-secondary)">
-                            Incoming Friend Request
-                          </span>
+                          <span className="text-xs text-(--text-secondary)">Incoming Friend Request</span>
                         </div>
                       </div>
 
@@ -348,16 +329,10 @@ export default function FriendsLayout() {
                         <Avatar color={request.avatarColor} />
                         <div className="flex flex-col">
                           <div className="flex items-baseline gap-1">
-                            <span className="text-base font-semibold text-(--text-primary)">
-                              {request.displayName}
-                            </span>
-                            <span className="text-sm font-medium text-(--text-secondary)">
-                              {request.username}
-                            </span>
+                            <span className="text-base font-semibold text-(--text-primary)">{request.displayName}</span>
+                            <span className="text-sm font-medium text-(--text-secondary)">{request.username}</span>
                           </div>
-                          <span className="text-xs text-(--text-secondary)">
-                            Outgoing Friend Request
-                          </span>
+                          <span className="text-xs text-(--text-secondary)">Outgoing Friend Request</span>
                         </div>
                       </div>
 
