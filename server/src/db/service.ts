@@ -1,8 +1,9 @@
-import { Conversation, FriendRequest, KeyExchangeRequest, Message, User } from './models';
-import actions, { CreateConversation } from '@latticechat/shared';
-import { HttpErrors } from '../util/error';
-import { BasicUserInfo } from '../http/types';
-import { UserDocument } from './schemas/User';
+import { Conversation, FriendRequest, KeyExchangeRequest, Message, User, Account } from './models';
+import type actions from '@latticechat/shared';
+import { HttpError, HttpErrors } from '../util/error';
+import type { BasicUserInfo } from '../http/types';
+import type { CreateConversation } from '@latticechat/shared';
+import type { UserDocument } from './schemas/User';
 
 function createConversationName(memberNames: string[]) {
   return memberNames.join(', ');
@@ -53,8 +54,8 @@ export async function removePrivateConversation(data: actions.RemovePrivateConve
 }
 
 export async function getConversationMessages(conversationId: string) {
-  const messages = await Message.find({ conversationId: conversationId });
-  if (!messages) return [];
+  const messages = await Message.find({ conversation: conversationId });
+
   return messages;
 }
 
@@ -123,7 +124,10 @@ export async function createFriendRequest(senderId: string, targetId: string) {
 
     return null;
   } else {
-    return await FriendRequest.create({ fromId: sender.id, toId: target.id });
+    return await FriendRequest.create({
+      fromId: sender.id,
+      toId: target.id,
+    });
   }
 }
 
@@ -144,7 +148,6 @@ export async function getFriendRequests(userId: string) {
     $or: [{ fromId: userId }, { toId: userId }],
   });
 
-  if (!friendRequests) return [];
   return friendRequests;
 }
 
@@ -180,7 +183,11 @@ export async function isUsernameTaken(username: string) {
 }
 
 export async function deleteUser(userId: string) {
-  const user = await findUser(userId);
+  const user = await User.findById(userId);
+  if (user == null) {
+    throw HttpErrors.USER_NOT_FOUND;
+  }
+
   await user.deleteOne();
 }
 
@@ -233,9 +240,10 @@ export async function createKeyExchangeRequest(fromId: string, toId: string, cip
 export async function findKeyExchangeRequestsTo(userId: string) {
   const user = await findUser(userId);
 
-  const keyExchangeRequests = await KeyExchangeRequest.find({ toId: user._id });
+  const keyExchangeRequests = await KeyExchangeRequest.find({
+    to: user._id,
+  });
 
-  if (!keyExchangeRequests) return [];
   return keyExchangeRequests;
 }
 
