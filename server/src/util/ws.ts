@@ -3,10 +3,7 @@ import auth from './auth';
 import type { WebsocketContext } from '../lib/websocket/types';
 import { WebsocketError } from '../lib/websocket/types';
 
-export async function validateWSHandshake(
-  data: actions.InitHandshake,
-  context: WebsocketContext
-): Promise<string> {
+export async function validateWSHandshake(data: actions.InitHandshake, context: WebsocketContext): Promise<string> {
   if (!data.jwt) {
     throw new WebsocketError('Missing JWT token', 'AUTH_MISSING_TOKEN', 401);
   }
@@ -18,7 +15,7 @@ export async function validateWSHandshake(
       },
     });
 
-    if (!session?.user?.id) {
+    if (!session?.user.id) {
       throw new WebsocketError('Invalid or expired token', 'AUTH_INVALID_TOKEN', 401);
     }
 

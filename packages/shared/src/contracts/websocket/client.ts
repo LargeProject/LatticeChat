@@ -26,3 +26,10 @@ export const removePrivateConversation = z.object({
 export type RemovePrivateConversation = z.infer<
   typeof removePrivateConversation
 >;
+
+// Client -> Server: add a member to a conversation (single member at a time)
+export const addMember = z.object({
+  conversationId: z.string().nonempty(),
+  userId: z.string().nonempty(),
+});
+export type AddMember = z.infer<typeof addMember>;

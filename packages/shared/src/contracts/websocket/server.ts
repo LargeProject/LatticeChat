@@ -8,3 +8,12 @@ export const emitMessage = z.object({
   createdAt: z.date(),
 });
 export type EmitMessage = z.infer<typeof emitMessage>;
+
+// Server -> Client: notify that a member was added to a conversation
+export const emitMemberAdded = z.object({
+  conversationId: z.string().nonempty(),
+  userId: z.string().nonempty(),
+  addedBy: z.string().nonempty(),
+  addedAt: z.date(),
+});
+export type EmitMemberAdded = z.infer<typeof emitMemberAdded>;

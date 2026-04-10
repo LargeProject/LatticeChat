@@ -13,12 +13,29 @@ import {
   setLocalUserId,
 } from '#/lib/util/storage';
 import { fetchUserInfo } from '#/lib/api/user';
+import type * as contracts from '@latticechat/shared';
 
 interface WebsocketProviderProps {
   children: ReactNode;
   wsUrl: string;
   onError?: (error: string) => void;
 }
+
+type ClientEventMap = {
+  initHandshake: contracts.InitHandshake;
+  createMessage: contracts.CreateMessage;
+  createConversation: contracts.CreateConversation;
+  removePrivateConversation: contracts.RemovePrivateConversation;
+  addMember: contracts.AddMember;
+};
+
+type ServerEventMap = {
+  newMessage: contracts.EmitMessage;
+  newConversation: any;
+  newMember: contracts.EmitMemberAdded;
+};
+
+type AckResponse = contracts.AckResponse;
 
 export function WebsocketProvider({
   children,
@@ -33,7 +50,7 @@ export function WebsocketProvider({
 
   // Initialize socket connection
   useEffect(() => {
-    if (socketRef.current) return; // Already initialized
+    if (socketRef.current) return;
 
     const socket = io(wsUrl, {
       autoConnect: true,
@@ -75,75 +92,39 @@ export function WebsocketProvider({
   }, [wsUrl, onError]);
 
   const emitWithAck = useCallback(
-    <R = any,>(
-      event: string,
-      data?: any,
+    async <K extends keyof ClientEventMap>(
+      event: K,
+      data: ClientEventMap[K],
       timeoutMs: number = 5000,
-    ): Promise<R> => {
+    ): Promise<AckResponse> => {
+      const sock = socketRef.current;
+      if (!sock) {
+        throw new Error('Socket not initialized');
+      }
+
       return new Promise((resolve, reject) => {
-        const sock = socketRef.current;
-        if (!sock) {
-          reject(new Error('Socket not initialized'));
-          return;
-        }
-        try {
-          let timedOut = false;
-          const timer = setTimeout(() => {
-            timedOut = true;
-            reject(new Error(`${event} acknowledgement timed out`));
-          }, timeoutMs);
+        let timedOut = false;
+        const timer = setTimeout(() => {
+          timedOut = true;
+          reject(new Error(`${String(event)} acknowledgement timed out`));
+        }, timeoutMs);
 
-          sock.emit(event, data, (err: any, res: R) => {
-            clearTimeout(timer);
-            if (timedOut) return;
-
-            // Normalize ack parameter patterns from the server.
-            // Server may call ack(err, res), or ack(res) with res in first param (boolean/object), or ack(true/false).
-            let actualErr: any = null;
-            let actualRes: any = undefined;
-
-            if (err !== undefined && err !== null) {
-              // If err is an object that looks like a response (contains success/error), treat it as result
-              if (
-                typeof err === 'object' &&
-                ('success' in err || 'error' in err)
-              ) {
-                actualRes = err;
-              } else if (typeof err === 'boolean') {
-                // server used boolean first-arg as success flag
-                actualRes = err as any;
-              } else if (err instanceof Error) {
-                actualErr = err;
-              } else {
-                // treat other truthy err values as errors
-                actualErr = new Error(JSON.stringify(err));
-              }
-            } else {
-              // err is null/undefined -> use res
-              actualRes = res;
-            }
-
-            if (actualErr) {
-              reject(
-                actualErr instanceof Error
-                  ? actualErr
-                  : new Error(JSON.stringify(actualErr)),
-              );
-            } else {
-              resolve(actualRes);
-            }
-          });
-        } catch (e) {
-          reject(e);
-        }
+        sock.emit(event, data, (response: AckResponse) => {
+          clearTimeout(timer);
+          if (timedOut) return;
+          resolve(response);
+        });
       });
     },
     [],
   );
 
-  const emit = useCallback((event: string, data?: any) => {
-    socketRef.current?.emit(event, data);
-  }, []);
+  const emit = useCallback(
+    <K extends keyof ServerEventMap>(event: K, data: ServerEventMap[K]) => {
+      socketRef.current?.emit(event, data);
+    },
+    [],
+  );
 
   const performHandshake = useCallback(
     async (socket: Socket) => {
@@ -160,12 +141,14 @@ export function WebsocketProvider({
       // If id missing, try to fetch current user using JWT
       if (!id) {
         try {
-          const me = await fetchUserInfo();
-          if (me && (me as any).user && (me as any).user.id) {
-            id = (me as any).user.id;
+          const response = await fetchUserInfo();
+          if (response?.user.id) {
+            id = response.user.id;
             setLocalUserId(id);
           }
-        } catch (err) {}
+        } catch (err) {
+          console.error('[Websocket] Failed to fetch user info:', err);
+        }
       }
 
       if (!id) {
@@ -176,24 +159,14 @@ export function WebsocketProvider({
       }
 
       try {
-        const response = await emitWithAck<
-          { jwt?: string },
-          { success?: boolean; userId?: string; error?: string }
-        >(
-          'initHandshake',
-          {
-            jwt,
-            id,
-          },
-          5000,
-        );
+        const response = await emitWithAck('initHandshake', { jwt, id }, 5000);
 
-        if (response?.success && response?.userId) {
+        if (response.success && response.userId) {
           setUserId(response.userId);
           setConnectionState('authenticated');
           setError(null);
         } else {
-          const errorMsg = (response as any)?.error || 'Authentication failed';
+          const errorMsg = response.error || 'Authentication failed';
           setError(errorMsg);
           setConnectionState('error');
           socket.disconnect();
@@ -203,12 +176,7 @@ export function WebsocketProvider({
           err instanceof Error ? err.message : JSON.stringify(err);
         setError(errorMessage);
         setConnectionState('error');
-        console.error(
-          '[Websocket] handshake failed',
-          err,
-          'message:',
-          errorMessage,
-        );
+        console.error('[Websocket] Handshake failed:', errorMessage);
         socket.disconnect();
       }
     },

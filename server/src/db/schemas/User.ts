@@ -67,7 +67,7 @@ export const userSchema = new Schema(
         this.save();
       },
       hasFriend: function (targetFriendId: ObjectId) {
-        return this.friendIds.some((friendId) => friendId.equals(targetFriendId));
+        return (this.friendIds || []).some((friendId) => friendId.equals(targetFriendId));
       },
       getFriendRequestTo: function (targetId: ObjectId) {
         return FriendRequest.findOne({

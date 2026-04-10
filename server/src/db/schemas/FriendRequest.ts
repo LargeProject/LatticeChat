@@ -13,4 +13,4 @@ export const friendRequestSchema = new Schema({
   },
 });
 
-friendRequestSchema.index({ fromId: 1, toId: 1 }, { unique: true });
+friendRequestSchema.index({ fromId: 1, toId: 1 }, { unique: true, sparse: true });

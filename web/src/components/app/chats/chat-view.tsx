@@ -1,11 +1,14 @@
 import { useCallback, useMemo, useState } from 'react';
-import { Info, Phone, Video } from 'lucide-react';
+import { Info, UserPlus } from 'lucide-react';
 import { MessageList } from './messages';
 import { ChatInput } from './chat-input';
+import { AddMembersModal } from './add-members-modal';
 import { useWebsocket } from '#/lib/hooks/useWebsocket';
+import { useWebsocketListener } from '#/lib/hooks/useWebsocketListener';
 import { type Message } from '#/lib/api/conversation.ts';
 import { useUser } from '#/lib/context/UserContext.tsx';
 import { useConversation } from '#/components/hooks/useConversation';
+import type * as contracts from '@latticechat/shared';
 
 type ChatViewProps = {
   conversationId: string;
@@ -14,13 +17,24 @@ type ChatViewProps = {
 
 export function ChatView({ conversationId, onTogglePanel }: ChatViewProps) {
   const { conversations } = useUser();
-  const { createMessage: sendMessage } = useWebsocket();
+  const { createMessage: sendMessage, isAuthenticated } = useWebsocket();
   const { userInfo } = useUser();
   const [pendingMessages, setPendingMessages] = useState<Array<Message & { optimistic: true }>>([]);
+  const [isAddMembersOpen, setIsAddMembersOpen] = useState(false);
+  const [memberCount, setMemberCount] = useState(0);
 
   const conversation = useMemo(() => {
     return conversations.find((c) => c.id == conversationId);
   }, [conversations]);
+
+  // Listen for new members being added
+  const handleNewMember = useCallback((data: contracts.EmitMemberAdded) => {
+    if (data.conversationId === conversationId) {
+      setMemberCount((prev) => prev + 1);
+    }
+  }, [conversationId]);
+
+  useWebsocketListener('newMember', handleNewMember, isAuthenticated);
 
   if (!conversation) {
     return <>Conversation not found!</>;
@@ -57,7 +71,11 @@ export function ChatView({ conversationId, onTogglePanel }: ChatViewProps) {
       // Remove optimistic message (will be replaced by real one from server)
       setPendingMessages((msgs) => msgs.filter((m) => m.id !== tempId));
     }
-  }, [conversation, userInfo]);
+  }, [conversation, userInfo, sendMessage]);
+
+  const handleMemberAdded = useCallback(() => {
+    setIsAddMembersOpen(false);
+  }, []);
 
   return (
     <section
@@ -78,20 +96,12 @@ export function ChatView({ conversationId, onTogglePanel }: ChatViewProps) {
           <div className="flex items-center gap-1">
             <button
               type="button"
+              onClick={() => setIsAddMembersOpen(true)}
               className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-(--text-secondary) transition-colors hover:bg-(--link-bg-hover) hover:text-(--text-primary) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--line)"
-              aria-label="Start voice call"
-              title="Voice call"
+              aria-label="Add members"
+              title="Add members"
             >
-              <Phone size={16} />
-            </button>
-
-            <button
-              type="button"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-(--text-secondary) transition-colors hover:bg-(--link-bg-hover) hover:text-(--text-primary) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--line)"
-              aria-label="Start video call"
-              title="Video call"
-            >
-              <Video size={16} />
+              <UserPlus size={16} />
             </button>
 
             <button
@@ -114,6 +124,13 @@ export function ChatView({ conversationId, onTogglePanel }: ChatViewProps) {
       <div className="border-t border-(--line) bg-(--surface)">
         <ChatInput onSend={handleSend} />
       </div>
+
+      <AddMembersModal
+        conversationId={conversationId}
+        isOpen={isAddMembersOpen}
+        onClose={() => setIsAddMembersOpen(false)}
+        onMemberAdded={handleMemberAdded}
+      />
     </section>
   );
 }

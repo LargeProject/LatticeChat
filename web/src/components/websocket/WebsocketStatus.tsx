@@ -39,7 +39,6 @@ export function WebsocketStatus() {
       <span className="text-sm font-medium">
         {statusMessages[connectionState]}
       </span>
-      <span className="text-xs font-medium">{error}</span>
     </div>
   );
 }

@@ -15,8 +15,8 @@ export function useWebsocket() {
       }
 
       try {
-        const ack: boolean = await context.emitWithAck<boolean>('createMessage', data);
-        return { success: ack };
+        const ack = await context.emitWithAck('createMessage', data);
+        return { success: ack.success };
       } catch (error) {
         console.error('Error sending message:', error);
         messageQueueRef.current.push(data);
@@ -34,11 +34,29 @@ export function useWebsocket() {
       }
 
       try {
-        const ack: boolean = await context.emitWithAck<boolean>('createConversation', data);
-        return { success: ack };
+        const ack = await context.emitWithAck('createConversation', data);
+        return { success: ack.success };
       } catch (error) {
         console.error('Error creating conversation:', error);
         return { success: false };
+      }
+    },
+    [context.emitWithAck, context.socket, context.isAuthenticated]
+  );
+
+  const addMember = useCallback(
+    async (conversationId: string, userId: string) => {
+      if (!context.socket || !context.isAuthenticated) {
+        console.warn('Socket not connected or not authenticated');
+        return { success: false };
+      }
+
+      try {
+        const ack = await context.emitWithAck('addMember', { conversationId, userId });
+        return { success: ack.success, error: ack.error };
+      } catch (error) {
+        console.error('Error adding member:', error);
+        return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
       }
     },
     [context.emitWithAck, context.socket, context.isAuthenticated]
@@ -61,8 +79,8 @@ export function useWebsocket() {
     socket: context.socket,
     createMessage,
     createConversation,
+    addMember,
     getMessageQueue,
     clearMessageQueue,
   };
 }
-
