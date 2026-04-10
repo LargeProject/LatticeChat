@@ -3,7 +3,7 @@ import type { WebsocketContext } from '../lib/websocket/types';
 import { WebsocketError } from '../lib/websocket/types';
 import type * as actions from '@latticechat/shared';
 
-export class MessageHandlers {
+export class WebsocketHandlers {
   static async handleCreateMessage(data: actions.CreateMessage, context: WebsocketContext): Promise<boolean> {
     try {
       const message = await MessageService.createMessage(data);

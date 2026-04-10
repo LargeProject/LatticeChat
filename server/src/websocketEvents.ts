@@ -1,4 +1,4 @@
-import { MessageHandlers } from './websocket/MessageService';
+import { WebsocketHandlers } from './websocket/handlers';
 import type { RegisteredEvent } from './lib/websocket/types';
 import * as payload from '@latticechat/shared';
 import { validateWSHandshake } from './util/ws';
@@ -12,16 +12,16 @@ export const events: RegisteredEvent[] = [
   {
     name: 'createMessage',
     payloadSchema: payload.createMessage,
-    handler: MessageHandlers.handleCreateMessage,
+    handler: WebsocketHandlers.handleCreateMessage,
   },
   {
     name: 'createConversation',
     payloadSchema: payload.createConversation,
-    handler: MessageHandlers.handleCreateConversation,
+    handler: WebsocketHandlers.handleCreateConversation,
   },
   {
     name: 'addMember',
     payloadSchema: payload.addMember,
-    handler: MessageHandlers.handleAddMember,
+    handler: WebsocketHandlers.handleAddMember,
   },
 ];
