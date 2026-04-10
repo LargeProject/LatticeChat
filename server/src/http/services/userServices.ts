@@ -1,5 +1,5 @@
 import type * as types from '../types';
-import { deleteUser, getBasicUserInfoById, getBasicUserInfoByName, findUser, getConversation } from '../../db';
+import { ConversationService } from '../../db';
 import { handleHttpError } from '../../util/error';
 import { Conversation, User } from '../../db/models';
 import * as contracts from '@latticechat/shared';

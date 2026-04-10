@@ -7,5 +7,6 @@ export async function connectMongoDB() {
   await mongoose.connect(uri);
 }
 
-export * from './service';
-export * from './models';
+export * from './services/MessageService';
+export * from './services/ConversationService';
+export * from './services/UserService';
