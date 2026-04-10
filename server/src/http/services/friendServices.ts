@@ -1,13 +1,12 @@
-import { Service, UserRequest } from '../types';
+import type { Service, UserRequest } from '../types';
 import {
-  createConversation,
   createFriendRequest,
   getFriendRequests,
   removeFriend,
   removeFriendRequest,
   removePrivateConversation,
 } from '../../db';
-import {
+import type {
   CreateConversation,
   RemovePrivateConversation,
 } from '@latticechat/shared';
@@ -31,17 +30,11 @@ const handleGetFriendRequests: Service = async (req: UserRequest, res) => {
 
 const handleAddFriendRequest: Service = async (req: UserRequest, res) => {
   const senderId = req.params.user_id?.toString() ?? '';
-  const targetId = req.body.target_id ?? '';
+  const targetId = req.body.targetId ?? '';
 
   try {
     const friendRequest = await createFriendRequest(senderId, targetId);
     if (!friendRequest) {
-      // create conversation
-      const createConversationData: CreateConversation = {
-        memberIds: [senderId, targetId],
-      };
-      await createConversation(createConversationData);
-
       res.status(200).send({
         success: true,
         message: 'Friend successfully added',
@@ -61,7 +54,7 @@ const handleRemoveFriendRequest: Service = async (req: UserRequest, res) => {
   const type = req.query.type;
 
   const senderId = req.params.user_id?.toString() ?? '';
-  const targetId = req.body.target_id ?? '';
+  const targetId = req.body.targetId ?? '';
 
   let fromId = '';
   let toId = '';
@@ -92,7 +85,7 @@ const handleRemoveFriendRequest: Service = async (req: UserRequest, res) => {
 
 const handleRemoveFriend: Service = async (req: UserRequest, res) => {
   const senderId = req.params.user_id?.toString() ?? '';
-  const targetId = req.body.target_id ?? '';
+  const targetId = req.body.targetId ?? '';
 
   try {
     await removeFriend(senderId, targetId);
@@ -111,9 +104,4 @@ const handleRemoveFriend: Service = async (req: UserRequest, res) => {
   }
 };
 
-export {
-  handleGetFriendRequests,
-  handleAddFriendRequest,
-  handleRemoveFriendRequest,
-  handleRemoveFriend,
-};
+export { handleGetFriendRequests, handleAddFriendRequest, handleRemoveFriendRequest, handleRemoveFriend };

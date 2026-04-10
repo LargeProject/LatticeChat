@@ -1,8 +1,9 @@
-import {Conversation, FriendRequest, Message, User} from './models';
-import actions from '@latticechat/shared';
-import {ErrorCodes, HttpError} from '../util/error';
-import {BasicUserInfo} from "../http/types";
-import {UserDocument} from "./schemas/User";
+import { Conversation, FriendRequest, KeyExchangeRequest, Message, User, Account } from './models';
+import type actions from '@latticechat/shared';
+import { HttpError, HttpErrors } from '../util/error';
+import type { BasicUserInfo } from '../http/types';
+import type { CreateConversation } from '@latticechat/shared';
+import type { UserDocument } from './schemas/User';
 
 function createConversationName(memberNames: string[]) {
   return memberNames.join(', ');
@@ -12,7 +13,7 @@ export async function getConversation(conversationId: string) {
   const conversation = await Conversation.findById(conversationId);
 
   if (!conversation) {
-    throw new HttpError(404, ErrorCodes.CONVERSATION_NOT_FOUND, 'Conversation not found');
+    throw HttpErrors.CONVERSATION_NOT_FOUND;
   }
 
   return conversation;
@@ -23,27 +24,23 @@ export async function createConversation(data: actions.CreateConversation) {
   const owner = await User.findById(ownerId);
 
   const members = await User.find({ _id: { $in: memberIds } });
-  const name =
-    data.name ??
-    createConversationName(members.map((m) => m.displayUsername ?? m.username));
+  const name = data.name ?? createConversationName(members.map((m) => m.name));
 
   const conversation = await Conversation.create({
     ...(owner != null && { owner: owner._id }),
     name,
-    members: members.map((m) => m._id),
+    memberIds: members.map((m) => m._id),
   });
 
   return conversation;
 }
 
-export async function removePrivateConversation(
-  data: actions.RemovePrivateConversation,
-) {
+export async function removePrivateConversation(data: actions.RemovePrivateConversation) {
   const { memberIds } = data;
   const [memberId1, memberId2] = memberIds;
 
   const conversation = await Conversation.findOne({
-    members: {
+    memberIds: {
       $all: [memberId1, memberId2],
       $size: 2,
     },
@@ -57,10 +54,7 @@ export async function removePrivateConversation(
 }
 
 export async function getConversationMessages(conversationId: string) {
-  const messages = await Message.find({ conversation: conversationId });
-  if (!messages) {
-    return [];
-  }
+  const messages = await Message.find({ conversationId });
 
   return messages;
 }
@@ -69,45 +63,54 @@ export async function createMessage(data: actions.CreateMessage) {
   const { senderId, conversationId, content } = data;
   const sender = await User.findById(senderId);
   if (!sender) {
-    return new Error('User not found');
+    console.error(`createMessage: sender ${senderId} not found`);
+    throw new Error('User not found');
   }
 
   const conversation = await Conversation.findById(conversationId);
   if (!conversation) {
-    return new Error('Conversation not found');
+    console.error(`createMessage: conversation ${conversationId} not found`);
+    throw new Error('Conversation not found');
   }
 
   const message = await Message.create({
-    sender: sender._id,
-    conversation: conversation._id,
+    senderId: sender._id,
+    conversationId: conversation._id,
     content,
   });
 
   return message;
 }
 
-export async function createFriendRequest(senderId: string, targetId: string) {
-  const sender = await User.findById(senderId);
-  const target = await User.findById(targetId);
-
-  if (sender == null) {
-    throw new HttpError(404, ErrorCodes.USER_NOT_FOUND, 'User not found');
+export async function findUser(userId: string, type: 'user' | 'target' = 'user') {
+  const user = await User.findById(userId);
+  if (user == null) {
+    switch (type) {
+      case 'target':
+        throw HttpErrors.TARGET_NOT_FOUND;
+      case 'user':
+        throw HttpErrors.USER_NOT_FOUND;
+    }
   }
 
-  if (target == null) {
-    throw new HttpError(404, ErrorCodes.TARGET_NOT_FOUND, 'Target not found');
+  return user;
+}
+
+export async function createFriendRequest(senderId: string, targetId: string) {
+  const sender = await findUser(senderId, 'user');
+  const target = await findUser(targetId, 'target');
+
+  if (sender._id.equals(target._id)) {
+    throw HttpErrors.SELF_FRIEND_REQUEST;
   }
 
   if (sender.hasFriend(target._id)) {
-    throw new HttpError(409, ErrorCodes.FRIEND_EXISTS, 'Already friends with this user');
+    throw HttpErrors.FRIEND_EXISTS;
   }
 
-  const friendRequest = await FriendRequest.findOne({
-    from: sender._id,
-    to: target._id,
-  });
+  const friendRequest = await FriendRequest.findOne({ fromId: sender._id, toId: target._id });
   if (friendRequest != null) {
-    throw new HttpError(409, ErrorCodes.FRIEND_REQUEST_EXISTS, 'Friend request already exists');
+    throw HttpErrors.FRIEND_REQUEST_EXISTS;
   }
 
   const targetFriendRequest = await target.getFriendRequestTo(sender._id);
@@ -118,34 +121,25 @@ export async function createFriendRequest(senderId: string, targetId: string) {
     sender.addFriend(target._id);
     target.addFriend(sender._id);
 
+    const createConversationData: CreateConversation = { memberIds: [senderId, targetId] };
+    await createConversation(createConversationData);
+
     return null;
   } else {
     return await FriendRequest.create({
-      from: sender.id,
-      to: target.id,
+      fromId: sender.id,
+      toId: target.id,
     });
   }
 }
 
 export async function removeFriendRequest(fromId: string, toId: string) {
-  const sender = await User.findById(fromId);
-  const target = await User.findById(toId);
+  const sender = await findUser(fromId, 'user');
+  const target = await findUser(toId, 'target');
 
-  if (sender == null) {
-    throw new HttpError(404, ErrorCodes.USER_NOT_FOUND, 'User not found');
-  }
-
-  if (target == null) {
-    throw new HttpError(404, ErrorCodes.TARGET_NOT_FOUND, 'Target not found');
-  }
-
-  const friendRequest = await FriendRequest.findOne({
-    from: sender._id,
-    to: target._id,
-  });
-
+  const friendRequest = await FriendRequest.findOne({ fromId: sender._id, toId: target._id });
   if (friendRequest == null) {
-    throw new HttpError(404, ErrorCodes.FRIEND_REQUEST_NOT_FOUND, 'Friend request not found');
+    throw HttpErrors.FRIEND_REQUEST_NOT_FOUND;
   }
 
   await friendRequest.deleteOne();
@@ -153,30 +147,18 @@ export async function removeFriendRequest(fromId: string, toId: string) {
 
 export async function getFriendRequests(userId: string) {
   const friendRequests = await FriendRequest.find({
-    $or: [{ from: userId }, { to: userId }],
+    $or: [{ fromId: userId }, { toId: userId }],
   });
-
-  if (!friendRequests) {
-    return [];
-  }
 
   return friendRequests;
 }
 
 export async function removeFriend(sourceId: string, targetId: string) {
-  const source = await User.findById(sourceId);
-  const target = await User.findById(targetId);
-
-  if (source == null) {
-    throw new HttpError(404, ErrorCodes.USER_NOT_FOUND, 'User not found');
-  }
-
-  if (target == null) {
-    throw new HttpError(404, ErrorCodes.TARGET_NOT_FOUND, 'Target not found');
-  }
+  const source = await findUser(sourceId, 'user');
+  const target = await findUser(targetId, 'target');
 
   if (!source.hasFriend(target._id)) {
-    throw new HttpError(404, ErrorCodes.FRIEND_NOT_FOUND, 'Friend not found');
+    throw HttpErrors.FRIEND_NOT_FOUND;
   }
 
   source.removeFriend(target._id);
@@ -186,7 +168,7 @@ export async function removeFriend(sourceId: string, targetId: string) {
 export async function isEmailVerified(email: string) {
   const user = await User.findOne({ email: email });
   if (user == null) {
-    throw new HttpError(404, ErrorCodes.EMAIL_NOT_FOUND, 'Email not found');
+    throw HttpErrors.EMAIL_NOT_FOUND;
   }
 
   return user.emailVerified;
@@ -198,21 +180,17 @@ export async function isEmailTaken(email: string) {
 }
 
 export async function isUsernameTaken(username: string) {
-  const user = await User.findOne({ username: username });
+  const user = await User.findOne({ name: username });
   return user != null;
 }
 
 export async function deleteUser(userId: string) {
-  const user = await User.findById(userId);
-  if (user == null) {
-    throw new HttpError(404, ErrorCodes.USER_NOT_FOUND, 'User not found');
-  }
-
+  const user = await findUser(userId);
   await user.deleteOne();
 }
 
 export async function getBasicUserInfoByName(name: string) {
-  const user = await User.findOne({ username: name });
+  const user = await User.findOne({ name: name });
   return await getBasicUserInfo(user);
 }
 
@@ -223,14 +201,51 @@ export async function getBasicUserInfoById(userId: string) {
 
 async function getBasicUserInfo(user: UserDocument | null): Promise<BasicUserInfo> {
   if (user == null) {
-    throw new HttpError(404, ErrorCodes.USER_NOT_FOUND, 'User not found');
+    throw HttpErrors.USER_NOT_FOUND;
   }
 
   return {
     id: user._id.toString(),
-    username: user.username ?? '',
-    displayUsername: user.displayUsername ?? '',
+    name: user.name,
     biography: user.biography ?? '',
     createdAt: user.createdAt ?? Date.now(),
   };
+}
+
+export async function createKeyExchangeRequest(fromId: string, toId: string, cipher: string) {
+  const sender = await findUser(fromId, 'user');
+  const target = await findUser(toId, 'target');
+
+  const keyExchangeRequest = await KeyExchangeRequest.findOne({
+    $or: [
+      { fromId: sender.id, toId: target.id },
+      { fromId: target.id, toId: sender.id },
+    ],
+  });
+
+  if (keyExchangeRequest != null) {
+    throw HttpErrors.KEY_EXCHANGE_REQUEST_EXISTS;
+  }
+
+  await KeyExchangeRequest.create({
+    fromId: sender.id,
+    toId: target.id,
+    cipher: cipher,
+  });
+}
+
+export async function findKeyExchangeRequestsTo(userId: string) {
+  const user = await findUser(userId);
+
+  const keyExchangeRequests = await KeyExchangeRequest.find({
+    toId: user._id,
+  });
+
+  return keyExchangeRequests;
+}
+
+export async function deleteKeyExchangeRequestsTo(userId: string) {
+  const user = await findUser(userId);
+
+  await KeyExchangeRequest.deleteMany({ toId: user.id });
 }

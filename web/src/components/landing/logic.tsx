@@ -55,10 +55,9 @@ export function useAuthLogic() {
 
     await authClient.signUp.email(
       {
-        name: '',
+        name: username,
         email,
         password,
-        username,
       },
       {
         onRequest: () => {
@@ -132,6 +131,8 @@ export function useAuthLogic() {
         return 'Username must be at least 3 characters';
       if (username.trim().length > 20)
         return 'Username must be at most 20 characters';
+    } else if (mode === 'login') {
+      return null;
     }
 
     if (!password) return 'Password is required';

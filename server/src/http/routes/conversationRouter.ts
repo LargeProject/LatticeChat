@@ -1,8 +1,5 @@
 import { Router } from 'express';
-import {
-  handleGetConversation,
-  handleGetConversationMessages,
-} from '../services/conversationServices';
+import { handleGetConversation, handleGetConversationMessages } from '../services/conversationServices';
 
 const conversationRouter = Router({ mergeParams: true });
 

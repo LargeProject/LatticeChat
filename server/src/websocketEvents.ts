@@ -1,16 +1,23 @@
-import * as handlers from './db';
-import { EventType } from './lib/websockets';
+import { MessageService } from './services/websocketService';
+import { handleCreateMessage } from './websocketHandlers';
+import type { RegisteredEvent } from './lib/websocket/types';
 import * as payload from '@latticechat/shared';
+import { validateWSHandshake } from './util/ws';
 
-export const events: EventType[] = [
+export const events: RegisteredEvent[] = [
+  {
+    name: 'initHandshake',
+    payloadSchema: payload.initHandshake,
+    handler: validateWSHandshake,
+  },
   {
     name: 'createMessage',
     payloadSchema: payload.createMessage,
-    handler: handlers.createMessage,
+    handler: handleCreateMessage,
   },
   {
     name: 'createConversation',
     payloadSchema: payload.createConversation,
-    handler: handlers.createConversation,
+    handler: async (data, context) => MessageService.handleCreateConversation(data, context),
   },
 ];

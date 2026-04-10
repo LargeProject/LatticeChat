@@ -1,0 +1,50 @@
+name: Test
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start MongoDB
+        uses: supercharge/mongodb-github-action@1.12.1
+        with:
+          mongodb-version: '7.0'
+          mongodb-replica-set: rs0
+
+      - name: Enable Corepack (For yarn)
+        run: corepack enable
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "yarn"
+
+      - name: Install
+        run: yarn install --immutable
+
+      - name: Build Shared
+        run: yarn workspace @latticechat/shared build
+
+      - name: Run API Integration Tests
+        run: |
+          cd ./server
+          yarn vitest
+        env:
+          HOST: ${{ secrets.HOST }}
+          PORT: ${{ secrets.PORT }}
+          ALLOW_ORIGIN: ${{ secrets.ALLOW_ORIGIN }}
+          MONGO_URI: ${{ secrets.MONGO_URI }}
+          BETTER_AUTH_SECRET: '_'
+          SENDGRID_API_KEY: '_'
+

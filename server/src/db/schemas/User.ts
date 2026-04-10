@@ -4,17 +4,13 @@ import validator from 'validator';
 import { DBFieldAttribute } from '@better-auth/core/db';
 import { ObjectId } from 'mongodb';
 import { Account, Conversation, FriendRequest, User } from '../models';
+import { HttpErrors } from '../../util/error';
 
 export const userSchema = new Schema(
   {
-    username: {
+    name: {
       type: String,
       required: true,
-      unique: true,
-    },
-    displayUsername: {
-      type: String,
-      required: false,
       unique: true,
     },
     email: {
@@ -35,13 +31,13 @@ export const userSchema = new Schema(
       type: String,
       required: false,
     },
-    friends: [
+    friendIds: [
       {
         type: Schema.Types.ObjectId,
         ref: 'User',
       },
     ],
-    conversations: [
+    conversationIds: [
       {
         type: Schema.Types.ObjectId,
         ref: 'Conversation',
@@ -63,23 +59,32 @@ export const userSchema = new Schema(
   {
     methods: {
       addFriend: function (friendId: ObjectId) {
-        this.friends.push(friendId);
+        this.friendIds.push(friendId);
         this.save();
       },
       removeFriend: function (targetFriendId: ObjectId) {
-        this.friends = this.friends.filter(
-          (friendId) => !friendId.equals(targetFriendId),
-        );
+        this.friendIds = this.friendIds.filter((friendId) => !friendId.equals(targetFriendId));
         this.save();
       },
       hasFriend: function (targetFriendId: ObjectId) {
-        return this.friends.some((friendId) => friendId.equals(targetFriendId));
+        return this.friendIds.some((friendId) => friendId.equals(targetFriendId));
       },
       getFriendRequestTo: function (targetId: ObjectId) {
         return FriendRequest.findOne({
-          from: this._id,
-          to: targetId._id,
+          fromId: this._id,
+          toId: targetId._id,
         });
+      },
+      getAccount: async function () {
+        const account = await Account.findOne({
+          userId: this._id,
+        });
+
+        if (account == null) {
+          throw HttpErrors.ACCOUNT_NOT_FOUND;
+        }
+
+        return account;
       },
     },
   },
@@ -88,41 +93,31 @@ export const userSchema = new Schema(
 type User = InferSchemaType<typeof userSchema>;
 export type UserDocument = HydratedDocument<User>;
 
-userSchema.pre(
-  'deleteOne',
-  { document: true, query: false },
-  async function () {
-    // remove account
-    await Account.deleteOne({
-      userId: this._id,
-    });
+userSchema.pre('deleteOne', { document: true, query: false }, async function () {
+  // remove account
+  await Account.deleteOne({
+    userId: this._id,
+  });
 
-    // remove this user from all users friends list
-    await User.updateMany(
-      { friends: this._id },
-      { $pull: { friends: this._id } },
-    );
+  // remove this user from all users friends list
+  await User.updateMany({ friendIds: this._id }, { $pull: { friendIds: this._id } });
 
-    // delete all friend requests associated connected to this user
-    await FriendRequest.deleteMany({
-      $or: [{ from: this._id }, { to: this._id }],
-    });
+  // delete all friend requests associated connected to this user
+  await FriendRequest.deleteMany({
+    $or: [{ fromId: this._id }, { toId: this._id }],
+  });
 
-    // delete all private conversations that only have this user
-    await Conversation.deleteMany({
-      members: {
-        $all: [this._id],
-      },
-      owner: null,
-    });
+  // delete all private conversations that only have this user
+  await Conversation.deleteMany({
+    memberIds: {
+      $all: [this._id],
+    },
+    ownerId: null,
+  });
 
-    // remove this user from all conversations that include them
-    await Conversation.updateMany(
-      { members: this._id },
-      { $pull: { members: this._id } },
-    );
-  },
-);
+  // remove this user from all conversations that include them
+  await Conversation.updateMany({ memberIds: this._id }, { $pull: { memberIds: this._id } });
+});
 
 type UserAdditionalFields = {
   [x: string]: DBFieldAttribute;
@@ -141,12 +136,12 @@ export const authUserAdditionalFields: UserAdditionalFields = {
     required: false,
     input: true,
   },
-  friends: {
+  friendIds: {
     type: 'string[]',
     input: false,
     defaultValue: [],
   },
-  conversations: {
+  conversationIds: {
     type: 'string[]',
     input: false,
     defaultValue: [],
