@@ -54,8 +54,6 @@ const ChatRow = memo(function ChatRow({
   isSelected,
   onSelect,
 }: ChatRowProps) {
-  const { name } = useConversation(conversation);
-
   function onClick() {
     onSelect(conversation.id);
   }
@@ -109,7 +107,6 @@ export function ChatList({ onSelect }: ChatListProps) {
   });
 
   const [query, setQuery] = useState('');
-  const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
 
   const deferredQuery = useDeferredValue(query);
 
@@ -169,8 +166,8 @@ export function ChatList({ onSelect }: ChatListProps) {
               <li key={chat.id}>
                 <ChatRow
                   conversation={chat}
-                  isSelected={selectedChatId === chat.id}
-                  onSelect={setSelectedChatId}
+                  onSelect={onSelect}
+                  isSelected={false}
                 />
               </li>
             ))}

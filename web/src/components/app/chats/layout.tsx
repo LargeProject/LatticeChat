@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { ChatList } from './chat-list';
 import { ChatView } from './chat-view';
 import { UserInfoPanel } from './user-info';
 import { EmptyState } from './empty-state';
 import type { Conversation } from '#/lib/api/conversation';
+import { AppStateContext, useAppState } from '#/lib/context/AppStateContext';
 
 export type Chat = {
   id: string;
@@ -16,7 +17,7 @@ export type Chat = {
 const PANEL_BREAKPOINT = 1280;
 
 export default function ChatLayout() {
-  const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
+  const { convoId } = useAppState();
   const [isPanelOpen, setIsPanelOpen] = useState(true);
   const [userToggled, setUserToggled] = useState(false);
   const [isWideScreen, setIsWideScreen] = useState(() =>
@@ -76,6 +77,8 @@ export default function ChatLayout() {
           <ChatList onSelect={handleSelectChat} />
         </div>
       </aside>
+
+      {selectedChatId ? 'HIIHIH' : 'NONONOON'}
 
       <main className="flex min-w-0 flex-1 overflow-hidden">
         {!selectedChatId ? (

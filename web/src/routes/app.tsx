@@ -5,6 +5,7 @@ import ChatLayout from '#/components/app/chats/layout';
 import SettingsLayout from '#/components/app/settings/layout';
 import FriendsLayout from '#/components/app/friends/layout';
 import { useUser } from '#/lib/context/UserContext';
+import { AppStateProvider } from '#/lib/provider/AppProvider';
 
 type Section = 'chats' | 'friends' | 'calls' | 'settings';
 
@@ -28,10 +29,12 @@ function RouteComponent() {
 
   return (
     <main className="flex h-screen overflow-hidden bg-(--bg-base) text-(--sea-ink)">
-      <Sidebar
-        activeSection={activeSection}
-        onSelectSection={setActiveSection}
-      />
+      <AppStateProvider>
+        <Sidebar
+          activeSection={activeSection}
+          onSelectSection={setActiveSection}
+        />
+      </AppStateProvider>
       <div className="flex-1">{content}</div>
     </main>
   );
