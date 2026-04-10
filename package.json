@@ -8,7 +8,8 @@
     "server"
   ],
   "scripts": {
-    "dev": "concurrently \"yarn workspace server dev\" \"yarn workspace web dev\""
+    "dev": "concurrently \"yarn workspace server dev\" \"yarn workspace web dev\"",
+    "build": "yarn workspaces foreach --all -pt run build"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"
