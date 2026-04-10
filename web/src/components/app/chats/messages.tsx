@@ -3,9 +3,12 @@ import type { Message } from '#/lib/api/conversation';
 
 export type MessageRole = 'user' | 'assistant';
 
+import type { BasicUserInfo } from '#/lib/api/user';
+
 type MessageBubbleProps = {
   message: Message;
   isOwnMessage: boolean;
+  members?: BasicUserInfo[];
 };
 
 const bubbleBaseClass =
@@ -15,17 +18,55 @@ const userBubbleClass =
 const assistantBubbleClass =
   'bg-(--surface) text-(--text-primary) ring-(--line) rounded-bl-md';
 
+function Avatar({ name }: { name: string }) {
+  const initials = name
+    .split(' ')
+    .map((p) => p[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
+  return (
+    <div className="h-9 w-9 flex-none rounded-full bg-(--line) flex items-center justify-center text-xs font-semibold text-(--text-primary)">
+      {initials}
+    </div>
+  );
+}
+
 export const MessageBubble = memo(function MessageBubble({
   message,
   isOwnMessage,
+  members = [],
 }: MessageBubbleProps) {
   const bubbleClass = isOwnMessage ? userBubbleClass : assistantBubbleClass;
   const alignment = isOwnMessage ? 'justify-end' : 'justify-start';
+
+  const sender = members.find((m) => m.id === message.senderId);
+  const senderName = sender?.name ?? 'Unknown';
+
+  if (isOwnMessage) {
+    return (
+      <li className={`flex w-full ${alignment}`}>
+        <article className={`${bubbleBaseClass} ${bubbleClass}`}>
+          <p className="whitespace-pre-wrap wrap-break-word">{message.content}</p>
+        </article>
+      </li>
+    );
+  }
+
   return (
     <li className={`flex w-full ${alignment}`}>
-      <article className={`${bubbleBaseClass} ${bubbleClass}`}>
-        <p className="whitespace-pre-wrap wrap-break-word">{message.content}</p>
-      </article>
+      <div className="flex items-start gap-3">
+        <Avatar name={senderName} />
+        <div>
+          <div className="mb-1 flex items-center gap-2">
+            <span className="text-xs font-medium text-(--text-primary)">{senderName}</span>
+            <span className="text-xs text-(--text-secondary)">·</span>
+          </div>
+          <article className={`${bubbleBaseClass} ${bubbleClass}`}>
+            <p className="whitespace-pre-wrap wrap-break-word">{message.content}</p>
+          </article>
+        </div>
+      </div>
     </li>
   );
 });
@@ -33,6 +74,7 @@ export const MessageBubble = memo(function MessageBubble({
 type MessageListProps = {
   messages: Message[];
   currentUserId: string;
+  members?: BasicUserInfo[];
   className?: string;
   smoothScroll?: boolean;
 };
@@ -42,6 +84,7 @@ const SCROLL_THRESHOLD_PX = 80;
 export function MessageList({
   messages,
   currentUserId,
+  members = [],
   className = '',
   smoothScroll = true,
 }: MessageListProps) {
@@ -81,6 +124,7 @@ export function MessageList({
             key={message.id}
             message={message}
             isOwnMessage={message.senderId === currentUserId}
+            members={members}
           />
         ))}
       </ol>

@@ -119,7 +119,7 @@ export function ChatView({ conversationId, onTogglePanel }: ChatViewProps) {
         </div>
       </header>
 
-      <MessageList messages={allMessages} currentUserId={userInfo.data?.id || ''} />
+      <MessageList messages={allMessages} currentUserId={userInfo.data?.id || ''} members={conversation.members} />
 
       <div className="border-t border-(--line) bg-(--surface)">
         <ChatInput onSend={handleSend} />

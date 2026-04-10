@@ -32,14 +32,23 @@ const ChatRow = memo(function ChatRow({
       ].join(' ')}
       aria-current={isSelected ? 'page' : undefined}
     >
-      <img
-        // TODO: pull these in from use conversation, not chat
-        // src={chat.user.avatar}
-        // alt={`${chat.user.name} avatar`}
-        className="size-10 shrink-0 rounded-full object-cover ring-1 ring-black/5 dark:ring-white/10"
-        loading="lazy"
-        decoding="async"
-      />
+      <div className="relative flex shrink-0" style={{ width: 40 }}>
+        {conversation.members?.slice(0, 3).map((m, idx) => (
+          <div
+            key={m.id}
+            className="absolute inline-flex h-9 w-9 items-center justify-center rounded-full bg-(--line) text-xs font-semibold text-(--text-primary) ring-1"
+            style={{ left: idx * 16 }}
+            title={m.name}
+          >
+            {m.name
+              .split(' ')
+              .map((p) => p[0])
+              .slice(0, 2)
+              .join('')
+              .toUpperCase()}
+          </div>
+        ))}
+      </div>
 
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium text-(--text-primary)">
