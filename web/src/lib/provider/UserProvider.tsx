@@ -35,8 +35,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
       isLoading: false,
     });
 
-    refreshFriends();
-    refreshConversations();
     refreshFriends(data);
     refreshConversations(data);
     refreshFriendRequests();
@@ -44,8 +42,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   const refreshFriends = async (data: UserInfo | undefined = userInfo.data) => {
     console.log('Refreshing Friends...');
-    if (userInfo.data == null) return;
-    setFriends(await fetchFriends(userInfo.data.friendIds));
     if (data == null) return;
     setFriends(await fetchFriends(data.friendIds));
   };
