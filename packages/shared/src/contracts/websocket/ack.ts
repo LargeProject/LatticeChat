@@ -1,6 +1,5 @@
 import * as z from 'zod';
 
-// Standardized acknowledgement response for websocket events
 export const ackResponse = z.object({
   success: z.boolean(),
   userId: z.string().optional(),
