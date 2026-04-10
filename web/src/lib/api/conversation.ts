@@ -3,32 +3,37 @@ import { HttpError } from '#/lib/util/error.ts';
 import { getLocalJWT, getLocalUserId } from '#/lib/util/storage.ts';
 
 export type Conversation = {
-  id: string,
-  name: string,
-  ownerId?: string,
-  members: BasicUserInfo[]
-}
+  id: string;
+  name: string;
+  ownerId?: string;
+  members: BasicUserInfo[];
+};
 
 export type Message = {
-  id: string,
-  senderId: string,
-  conversationId: string,
-  content: string,
-  createdAt: Date,
-}
+  id: string;
+  senderId: string;
+  conversationId: string;
+  content: string;
+  createdAt: Date;
+};
 
 export async function fetchConversation(
   conversationId: string,
 ): Promise<Conversation | null> {
   const userId = getLocalUserId();
   const jwt = getLocalJWT();
+
   const response = await fetch(
-    import.meta.env.VITE_API_BASE_URL + '/users/' + userId + '/conversations/' + conversationId,
+    import.meta.env.VITE_API_BASE_URL +
+      '/users/' +
+      userId +
+      '/conversations/' +
+      conversationId,
     {
       method: 'GET',
       headers: {
-        'Authorization': 'Bearer ' + jwt,
-      }
+        Authorization: 'Bearer ' + jwt,
+      },
     },
   );
   const body = await response.json();
@@ -39,7 +44,7 @@ export async function fetchConversation(
   const rawConversation = body.conversation;
 
   let members: BasicUserInfo[] = [];
-  for (const memberId of rawConversation.members) {
+  for (const memberId of rawConversation.memberIds) {
     const member = await fetchBasicUserInfo(memberId);
     if (member != null) {
       members.push(member);
@@ -48,9 +53,10 @@ export async function fetchConversation(
 
   // set conversation name to receiving user if private
   let privateName = null;
-  if(rawConversation.owner == null) { // if conversation is private
-    const receivingMember = members.find(user => user.id != userId);
-    if(receivingMember != null) {
+  if (rawConversation.ownerId == null) {
+    // if conversation is private
+    const receivingMember = members.find((user) => user.id != userId);
+    if (receivingMember != null) {
       privateName = receivingMember.displayUsername;
     }
   }
@@ -58,17 +64,18 @@ export async function fetchConversation(
   return {
     id: rawConversation.id,
     name: privateName ?? rawConversation.name,
-    ownerId: rawConversation.owner,
-    members: members
+    ownerId: rawConversation.ownerId,
+    members: members,
   };
 }
 
-export async function fetchConversations(conversationIds: string[]): Promise<Conversation[]> {
-
+export async function fetchConversations(
+  conversationIds: string[],
+): Promise<Conversation[]> {
   const conversations: Conversation[] = [];
-  for(const conversationId of conversationIds) {
+  for (const conversationId of conversationIds) {
     const conversation = await fetchConversation(conversationId);
-    if(conversation != null) {
+    if (conversation != null) {
       conversations.push(conversation);
     }
   }
@@ -76,11 +83,19 @@ export async function fetchConversations(conversationIds: string[]): Promise<Con
   return conversations;
 }
 
-export async function fetchConversationMessages(conversationId: string): Promise<Message[]>{
+export async function fetchConversationMessages(
+  conversationId: string,
+): Promise<Message[]> {
   const userId = getLocalUserId();
   const jwt = getLocalJWT();
+
   const response = await fetch(
-    import.meta.env.VITE_API_BASE_URL + '/users/' + userId + '/conversations/' + conversationId + '/messages',
+    import.meta.env.VITE_API_BASE_URL +
+      '/users/' +
+      userId +
+      '/conversations/' +
+      conversationId +
+      '/messages',
     {
       method: 'GET',
       headers: {
@@ -102,8 +117,8 @@ export async function fetchConversationMessages(conversationId: string): Promise
       senderId: rawMessage.sender,
       conversationId: rawMessage.conversation,
       content: rawMessage.content,
-      createdAt: rawMessage.createdAt
-    }
+      createdAt: rawMessage.createdAt,
+    };
     messages.push(message);
   }
 

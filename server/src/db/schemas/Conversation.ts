@@ -2,12 +2,12 @@ import { Schema, Types } from 'mongoose';
 import { User } from '../models';
 
 export const messageSchema = new Schema({
-  sender: {
+  senderId: {
     type: Schema.Types.ObjectId,
     ref: 'User',
     required: true,
   },
-  conversation: {
+  conversationId: {
     type: Schema.Types.ObjectId,
     ref: 'Conversation',
     required: true,
@@ -36,7 +36,7 @@ export const messageSchema = new Schema({
 });
 
 export const conversationSchema = new Schema({
-  owner: {
+  ownerId: {
     type: Schema.Types.ObjectId,
     ref: 'User',
     required: false,
@@ -45,7 +45,7 @@ export const conversationSchema = new Schema({
     type: String,
     required: false,
   },
-  members: {
+  memberIds: {
     type: [
       {
         type: Schema.Types.ObjectId,
@@ -69,8 +69,8 @@ conversationSchema.pre(
     if (!this.isNew) return;
 
     await User.updateMany(
-      { _id: { $in: this.members } },
-      { $addToSet: { conversations: this._id } },
+      { _id: { $in: this.memberIds } },
+      { $addToSet: { conversationIds: this._id } },
     );
   },
 );
@@ -80,8 +80,8 @@ conversationSchema.pre(
   { document: true, query: false },
   async function () {
     await User.updateMany(
-      { conversations: this._id },
-      { $pull: { conversations: this._id } },
+      { conversationIds: this._id },
+      { $pull: { conversationIds: this._id } },
     );
   },
 );

@@ -42,17 +42,22 @@ export async function fetchUserInfo(): Promise<UserInfo | undefined> {
     username: userData.username,
     usernameDisplay: userData.usernameDisplay,
     biography: userData.biography,
-    friendIds: bufferArrayToHexStringArray(userData.friends),
-    conversationIds: bufferArrayToHexStringArray(userData.conversations),
+    friendIds: bufferArrayToHexStringArray(userData.friendIds),
+    conversationIds: bufferArrayToHexStringArray(userData.conversationIds),
     createdAt: userData.createdAt,
   };
 }
 
 export async function fetchBasicUserInfo(
-  userId: string, byName: boolean = false
+  userId: string,
+  byName: boolean = false,
 ): Promise<BasicUserInfo | undefined> {
   const response = await fetch(
-    import.meta.env.VITE_API_BASE_URL + '/users/' + userId + "?byName=" + byName,
+    import.meta.env.VITE_API_BASE_URL +
+      '/users/' +
+      userId +
+      '?byName=' +
+      byName,
     {
       method: 'GET',
     },

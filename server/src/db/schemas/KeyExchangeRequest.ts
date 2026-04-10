@@ -1,12 +1,12 @@
 import { Schema } from 'mongoose';
 
 export const keyExchangeRequestSchema = new Schema({
-  from: {
+  fromId: {
     type: Schema.Types.ObjectId,
     ref: 'User',
     required: true,
   },
-  to: {
+  toId: {
     type: Schema.Types.ObjectId,
     ref: 'User',
     required: true,

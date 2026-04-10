@@ -1,11 +1,4 @@
-import {
-  Account,
-  Conversation,
-  FriendRequest,
-  KeyExchangeRequest,
-  Message,
-  User,
-} from './models';
+import { Conversation, FriendRequest, KeyExchangeRequest, Message, User } from './models';
 import actions, { CreateConversation } from '@latticechat/shared';
 import { ErrorCodes, HttpError } from '../util/error';
 import { BasicUserInfo } from '../http/types';
@@ -19,11 +12,7 @@ export async function getConversation(conversationId: string) {
   const conversation = await Conversation.findById(conversationId);
 
   if (!conversation) {
-    throw new HttpError(
-      404,
-      ErrorCodes.CONVERSATION_NOT_FOUND,
-      'Conversation not found',
-    );
+    throw new HttpError(404, ErrorCodes.CONVERSATION_NOT_FOUND, 'Conversation not found');
   }
 
   return conversation;
@@ -34,27 +23,23 @@ export async function createConversation(data: actions.CreateConversation) {
   const owner = await User.findById(ownerId);
 
   const members = await User.find({ _id: { $in: memberIds } });
-  const name =
-    data.name ??
-    createConversationName(members.map((m) => m.displayUsername ?? m.username));
+  const name = data.name ?? createConversationName(members.map((m) => m.displayUsername ?? m.username));
 
   const conversation = await Conversation.create({
     ...(owner != null && { owner: owner._id }),
     name,
-    members: members.map((m) => m._id),
+    memberIds: members.map((m) => m._id),
   });
 
   return conversation;
 }
 
-export async function removePrivateConversation(
-  data: actions.RemovePrivateConversation,
-) {
+export async function removePrivateConversation(data: actions.RemovePrivateConversation) {
   const { memberIds } = data;
   const [memberId1, memberId2] = memberIds;
 
   const conversation = await Conversation.findOne({
-    members: {
+    memberIds: {
       $all: [memberId1, memberId2],
       $size: 2,
     },
@@ -68,7 +53,7 @@ export async function removePrivateConversation(
 }
 
 export async function getConversationMessages(conversationId: string) {
-  const messages = await Message.find({ conversation: conversationId });
+  const messages = await Message.find({ conversationId: conversationId });
   if (!messages) {
     return [];
   }
@@ -89,27 +74,20 @@ export async function createMessage(data: actions.CreateMessage) {
   }
 
   const message = await Message.create({
-    sender: sender._id,
-    conversation: conversation._id,
+    senderId: sender._id,
+    conversationId: conversation._id,
     content,
   });
 
   return message;
 }
 
-export async function findUser(
-  userId: string,
-  type: 'user' | 'target' = 'user',
-) {
+export async function findUser(userId: string, type: 'user' | 'target' = 'user') {
   const user = await User.findById(userId);
   if (user == null) {
     switch (type) {
       case 'target':
-        throw new HttpError(
-          404,
-          ErrorCodes.TARGET_NOT_FOUND,
-          'Target not found',
-        );
+        throw new HttpError(404, ErrorCodes.TARGET_NOT_FOUND, 'Target not found');
       case 'user':
         throw new HttpError(404, ErrorCodes.USER_NOT_FOUND, 'User not found');
     }
@@ -123,23 +101,15 @@ export async function createFriendRequest(senderId: string, targetId: string) {
   const target = await findUser(targetId, 'target');
 
   if (sender.hasFriend(target._id)) {
-    throw new HttpError(
-      409,
-      ErrorCodes.FRIEND_EXISTS,
-      'Already friends with this user',
-    );
+    throw new HttpError(409, ErrorCodes.FRIEND_EXISTS, 'Already friends with this user');
   }
 
   const friendRequest = await FriendRequest.findOne({
-    from: sender._id,
-    to: target._id,
+    fromId: sender._id,
+    toId: target._id,
   });
   if (friendRequest != null) {
-    throw new HttpError(
-      409,
-      ErrorCodes.FRIEND_REQUEST_EXISTS,
-      'Friend request already exists',
-    );
+    throw new HttpError(409, ErrorCodes.FRIEND_REQUEST_EXISTS, 'Friend request already exists');
   }
 
   const targetFriendRequest = await target.getFriendRequestTo(sender._id);
@@ -159,8 +129,8 @@ export async function createFriendRequest(senderId: string, targetId: string) {
     return null;
   } else {
     return await FriendRequest.create({
-      from: sender.id,
-      to: target.id,
+      fromId: sender.id,
+      toId: target.id,
     });
   }
 }
@@ -170,16 +140,12 @@ export async function removeFriendRequest(fromId: string, toId: string) {
   const target = await findUser(toId, 'target');
 
   const friendRequest = await FriendRequest.findOne({
-    from: sender._id,
-    to: target._id,
+    fromId: sender._id,
+    toId: target._id,
   });
 
   if (friendRequest == null) {
-    throw new HttpError(
-      404,
-      ErrorCodes.FRIEND_REQUEST_NOT_FOUND,
-      'Friend request not found',
-    );
+    throw new HttpError(404, ErrorCodes.FRIEND_REQUEST_NOT_FOUND, 'Friend request not found');
   }
 
   await friendRequest.deleteOne();
@@ -187,7 +153,7 @@ export async function removeFriendRequest(fromId: string, toId: string) {
 
 export async function getFriendRequests(userId: string) {
   const friendRequests = await FriendRequest.find({
-    $or: [{ from: userId }, { to: userId }],
+    $or: [{ fromId: userId }, { toId: userId }],
   });
 
   if (!friendRequests) {
@@ -247,9 +213,7 @@ export async function getBasicUserInfoById(userId: string) {
   return await getBasicUserInfo(user);
 }
 
-async function getBasicUserInfo(
-  user: UserDocument | null,
-): Promise<BasicUserInfo> {
+async function getBasicUserInfo(user: UserDocument | null): Promise<BasicUserInfo> {
   if (user == null) {
     throw new HttpError(404, ErrorCodes.USER_NOT_FOUND, 'User not found');
   }
@@ -263,38 +227,24 @@ async function getBasicUserInfo(
   };
 }
 
-export async function createKeyExchangeRequest(
-  fromId: string,
-  toId: string,
-  cipher: string,
-) {
+export async function createKeyExchangeRequest(fromId: string, toId: string, cipher: string) {
   const sender = await findUser(fromId, 'user');
   const target = await findUser(toId, 'target');
 
   const keyExchangeRequest = await KeyExchangeRequest.findOne({
     $or: [
-      {
-        from: sender.id,
-        to: target.id,
-      },
-      {
-        from: target.id,
-        to: sender.id,
-      },
+      { fromId: sender.id, toId: target.id },
+      { fromId: target.id, toId: sender.id },
     ],
   });
 
   if (keyExchangeRequest != null) {
-    throw new HttpError(
-      404,
-      ErrorCodes.KEY_EXCHANGE_REQUEST_EXISTS,
-      'Key exchange request exists',
-    );
+    throw new HttpError(404, ErrorCodes.KEY_EXCHANGE_REQUEST_EXISTS, 'Key exchange request exists');
   }
 
   await KeyExchangeRequest.create({
-    from: sender.id,
-    to: target.id,
+    fromId: sender.id,
+    toId: target.id,
     cipher: cipher,
   });
 }
@@ -303,7 +253,7 @@ export async function findKeyExchangeRequestsTo(userId: string) {
   const user = await findUser(userId);
 
   const keyExchangeRequests = await KeyExchangeRequest.find({
-    to: user._id,
+    toId: user._id,
   });
 
   if (!keyExchangeRequests) {
@@ -317,6 +267,6 @@ export async function deleteKeyExchangeRequestsTo(userId: string) {
   const user = await findUser(userId);
 
   await KeyExchangeRequest.deleteMany({
-    to: user.id,
+    toId: user.id,
   });
 }

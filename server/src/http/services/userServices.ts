@@ -1,9 +1,5 @@
 import type * as types from '../types';
-import {
-  deleteUser,
-  getBasicUserInfoById,
-  getBasicUserInfoByName,
-} from '../../db';
+import { deleteUser, getBasicUserInfoById, getBasicUserInfoByName } from '../../db';
 import { handleHttpError } from '../../util/error';
 
 const handleGetBasicUserInformation: types.Service = async (req, res) => {

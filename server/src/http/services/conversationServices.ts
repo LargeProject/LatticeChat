@@ -10,7 +10,7 @@ const handleGetConversation: Service = async (req: UserRequest, res) => {
   try {
     const conversation = await getConversation(conversationId);
     const userObjectId = new mongoose.Types.ObjectId(userId);
-    if (!conversation.members.includes(userObjectId)) {
+    if (!conversation.memberIds.includes(userObjectId)) {
       res.status(401).send({
         success: false,
         message: 'Not a member of the conversation',
@@ -27,17 +27,14 @@ const handleGetConversation: Service = async (req: UserRequest, res) => {
   }
 };
 
-const handleGetConversationMessages: Service = async (
-  req: UserRequest,
-  res,
-) => {
+const handleGetConversationMessages: Service = async (req: UserRequest, res) => {
   const userId = req.params.user_id?.toString() ?? '';
   const conversationId = req.params.conversation_id?.toString() ?? '';
 
   try {
     const conversation = await getConversation(conversationId);
     const userObjectId = new mongoose.Types.ObjectId(userId);
-    if (!conversation.members.includes(userObjectId)) {
+    if (!conversation.memberIds.includes(userObjectId)) {
       res.status(401).send({
         success: false,
         message: 'Not a member of the conversation',

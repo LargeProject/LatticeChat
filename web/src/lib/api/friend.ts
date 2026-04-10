@@ -3,19 +3,22 @@ import { HttpError } from '#/lib/util/error.ts';
 import { getLocalJWT, getLocalUserId } from '#/lib/util/storage.ts';
 
 export type FriendRequest = {
-  type: 'incoming' | 'outgoing'
+  type: 'incoming' | 'outgoing';
   associatedUser: BasicUserInfo;
-}
+};
 
 export async function fetchFriendRequests(): Promise<FriendRequest[]> {
   const senderId = getLocalUserId();
   const jwt = getLocalJWT();
   const response = await fetch(
-    import.meta.env.VITE_API_BASE_URL + '/users/' + senderId + '/friend-requests',
+    import.meta.env.VITE_API_BASE_URL +
+      '/users/' +
+      senderId +
+      '/friend-requests',
     {
       method: 'GET',
       headers: {
-        'Authorization': 'Bearer ' + jwt
+        Authorization: 'Bearer ' + jwt,
       },
     },
   );
@@ -27,21 +30,20 @@ export async function fetchFriendRequests(): Promise<FriendRequest[]> {
 
   const friendRequests: FriendRequest[] = [];
   for (const rawFriendRequest of body.friendRequests) {
-
     let requestType: 'incoming' | 'outgoing' | null = null;
     let associatedUser;
-    if(senderId == rawFriendRequest.from) {
+    if (senderId == rawFriendRequest.fromId) {
       requestType = 'outgoing';
-      associatedUser = await fetchBasicUserInfo(rawFriendRequest.to);
-    } else if (senderId == rawFriendRequest.to) {
+      associatedUser = await fetchBasicUserInfo(rawFriendRequest.toId);
+    } else if (senderId == rawFriendRequest.toId) {
       requestType = 'incoming';
-      associatedUser = await fetchBasicUserInfo(rawFriendRequest.from);
+      associatedUser = await fetchBasicUserInfo(rawFriendRequest.fromId);
     }
 
     const friendRequest: FriendRequest = {
       type: requestType ?? 'incoming',
       associatedUser: associatedUser!,
-    }
+    };
     friendRequests.push(friendRequest);
   }
 
@@ -52,13 +54,16 @@ export async function sendFriendRequest(targetId: string) {
   const senderId = getLocalUserId();
   const jwt = getLocalJWT();
 
-  const requestBody = { target_id: targetId }
+  const requestBody = { targetId: targetId };
   const response = await fetch(
-    import.meta.env.VITE_API_BASE_URL + '/users/' + senderId + '/friend-requests',
+    import.meta.env.VITE_API_BASE_URL +
+      '/users/' +
+      senderId +
+      '/friend-requests',
     {
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer ' + jwt,
+        Authorization: 'Bearer ' + jwt,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(requestBody),
@@ -71,13 +76,21 @@ export async function sendFriendRequest(targetId: string) {
   }
 }
 
-export async function removeFriendRequest(targetId: string, type: 'incoming' | 'outgoing') {
+export async function removeFriendRequest(
+  targetId: string,
+  type: 'incoming' | 'outgoing',
+) {
   const senderId = getLocalUserId();
   const jwt = getLocalJWT();
 
-  const requestBody = { target_id: targetId };
+  const requestBody = { targetId: targetId };
   const response = await fetch(
-    import.meta.env.VITE_API_BASE_URL + '/users/' + senderId + '/friend-requests' + '?type=' + type,
+    import.meta.env.VITE_API_BASE_URL +
+      '/users/' +
+      senderId +
+      '/friend-requests' +
+      '?type=' +
+      type,
     {
       method: 'DELETE',
       headers: {
@@ -98,12 +111,14 @@ export async function removeFriend(userId: string) {
   // TODO: implement remove friend api call
 }
 
-export async function fetchFriends(friendIds: string[]): Promise<BasicUserInfo[]> {
+export async function fetchFriends(
+  friendIds: string[],
+): Promise<BasicUserInfo[]> {
   let friends: BasicUserInfo[] = [];
   for (const friendId of friendIds) {
     const friend = await fetchBasicUserInfo(friendId);
 
-    if(friend != null) {
+    if (friend != null) {
       friends.push(friend);
     }
   }

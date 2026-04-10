@@ -13,19 +13,19 @@ export class HttpError extends Error {
 
 export const handleHttpError = (error: any, res: Response) => {
   if (error instanceof HttpError) {
-    res
-      .status(error.statusCode)
-      .send({ success: false, code: error.code, message: error.message });
+    res.status(error.statusCode).send({
+      success: false,
+      code: error.code,
+      message: error.message,
+    });
     return;
   }
 
-  res
-    .status(500)
-    .send({
-      success: false,
-      code: 'INTERNAL_ERROR',
-      message: 'Unknown Error: ' + error.message,
-    });
+  res.status(500).send({
+    success: false,
+    code: 'INTERNAL_ERROR',
+    message: 'Unknown Error: ' + error.message,
+  });
 };
 
 export class ErrorCodes {

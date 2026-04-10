@@ -1,16 +1,12 @@
 import { Service, UserRequest } from '../types';
 import {
-  createConversation,
   createFriendRequest,
   getFriendRequests,
   removeFriend,
   removeFriendRequest,
   removePrivateConversation,
 } from '../../db';
-import {
-  CreateConversation,
-  RemovePrivateConversation,
-} from '@latticechat/shared';
+import { RemovePrivateConversation } from '@latticechat/shared';
 import { handleHttpError } from '../../util/error';
 
 const handleGetFriendRequests: Service = async (req: UserRequest, res) => {
@@ -31,7 +27,7 @@ const handleGetFriendRequests: Service = async (req: UserRequest, res) => {
 
 const handleAddFriendRequest: Service = async (req: UserRequest, res) => {
   const senderId = req.params.user_id?.toString() ?? '';
-  const targetId = req.body.target_id ?? '';
+  const targetId = req.body.targetId ?? '';
 
   try {
     const friendRequest = await createFriendRequest(senderId, targetId);
@@ -55,7 +51,7 @@ const handleRemoveFriendRequest: Service = async (req: UserRequest, res) => {
   const type = req.query.type;
 
   const senderId = req.params.user_id?.toString() ?? '';
-  const targetId = req.body.target_id ?? '';
+  const targetId = req.body.targetId ?? '';
 
   let fromId = '';
   let toId = '';
@@ -86,7 +82,7 @@ const handleRemoveFriendRequest: Service = async (req: UserRequest, res) => {
 
 const handleRemoveFriend: Service = async (req: UserRequest, res) => {
   const senderId = req.params.user_id?.toString() ?? '';
-  const targetId = req.body.target_id ?? '';
+  const targetId = req.body.targetId ?? '';
 
   try {
     await removeFriend(senderId, targetId);
@@ -105,9 +101,4 @@ const handleRemoveFriend: Service = async (req: UserRequest, res) => {
   }
 };
 
-export {
-  handleGetFriendRequests,
-  handleAddFriendRequest,
-  handleRemoveFriendRequest,
-  handleRemoveFriend,
-};
+export { handleGetFriendRequests, handleAddFriendRequest, handleRemoveFriendRequest, handleRemoveFriend };

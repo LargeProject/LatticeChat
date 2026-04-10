@@ -1,11 +1,6 @@
 import type * as types from '../types';
 import { handleHttpError } from '../../util/error';
-import {
-  createKeyExchangeRequest,
-  deleteKeyExchangeRequestsTo,
-  findKeyExchangeRequestsTo,
-  findUser,
-} from '../../db';
+import { createKeyExchangeRequest, deleteKeyExchangeRequestsTo, findKeyExchangeRequestsTo, findUser } from '../../db';
 
 const handleSetPublicKey: types.Service = async (req, res) => {
   const userId = req.params.user_id?.toString() ?? '';
@@ -45,7 +40,7 @@ const handleGetPublicKey: types.Service = async (req, res) => {
 
 const handleCreateKeyExchangeRequest: types.Service = async (req, res) => {
   const fromId = req.params.user_id?.toString() ?? '';
-  const toId = req.body.target_id ?? '';
+  const toId = req.body.targetId ?? '';
   const cipher = req.body.cipher ?? '';
 
   try {
@@ -61,17 +56,15 @@ const handleCreateKeyExchangeRequest: types.Service = async (req, res) => {
 };
 
 const handleGetKeyExchangeRequests: types.Service = async (req, res) => {
-  const toId = req.params.user_id?.toString() ?? '';
+  const targetId = req.params.user_id?.toString() ?? '';
 
   try {
-    const keyExchangeRequests = await findKeyExchangeRequestsTo(toId);
+    const keyExchangeRequests = await findKeyExchangeRequestsTo(targetId);
 
     res.status(200).send({
       success: true,
       message: 'Key exchange requests found',
-      keyExchangeRequests: keyExchangeRequests.map((keyExchangeRequest) =>
-        keyExchangeRequest.toObject(),
-      ),
+      keyExchangeRequests: keyExchangeRequests.map((keyExchangeRequest) => keyExchangeRequest.toObject()),
     });
   } catch (error) {
     handleHttpError(error, res);

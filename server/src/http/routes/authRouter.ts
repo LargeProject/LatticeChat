@@ -1,9 +1,5 @@
 import { Router } from 'express';
-import {
-  handleEmailTaken,
-  handleEmailVerified,
-  handleUsernameTaken,
-} from '../services/authServices';
+import { handleEmailTaken, handleEmailVerified, handleUsernameTaken } from '../services/authServices';
 
 const authRouter = Router();
 

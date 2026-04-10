@@ -1,16 +1,16 @@
-import { Schema } from "mongoose";
+import { Schema } from 'mongoose';
 
 export const friendRequestSchema = new Schema({
-  from: {
+  fromId: {
     type: Schema.Types.ObjectId,
-    ref: "User",
+    ref: 'User',
     required: true,
   },
-  to: {
+  toId: {
     type: Schema.Types.ObjectId,
-    ref: "User",
+    ref: 'User',
     required: true,
-  }
+  },
 });
 
-friendRequestSchema.index({ from: 1, to: 1 }, {unique: true});
+friendRequestSchema.index({ fromId: 1, toId: 1 }, { unique: true });
