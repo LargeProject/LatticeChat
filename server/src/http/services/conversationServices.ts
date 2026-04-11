@@ -1,14 +1,14 @@
 import { Service, UserRequest } from '../types';
 import { handleHttpError } from '../../util/error';
-import { getConversation, getConversationMessages } from '../../db';
 import mongoose from 'mongoose';
+import {ConversationService} from "../../db";
 
 const handleGetConversation: Service = async (req: UserRequest, res) => {
   const userId = req.params.user_id?.toString() ?? '';
   const conversationId = req.params.conversation_id?.toString() ?? '';
 
   try {
-    const conversation = await getConversation(conversationId);
+    const conversation = await ConversationService.getConversation(conversationId);
     if (!conversation.hasMember(userId)) {
       res.status(401).send({
         success: false,
@@ -31,7 +31,8 @@ const handleGetConversationMessages: Service = async (req: UserRequest, res) => 
   const conversationId = req.params.conversation_id?.toString() ?? '';
 
   try {
-    const conversation = await getConversation(conversationId);
+    // use hasMember here
+    const conversation = await ConversationService.getConversation(conversationId);
     const userObjectId = new mongoose.Types.ObjectId(userId);
     if (!conversation.memberIds.includes(userObjectId)) {
       res.status(401).send({
@@ -40,7 +41,7 @@ const handleGetConversationMessages: Service = async (req: UserRequest, res) => 
       });
     }
 
-    const messages = await getConversationMessages(conversationId);
+    const messages = await ConversationService.getConversationMessages(conversationId);
 
     res.status(200).send({
       success: true,

@@ -1,5 +1,5 @@
 import type * as types from '../types';
-import { ConversationService } from '../../db';
+import { ConversationService, UserService } from '../../db';
 import { handleHttpError } from '../../util/error';
 import { Conversation, User } from '../../db/models';
 import * as contracts from '@latticechat/shared';
@@ -11,9 +11,9 @@ const handleGetBasicUserInformation: types.Service = async (req, res) => {
   try {
     let userInformation;
     if (byName === 'true') {
-      userInformation = await getBasicUserInfoByName(userId);
+      userInformation = await UserService.getBasicUserInfoByName(userId);
     } else if (byName === 'false') {
-      userInformation = await getBasicUserInfoById(userId);
+      userInformation = await UserService.getBasicUserInfoById(userId);
     }
 
     res.status(200).send({
@@ -30,7 +30,7 @@ const handleGetCurrentUser: types.Service = async (req, res) => {
   const userId = (req as any).userInfo?.id?.toString() ?? '';
 
   try {
-    const user = await findUser(userId);
+    const user = await UserService.findUser(userId);
     if (!user) {
       return res.status(404).send({
         success: false,
@@ -42,14 +42,13 @@ const handleGetCurrentUser: types.Service = async (req, res) => {
     const conversationIds = user.conversationIds ?? [];
     const conversations = await Promise.all(
       conversationIds.map(async (convId) => {
-        const conv = await Conversation.findById(convId);
-        if (!conv) return null;
+        const conv = await ConversationService.getConversation(convId.toString());
 
         const members = await User.find({ _id: { $in: conv.memberIds ?? [] } });
         return {
           id: conv._id.toString(),
           name: conv.name,
-          ownerId: conv.ownerId?.toString(),
+          ownerId: conv.ownerId?.toString() ?? undefined,
           members: members.map((m) => ({
             id: m._id.toString(),
             name: m.name,
@@ -92,7 +91,7 @@ const handleDeleteUser: types.Service = async (req, res) => {
   const userId = req.params.user_id?.toString() ?? '';
 
   try {
-    await deleteUser(userId);
+    await UserService.deleteUser(userId);
     res.status(200).send({
       success: true,
       message: 'User successfully deleted',

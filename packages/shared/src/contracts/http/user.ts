@@ -5,8 +5,7 @@ import * as z from 'zod';
  */
 export const basicUserInfo = z.object({
   id: z.string().nonempty(),
-  username: z.string().nonempty(),
-  displayUsername: z.string().nullable().optional(),
+  name: z.string().nonempty(),
   biography: z.string().nullable().optional(),
   createdAt: z.coerce.date(),
 });
@@ -28,8 +27,7 @@ export type Conversation = z.infer<typeof conversation>;
  */
 export const userInfo = z.object({
   id: z.string().nonempty(),
-  username: z.string().nonempty(),
-  displayUsername: z.string().nullable().optional(),
+  name: z.string().nonempty(),
   email: z.string().email(),
   biography: z.string().nullable().optional(),
   createdAt: z.coerce.date(),

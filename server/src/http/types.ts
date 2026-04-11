@@ -5,11 +5,3 @@ export type Service = (req: Request, res: Response) => void;
 
 // TODO: expand when all user fields are determined
 export type UserRequest = Request & { userInfo?: any };
-
-// TODO: create type in shared directory
-export type BasicUserInfo = {
-  id: string;
-  name: string;
-  biography: string;
-  createdAt: Date;
-};

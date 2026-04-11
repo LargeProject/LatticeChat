@@ -4,7 +4,7 @@ import validator from 'validator';
 import { DBFieldAttribute } from '@better-auth/core/db';
 import { ObjectId } from 'mongodb';
 import { Account, Conversation, FriendRequest, User } from '../models';
-import { HttpErrors } from '../../util/error';
+import { AccountNotFoundError } from '../../util/error';
 
 export const userSchema = new Schema(
   {
@@ -81,7 +81,7 @@ export const userSchema = new Schema(
         });
 
         if (account == null) {
-          throw HttpErrors.ACCOUNT_NOT_FOUND;
+          throw new AccountNotFoundError();
         }
 
         return account;

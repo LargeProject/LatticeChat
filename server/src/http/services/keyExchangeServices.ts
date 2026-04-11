@@ -1,13 +1,13 @@
 import type * as types from '../types';
 import { handleHttpError } from '../../util/error';
-import { createKeyExchangeRequest, deleteKeyExchangeRequestsTo, findKeyExchangeRequestsTo, findUser } from '../../db';
+import { UserService } from '../../db';
 
 const handleSetPublicKey: types.Service = async (req, res) => {
   const userId = req.params.user_id?.toString() ?? '';
   const publicKey = req.body.publicKey;
 
   try {
-    const user = await findUser(userId);
+    const user = await UserService.findUser(userId);
     const account = await user.getAccount();
     account.setPublicKey(publicKey);
 
@@ -24,7 +24,7 @@ const handleGetPublicKey: types.Service = async (req, res) => {
   const userId = req.params.user_id?.toString() ?? '';
 
   try {
-    const user = await findUser(userId);
+    const user = await UserService.findUser(userId);
     const account = await user.getAccount();
     const publicKey = account.publicKey;
 
@@ -44,7 +44,7 @@ const handleCreateKeyExchangeRequest: types.Service = async (req, res) => {
   const cipher = req.body.cipher ?? '';
 
   try {
-    await createKeyExchangeRequest(fromId, toId, cipher);
+    await UserService.createKeyExchangeRequest(fromId, toId, cipher);
 
     res.status(200).send({
       success: true,
@@ -59,7 +59,7 @@ const handleGetKeyExchangeRequests: types.Service = async (req, res) => {
   const targetId = req.params.user_id?.toString() ?? '';
 
   try {
-    const keyExchangeRequests = await findKeyExchangeRequestsTo(targetId);
+    const keyExchangeRequests = await UserService.findKeyExchangeRequestsTo(targetId);
 
     res.status(200).send({
       success: true,
@@ -75,7 +75,7 @@ const handleDeleteKeyExchangeRequests: types.Service = async (req, res) => {
   const toId = req.params.user_id?.toString() ?? '';
 
   try {
-    await deleteKeyExchangeRequestsTo(toId);
+    await UserService.deleteKeyExchangeRequestsTo(toId);
 
     res.status(200).send({
       success: true,

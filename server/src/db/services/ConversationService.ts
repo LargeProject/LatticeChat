@@ -1,13 +1,12 @@
 import type * as actions from '@latticechat/shared';
 import { Conversation, Message, User } from '../models';
-
-export const ConversationServiceErrors = {
-  CONVERSATION_NOT_FOUND: 'Conversation not found',
-  CANNOT_ADD_TO_DM: 'Cannot add members to a direct message.',
-  NOT_A_MEMBER: 'You are not a member of this conversation',
-  NOT_FRIENDS: 'Target user is not your friend',
-  ALREADY_MEMBER: 'User is already a member of this conversation',
-};
+import {
+  ConversationNotFoundError,
+  DirectMessageInviteError,
+  MemberExistsError,
+  NotFriendsError,
+  NotMemberError,
+} from '../../util/error';
 
 function createConversationName(memberNames: string[]) {
   return memberNames.join(', ');
@@ -24,7 +23,7 @@ export class ConversationService {
     const conversation = await Conversation.findById(conversationId);
 
     if (!conversation) {
-      throw new Error(ConversationServiceErrors.CONVERSATION_NOT_FOUND);
+      throw new ConversationNotFoundError();
     }
 
     return conversation;
@@ -58,7 +57,7 @@ export class ConversationService {
     });
 
     if (!conversation) {
-      throw new Error(ConversationServiceErrors.CONVERSATION_NOT_FOUND);
+      throw new ConversationNotFoundError();
     }
 
     await conversation.deleteOne();
@@ -68,13 +67,13 @@ export class ConversationService {
     const conversation = await this.getConversation(data.conversationId);
 
     if (conversation.isDirectMessage) {
-      throw new Error(ConversationServiceErrors.CANNOT_ADD_TO_DM);
+      throw new DirectMessageInviteError();
     }
 
     // Ensure requester is a member of the conversation
     const isRequesterMember = conversation.memberIds.some((m: any) => m.toString() === data.adderId);
     if (!isRequesterMember) {
-      throw new Error(ConversationServiceErrors.NOT_A_MEMBER);
+      throw new NotMemberError();
     }
 
     // Import UserService locally to avoid circular deps
@@ -84,12 +83,12 @@ export class ConversationService {
 
     // Only allow adding users who are friends of the adder
     if (!adder.hasFriend(target._id)) {
-      throw new Error(ConversationServiceErrors.NOT_FRIENDS);
+      throw new NotFriendsError();
     }
 
     // If already a member, noop
     if (conversation.memberIds.some((m: any) => m.toString() === target._id.toString())) {
-      throw new Error(ConversationServiceErrors.ALREADY_MEMBER);
+      throw new MemberExistsError();
     }
 
     // Add member to conversation and add conversation to user's conversationIds

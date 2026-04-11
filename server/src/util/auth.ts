@@ -4,7 +4,7 @@ import mongoose from 'mongoose';
 import { betterAuth } from 'better-auth';
 import { bearer, emailOTP } from 'better-auth/plugins';
 import { mongodbAdapter } from '@better-auth/mongo-adapter';
-import { connectMongoDB, isEmailTaken, isUsernameTaken } from '../db';
+import { connectMongoDB, UserService } from '../db';
 import { sendDuplicateEmailNotification, sendEmailVerificationOTP, sendForgetPasswordOTP } from './mailer';
 import { createAuthMiddleware } from '@better-auth/core/api';
 import { authUserAdditionalFields } from '../db/schemas/User';
@@ -76,7 +76,7 @@ const auth = betterAuth({
       if (ctx.path == '/sign-up/email') {
         // email validation
         const email = ctx.body.email;
-        if (await isEmailTaken(email)) {
+        if (await UserService.isEmailTaken(email)) {
           throw ctx.error(400, {
             code: 'EMAIL_TAKEN',
             message: 'Email is taken',
@@ -100,7 +100,7 @@ const auth = betterAuth({
           });
         }
 
-        if (await isUsernameTaken(name)) {
+        if (await UserService.isUsernameTaken(name)) {
           throw ctx.error(400, {
             code: 'USERNAME_TAKEN',
             message: 'Username is taken',

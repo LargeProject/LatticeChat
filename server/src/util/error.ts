@@ -1,18 +1,118 @@
 import type { Response } from 'express';
 
-export class HttpError extends Error {
-  statusCode: number;
-  code: string;
+export class TypeError extends Error {
+  public readonly statusCode: number;
+  public readonly code: string;
 
   constructor(statusCode: number = 500, code: string, message: string) {
     super(message);
     this.code = code;
     this.statusCode = statusCode;
   }
+
+  public toString() {
+    return `${this.code} Error: ${this.message}\n`;
+  }
+}
+
+export class AccountNotFoundError extends TypeError {
+  constructor() { 
+    super(404, 'ACCOUNT_NOT_FOUND', 'Account not found'); 
+  }
+}
+
+export class UserNotFoundError extends TypeError {
+ constructor() { 
+   super(404, `USER_NOT_FOUND`, `User not found`); 
+ }
+}
+
+export class TargetNotFoundError extends TypeError {
+  constructor() {
+    super(404, `TARGET_NOT_FOUND`, `Target not found`);
+  }
+}
+
+export class FriendNotFoundError extends TypeError {
+  constructor() {
+    super(404, 'FRIEND_NOT_FOUND', 'Friend not found');
+  }
+}
+
+export class EmailNotFoundError extends TypeError {
+  constructor() {
+    super(404, 'EMAIL_NOT_FOUND', 'Email not found');
+  }
+}
+
+export class ConversationNotFoundError extends TypeError {
+  constructor() {
+    super(404, 'CONVERSATION_NOT_FOUND', 'Conversation not found');
+  }
+}
+
+export class FriendRequestNotFoundError extends TypeError {
+  constructor() {
+    super(404, 'FRIEND_REQUEST_NOT_FOUND', 'Friend request not found');
+  }
+}
+
+export class FriendRequestExistsError extends TypeError {
+  constructor() {
+    super(409, 'FRIEND_REQUEST_EXISTS', 'Friend request already exists');
+  }
+}
+
+export class FriendExistsError extends TypeError {
+  constructor() {
+    super(409, 'FRIEND_EXISTS', 'Already friends with this user');
+  }
+}
+
+export class SelfFriendRequestError extends TypeError {
+  constructor() {
+    super(409, 'SELF_FRIEND_REQUEST', "Friend requests to one's own account are not allowed");
+  }
+}
+
+export class KeyExchangeExistsError extends TypeError {
+  constructor() {
+    super(409, 'KEY_EXCHANGE_REQUEST_EXISTS', 'Key exchange request exists');
+  }
+}
+
+export class KeyExchangeNotFoundError extends TypeError {
+  constructor() {
+    super(404, 'KEY_EXCHANGE_REQUEST_NOT_FOUND', 'Key exchange not found');
+  }
+}
+
+export class DirectMessageInviteError extends TypeError {
+  constructor() {
+    super(403, 'DIRECT_MESSAGE_INVITE', 'Members cannot be added to a direct message');
+  }
+}
+
+export class NotMemberError extends TypeError {
+  constructor() {
+    super(403, 'NOT_MEMBER', 'Not a member of this conversation');
+  }
+}
+
+export class NotFriendsError extends TypeError {
+  constructor() {
+    super(403, 'NOT_FRIENDS', 'Target user is not your friend');
+  }
+}
+
+export class MemberExistsError extends TypeError {
+  constructor() {
+    super(403, 'MEMBER_EXISTS', 'Member already exists in this conversation');
+  }
 }
 
 export const handleHttpError = (error: any, res: Response) => {
-  if (error instanceof HttpError) {
+  if (error instanceof TypeError) {
     res.status(error.statusCode).send({
       success: false,
       code: error.code,
@@ -27,25 +127,3 @@ export const handleHttpError = (error: any, res: Response) => {
     message: 'Unknown Error: ' + error.message,
   });
 };
-
-export class HttpErrors {
-  static readonly ACCOUNT_NOT_FOUND = new HttpError(404, 'ACCOUNT_NOT_FOUND', 'Account not found');
-  static readonly USER_NOT_FOUND = new HttpError(404, 'USER_NOT_FOUND', 'User not found');
-  static readonly TARGET_NOT_FOUND = new HttpError(404, 'TARGET_NOT_FOUND', 'Target not found');
-  static readonly FRIEND_NOT_FOUND = new HttpError(404, 'FRIEND_NOT_FOUND', 'Friend not found');
-  static readonly EMAIL_NOT_FOUND = new HttpError(404, 'EMAIL_NOT_FOUND', 'Email not found');
-  static readonly FRIEND_REQUEST_EXISTS = new HttpError(409, 'FRIEND_REQUEST_EXISTS', 'Friend request already exists');
-  static readonly FRIEND_REQUEST_NOT_FOUND = new HttpError(404, 'FRIEND_REQUEST_NOT_FOUND', 'Friend request not found');
-  static readonly FRIEND_EXISTS = new HttpError(409, 'FRIEND_EXISTS', 'Already friends with this user');
-  static readonly SELF_FRIEND_REQUEST = new HttpError(
-    409,
-    'SELF_FRIEND_REQUEST',
-    "Friend requests to one's own account are not allowed",
-  );
-  static readonly CONVERSATION_NOT_FOUND = new HttpError(404, 'CONVERSATION_NOT_FOUND', 'Conversation not found');
-  static readonly KEY_EXCHANGE_REQUEST_EXISTS = new HttpError(
-    404,
-    'KEY_EXCHANGE_REQUEST_EXISTS',
-    'Key exchange request exists',
-  );
-}

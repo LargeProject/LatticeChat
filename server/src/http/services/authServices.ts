@@ -1,12 +1,12 @@
 import type { Service } from '../types';
-import { isEmailTaken, isEmailVerified, isUsernameTaken } from '../../db';
 import { handleHttpError } from '../../util/error';
+import {UserService} from "../../db";
 
 const handleEmailTaken: Service = async (req, res) => {
   const email = (req.body?.email as string) ?? '';
 
   try {
-    const isTaken = await isEmailTaken(email);
+    const isTaken = await UserService.isEmailTaken(email);
     res.status(200).send({
       isTaken: isTaken,
     });
@@ -19,7 +19,7 @@ const handleUsernameTaken: Service = async (req, res) => {
   const username = (req.query?.username as string) ?? '';
 
   try {
-    const isTaken = await isUsernameTaken(username);
+    const isTaken = await UserService.isUsernameTaken(username);
     res.status(200).send({
       isTaken: isTaken,
     });
@@ -32,7 +32,7 @@ const handleEmailVerified: Service = async (req, res) => {
   const email = (req.body?.email as string) ?? '';
 
   try {
-    const isVerified = await isEmailVerified(email);
+    const isVerified = await UserService.isEmailVerified(email);
     res.status(200).send({
       isVerified: isVerified,
     });

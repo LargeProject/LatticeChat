@@ -1,19 +1,14 @@
 import type { CreateConversation } from '@latticechat/shared';
-import { FriendRequest, User } from '../models';
+import { FriendRequest, KeyExchangeRequest, User } from '../models';
 import { ConversationService } from './ConversationService';
-// import type { UserDocument } from './schemas/User'; // Commented out, not found
-
-export const UserServiceErrors = {
-  USER_NOT_FOUND: 'User not found',
-  TARGET_NOT_FOUND: 'Target user not found',
-  SELF_FRIEND_REQUEST: 'Cannot send friend request to yourself',
-  FRIEND_EXISTS: 'Friend already exists',
-  FRIEND_REQUEST_EXISTS: 'Friend request already exists',
-  FRIEND_REQUEST_NOT_FOUND: 'Friend request not found',
-  FRIEND_NOT_FOUND: 'Friend not found',
-  EMAIL_NOT_FOUND: 'Email not found',
-  KEY_EXCHANGE_REQUEST_EXISTS: 'Key exchange request already exists',
-};
+import {
+  EmailNotFoundError,
+  FriendExistsError, FriendNotFoundError, FriendRequestExistsError,
+  FriendRequestNotFoundError, KeyExchangeExistsError, KeyExchangeNotFoundError,
+  SelfFriendRequestError,
+  TargetNotFoundError,
+  UserNotFoundError,
+} from '../../util/error';
 
 export class UserService {
   static async findUser(userId: string, type: 'user' | 'target' = 'user') {
@@ -21,9 +16,9 @@ export class UserService {
     if (user == null) {
       switch (type) {
         case 'target':
-          throw new Error(UserServiceErrors.TARGET_NOT_FOUND);
+          throw new UserNotFoundError();
         case 'user':
-          throw new Error(UserServiceErrors.USER_NOT_FOUND);
+          throw new TargetNotFoundError();
       }
     }
 
@@ -35,16 +30,16 @@ export class UserService {
     const target = await this.findUser(targetId, 'target');
 
     if (sender._id.equals(target._id)) {
-      throw new Error(UserServiceErrors.SELF_FRIEND_REQUEST);
+      throw new SelfFriendRequestError();
     }
 
     if (sender.hasFriend(target._id)) {
-      throw new Error(UserServiceErrors.FRIEND_EXISTS);
+      throw new FriendExistsError();
     }
 
-    const friendRequest = await FriendRequest.findOne({ fromId: sender._id, toId: target._id });
+    const friendRequest = await sender.getFriendRequestTo(target._id);
     if (friendRequest != null) {
-      throw new Error(UserServiceErrors.FRIEND_REQUEST_EXISTS);
+      throw new FriendRequestExistsError();
     }
 
     const targetFriendRequest = await target.getFriendRequestTo(sender._id);
@@ -73,7 +68,7 @@ export class UserService {
 
     const friendRequest = await FriendRequest.findOne({ fromId: sender._id, toId: target._id });
     if (friendRequest == null) {
-      throw new Error(UserServiceErrors.FRIEND_REQUEST_NOT_FOUND);
+      throw new FriendRequestNotFoundError();
     }
 
     await friendRequest.deleteOne();
@@ -92,7 +87,7 @@ export class UserService {
     const target = await this.findUser(targetId, 'target');
 
     if (!source.hasFriend(target._id)) {
-      throw new Error(UserServiceErrors.FRIEND_NOT_FOUND);
+      throw new FriendNotFoundError();
     }
 
     source.removeFriend(target._id);
@@ -102,7 +97,7 @@ export class UserService {
   static async isEmailVerified(email: string) {
     const user = await User.findOne({ email: email });
     if (user == null) {
-      throw new Error(UserServiceErrors.EMAIL_NOT_FOUND);
+      throw new EmailNotFoundError();
     }
 
     return user.emailVerified;
@@ -135,7 +130,7 @@ export class UserService {
 
   static getBasicUserInfo(user: any): any {
     if (user == null) {
-      throw new Error(UserServiceErrors.USER_NOT_FOUND);
+      throw new UserNotFoundError();
     }
 
     return {
@@ -150,33 +145,42 @@ export class UserService {
     const sender = await this.findUser(fromId, 'user');
     const target = await this.findUser(toId, 'target');
 
-    // KeyExchangeRequest model not found, skipping related logic
-    // const keyExchangeRequest = await KeyExchangeRequest.findOne({
-    //   $or: [
-    //     { fromId: sender.id, toId: target.id },
-    //     { fromId: target.id, toId: sender.id },
-    //   ],
-    // });
+    const keyExchangeRequest = await KeyExchangeRequest.findOne({
+      $or: [
+        { fromId: sender.id, toId: target.id },
+        { fromId: target.id, toId: sender.id },
+      ],
+    });
 
-    // if (keyExchangeRequest != null) {
-    //   throw new Error(UserServiceErrors.KEY_EXCHANGE_REQUEST_EXISTS);
-    // }
+    if (keyExchangeRequest != null) {
+      throw new KeyExchangeExistsError();
+    }
 
-    // await KeyExchangeRequest.create({
-    //   fromId: sender.id,
-    //   toId: target.id,
-    //   cipher: cipher,
-    // });
+    await KeyExchangeRequest.create({
+      fromId: sender.id,
+      toId: target.id,
+      cipher: cipher,
+    });
     return;
   }
 
   static async findKeyExchangeRequestsTo(userId: string) {
-    // KeyExchangeRequest model not found, returning empty array
-    return [];
+    const user = await this.findUser(userId);
+
+    const keyExchangeRequests = await KeyExchangeRequest.find({
+      toId: user._id,
+    });
+    if(!keyExchangeRequests) {
+      throw new KeyExchangeNotFoundError();
+    }
+
+    return keyExchangeRequests;
   }
 
   static async deleteKeyExchangeRequestsTo(userId: string) {
-    // KeyExchangeRequest model not found, skipping
+    const user = await this.findUser(userId);
+
+    await KeyExchangeRequest.deleteMany({ toId: user.id });
     return;
   }
 }

@@ -1,22 +1,15 @@
 import type { Service, UserRequest } from '../types';
-import {
-  createFriendRequest,
-  getFriendRequests,
-  removeFriend,
-  removeFriendRequest,
-  removePrivateConversation,
-} from '../../db';
 import type {
-  CreateConversation,
   RemovePrivateConversation,
 } from '@latticechat/shared';
 import { handleHttpError } from '../../util/error';
+import {ConversationService, UserService} from "../../db";
 
 const handleGetFriendRequests: Service = async (req: UserRequest, res) => {
   const userId = req.params.user_id?.toString() ?? '';
 
   try {
-    const friendRequests = await getFriendRequests(userId);
+    const friendRequests = await UserService.getFriendRequests(userId);
 
     res.status(200).send({
       success: true,
@@ -33,7 +26,7 @@ const handleAddFriendRequest: Service = async (req: UserRequest, res) => {
   const targetId = req.body.targetId ?? '';
 
   try {
-    const friendRequest = await createFriendRequest(senderId, targetId);
+    const friendRequest = await UserService.createFriendRequest(senderId, targetId);
     if (!friendRequest) {
       res.status(200).send({
         success: true,
@@ -73,7 +66,7 @@ const handleRemoveFriendRequest: Service = async (req: UserRequest, res) => {
   }
 
   try {
-    await removeFriendRequest(fromId, toId);
+    await UserService.removeFriendRequest(fromId, toId);
     res.status(200).send({
       success: true,
       message: 'Friend request successfully deleted',
@@ -88,12 +81,12 @@ const handleRemoveFriend: Service = async (req: UserRequest, res) => {
   const targetId = req.body.targetId ?? '';
 
   try {
-    await removeFriend(senderId, targetId);
+    await UserService.removeFriend(senderId, targetId);
 
     const removePrivateConversationData: RemovePrivateConversation = {
       memberIds: [senderId, targetId],
     };
-    await removePrivateConversation(removePrivateConversationData);
+    await ConversationService.removePrivateConversation(removePrivateConversationData);
 
     res.status(200).send({
       success: true,
