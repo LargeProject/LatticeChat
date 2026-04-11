@@ -95,7 +95,7 @@ const auth = betterAuth({
 
         if (!/^[a-zA-Z0-9_-]+$/.test(name)) {
           throw ctx.error(400, {
-            code: 'INVALID_USERNAME_LENGTH',
+            code: 'INVALID_USERNAME_PATTERN',
             message: 'Username must only contain letters and numbers',
           });
         }
