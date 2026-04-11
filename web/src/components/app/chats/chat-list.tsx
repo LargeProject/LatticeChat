@@ -3,8 +3,9 @@ import { SearchField } from '@heroui/react';
 import { HiMagnifyingGlass } from 'react-icons/hi2';
 import { useUser } from '#/lib/context/UserContext.tsx';
 import { useAsyncEffect } from '#/components/hooks/useAsyncEffect.ts';
-import { type Conversation, fetchConversationsBySearch } from '#/lib/api/conversation';
+import type { Conversation } from '#/lib/api/conversation';
 import { useAppState } from '#/lib/context/AppStateContext';
+import { useConversation } from '#/components/hooks/useConversation';
 
 type ChatRowProps = {
   conversation: Conversation;
@@ -13,6 +14,7 @@ type ChatRowProps = {
 
 const ChatRow = memo(function ChatRow({ conversation, isSelected }: ChatRowProps) {
   const { setConvoId } = useAppState();
+  const { name } = useConversation(conversation);
   function onClick() {
     setConvoId(conversation.id);
   }
@@ -28,7 +30,7 @@ const ChatRow = memo(function ChatRow({ conversation, isSelected }: ChatRowProps
       aria-current={isSelected ? 'page' : undefined}
     >
       <div className="relative flex shrink-0" style={{ width: 40 }}>
-        {conversation.members?.slice(0, 3).map((m, idx) => (
+        {conversation.members.slice(0, 3).map((m, idx) => (
           <div
             key={m.id}
             className="absolute inline-flex h-9 w-9 items-center justify-center rounded-full bg-(--line) text-xs font-semibold text-(--text-primary) ring-1"
@@ -46,7 +48,7 @@ const ChatRow = memo(function ChatRow({ conversation, isSelected }: ChatRowProps
       </div>
 
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium text-(--text-primary)">{conversation.name}</p>
+        <p className="truncate text-sm font-medium text-(--text-primary)">{name}</p>
         <p className="truncate text-xs text-(--text-secondary)">Tap to open conversation</p>
       </div>
     </button>

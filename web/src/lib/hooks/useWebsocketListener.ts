@@ -1,9 +1,14 @@
 import { useEffect, useCallback, useRef } from 'react';
 import { useWebsocketContext } from '../context/WebsocketContext';
+import type { ServerEventMap } from '../context/WebsocketProvider';
 
-type EventCallback<T = any> = (data: T) => void;
+type EventCallback<T> = (data: T) => void;
 
-export function useWebsocketListener<T = any>(eventName: string, callback: EventCallback<T>, enabled: boolean = true) {
+export function useWebsocketListener<T extends keyof ServerEventMap>(
+  eventName: T,
+  callback: EventCallback<ServerEventMap[T]>,
+  enabled: boolean = true,
+) {
   const context = useWebsocketContext();
   const callbackRef = useRef(callback);
 
@@ -22,48 +27,10 @@ export function useWebsocketListener<T = any>(eventName: string, callback: Event
       return;
     }
 
-    const wrappedCallback = (data: T) => {
-      callbackRef.current(data);
-    };
-
-    context.socket.on(eventName, wrappedCallback);
+    context.socket.on(eventName as string, callbackRef.current);
 
     return () => {
-      context.socket?.off(eventName, wrappedCallback);
+      context.socket?.off(eventName as string, callbackRef.current);
     };
   }, [eventName, enabled, context.socket, context.isAuthenticated]);
-}
-
-export function useWebsocketListeners(listeners: Record<string, EventCallback>, enabled: boolean = true) {
-  const context = useWebsocketContext();
-  const listenersRef = useRef(listeners);
-
-  useEffect(() => {
-    listenersRef.current = listeners;
-  }, [listeners]);
-
-  useEffect(() => {
-    if (!enabled || !context.socket) {
-      return;
-    }
-
-    if (!context.isAuthenticated) {
-      return;
-    }
-
-    const wrappedListeners: Record<string, EventCallback> = {};
-
-    for (const [eventName, callback] of Object.entries(listenersRef.current)) {
-      wrappedListeners[eventName] = (data: any) => {
-        callback(data);
-      };
-      context.socket.on(eventName, wrappedListeners[eventName]);
-    }
-
-    return () => {
-      for (const [eventName, callback] of Object.entries(wrappedListeners)) {
-        context.socket?.off(eventName, callback);
-      }
-    };
-  }, [enabled, context.socket, context.isAuthenticated]);
 }

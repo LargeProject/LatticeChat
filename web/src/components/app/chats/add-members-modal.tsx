@@ -4,32 +4,29 @@ import { fetchFriends } from '#/lib/api/friend';
 import { useWebsocket } from '#/lib/hooks/useWebsocket';
 import type { BasicUserInfo } from '#/lib/api/friend';
 import { fetchUserInfo } from '#/lib/api/user';
+import { useConversation } from '#/components/hooks/useConversation';
+import type { Conversation } from '@latticechat/shared';
+import { useAppState } from '#/lib/context/AppStateContext';
 
 type AddMembersModalProps = {
-  conversationId: string;
-  members?: BasicUserInfo[];
+  conversation: Conversation;
   isOpen: boolean;
   onClose: () => void;
   onMemberAdded: () => void;
 };
 
-
-export function AddMembersModal({
-  conversationId,
-  members,
-  isOpen,
-  onClose,
-  onMemberAdded,
-}: AddMembersModalProps) {
+export function AddMembersModal({ conversation, isOpen, onClose, onMemberAdded }: AddMembersModalProps) {
+  const { setConvoId } = useAppState();
   const [friends, setFriends] = useState<BasicUserInfo[]>([]);
   const [selectedFriend, setSelectedFriend] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const { addMember, isAuthenticated } = useWebsocket();
+  const { addMember, createConversation, isAuthenticated } = useWebsocket();
   const modalRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const memberIds = (members ?? []).map((m) => m.id);
+
+  const memberIds = conversation.members.map((m) => m.id);
 
   // Load friends on modal open
   useEffect(() => {
@@ -40,15 +37,8 @@ export function AddMembersModal({
         setLoading(true);
         setError(null);
         const current = await fetchUserInfo();
-        // current.friends is an array of BasicUserInfo (hydrated)
-        const ids = (current?.friends ?? []).map((f: any) => f.id);
-        // If current.friends already contains BasicUserInfo, use it directly to avoid extra fetches
-        if (current?.friends && current.friends.length > 0) {
-          setFriends(current.friends);
-        } else {
-          const friendsList = await fetchFriends(ids);
-          setFriends(friendsList);
-        }
+
+        setFriends(current.friends);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load friends');
       } finally {
@@ -93,18 +83,29 @@ export function AddMembersModal({
       setError(null);
       setSuccess(false);
 
-      const result = await addMember(conversationId, selectedFriend);
+      // If DM, create new conversation with all users
+      const result = conversation.isDirectMessage
+        ? await createConversation({
+            memberIds: [...memberIds, selectedFriend],
+          })
+        : // Else, just add member to the conversation
+          await addMember(conversation.id, selectedFriend);
 
       if (result.success) {
         setSuccess(true);
         setSelectedFriend(null);
         onMemberAdded();
+
+        if (conversation.isDirectMessage && result.conversationId) {
+          setConvoId(result.conversationId);
+        }
+
         // Reset success after 2s
         setTimeout(() => {
           setSuccess(false);
         }, 2000);
       } else {
-        setError(result.error || 'Failed to add member');
+        setError('Failed to add member');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
@@ -115,17 +116,9 @@ export function AddMembersModal({
 
   if (!isOpen) return null;
 
-  const selectedFriendData = friends.find((f) => f.id === selectedFriend);
-
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-      onClick={handleBackdropClick}
-    >
-      <div
-        ref={modalRef}
-        className="w-full max-w-md rounded-lg border border-(--line) bg-(--surface) shadow-lg"
-      >
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={handleBackdropClick}>
+      <div ref={modalRef} className="w-full max-w-md rounded-lg border border-(--line) bg-(--surface) shadow-lg">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-(--line) px-4 py-3">
           <h2 className="text-sm font-semibold text-(--text-primary) flex items-center gap-2">
@@ -187,18 +180,12 @@ export function AddMembersModal({
                       className="h-4 w-4"
                     />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-(--text-primary) truncate">
-                        {friend.name}
-                      </p>
+                      <p className="text-sm font-medium text-(--text-primary) truncate">{friend.name}</p>
                       {friend.biography && (
-                        <p className="text-xs text-(--text-secondary) truncate">
-                          {friend.biography}
-                        </p>
+                        <p className="text-xs text-(--text-secondary) truncate">{friend.biography}</p>
                       )}
                     </div>
-                    {isMember && (
-                      <div className="text-xs text-(--text-secondary)">Already in conversation</div>
-                    )}
+                    {isMember && <div className="text-xs text-(--text-secondary)">Already in conversation</div>}
                   </label>
                 );
               })}

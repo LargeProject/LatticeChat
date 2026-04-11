@@ -1,12 +1,13 @@
-import { useEffect, useState } from 'react';
-import type { ReactNode } from 'react';
-import { UserContext } from '../context/UserContext.tsx';
-import type { UserInfoState } from '../context/UserContext.tsx';
-import { fetchUserInfo, type BasicUserInfo } from '#/lib/api/user.ts';
-import { fetchFriendRequests } from '#/lib/api/friend.ts';
-import type { FriendRequest } from '#/lib/api/friend.ts';
-import type { Conversation } from '@latticechat/shared';
 import { fetchConversationsBySearch } from '#/lib/api/conversation.ts';
+import type { FriendRequest } from '#/lib/api/friend.ts';
+import { fetchFriendRequests } from '#/lib/api/friend.ts';
+import type { BasicUserInfo } from '#/lib/api/user.ts';
+import { fetchUserInfo } from '#/lib/api/user.ts';
+import type { Conversation } from '@latticechat/shared';
+import type { ReactNode } from 'react';
+import { useEffect, useState } from 'react';
+import type { UserInfoState } from '../context/UserContext.tsx';
+import { UserContext } from '../context/UserContext.tsx';
 
 export function UserProvider({ children }: { children: ReactNode }) {
   const [userInfo, setUserInfo] = useState<UserInfoState>({
@@ -19,9 +20,17 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   const refreshUser = async () => {
     console.log('Refreshing User Information...');
-    const data = await fetchUserInfo();
+    try {
+      const data = await fetchUserInfo();
 
-    if (!data) {
+      setUserInfo({
+        data: data.user,
+        isLoading: false,
+      });
+
+      setConversations(data.conversations);
+      setFriends(data.friends);
+    } catch (e) {
       setUserInfo({
         data: undefined,
         isLoading: false,
@@ -29,14 +38,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    setUserInfo({
-      data: data.user,
-      isLoading: false,
-    });
-
-    // Set conversations and friends from the response directly
-    setConversations(data.conversations);
-    setFriends(data.friends);
     refreshFriendRequests();
   };
 

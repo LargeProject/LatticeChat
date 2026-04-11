@@ -5,7 +5,7 @@ import { ChatInput } from './chat-input';
 import { AddMembersModal } from './add-members-modal';
 import { useWebsocket } from '#/lib/hooks/useWebsocket';
 import { useWebsocketListener } from '#/lib/hooks/useWebsocketListener';
-import { type Message } from '#/lib/api/conversation.ts';
+import type { Message } from '#/lib/api/conversation.ts';
 import { useUser } from '#/lib/context/UserContext.tsx';
 import { useConversation } from '#/components/hooks/useConversation';
 import type * as contracts from '@latticechat/shared';
@@ -28,11 +28,14 @@ export function ChatView({ conversationId, onTogglePanel }: ChatViewProps) {
   }, [conversations]);
 
   // Listen for new members being added
-  const handleNewMember = useCallback((data: contracts.EmitMemberAdded) => {
-    if (data.conversationId === conversationId) {
-      setMemberCount((prev) => prev + 1);
-    }
-  }, [conversationId]);
+  const handleNewMember = useCallback(
+    (data: contracts.EmitMemberAdded) => {
+      if (data.conversationId === conversationId) {
+        setMemberCount((prev) => prev + 1);
+      }
+    },
+    [conversationId],
+  );
 
   useWebsocketListener('newMember', handleNewMember, isAuthenticated);
 
@@ -45,52 +48,51 @@ export function ChatView({ conversationId, onTogglePanel }: ChatViewProps) {
   // Optimistic UI: merge pending messages with confirmed messages
   const allMessages = [...messages, ...pendingMessages];
 
-  const handleSend = useCallback(async (text: string) => {
-    const normalized = text.trim();
-    if (!normalized || !userInfo.data) return;
-    const tempId = `pending-${Date.now()}`;
-    const optimisticMsg = {
-      id: tempId,
-      senderId: userInfo.data.id,
-      conversationId: conversation.id,
-      content: normalized,
-      createdAt: new Date(),
-      optimistic: true as const,
-    };
-    setPendingMessages((msgs) => [...msgs, optimisticMsg]);
-    const result = await sendMessage({
-      conversationId: conversation.id,
-      senderId: userInfo.data.id,
-      content: normalized,
-    });
-    if (!result.success) {
-      // Remove optimistic message and show error
-      setPendingMessages((msgs) => msgs.filter((m) => m.id !== tempId));
-      alert('Failed to send message.');
-    } else {
-      // Remove optimistic message (will be replaced by real one from server)
-      setPendingMessages((msgs) => msgs.filter((m) => m.id !== tempId));
-    }
-  }, [conversation, userInfo, sendMessage]);
+  const handleSend = useCallback(
+    async (text: string) => {
+      const normalized = text.trim();
+      if (!normalized || !userInfo.data) return;
+
+      const tempId = `pending-${Date.now()}`;
+      const optimisticMsg = {
+        id: tempId,
+        senderId: userInfo.data.id,
+        conversationId: conversation.id,
+        content: normalized,
+        createdAt: new Date(),
+        optimistic: true as const,
+      };
+      setPendingMessages((msgs) => [...msgs, optimisticMsg]);
+
+      const result = await sendMessage({
+        conversationId: conversation.id,
+        senderId: userInfo.data.id,
+        content: normalized,
+      });
+
+      if (!result.success) {
+        // Remove optimistic message and show error
+        setPendingMessages((msgs) => msgs.filter((m) => m.id !== tempId));
+        alert('Failed to send message.');
+      } else {
+        // Remove optimistic message (will be replaced by real one from server)
+        setPendingMessages((msgs) => msgs.filter((m) => m.id !== tempId));
+      }
+    },
+    [conversation, userInfo, sendMessage],
+  );
 
   const handleMemberAdded = useCallback(() => {
     setIsAddMembersOpen(false);
   }, []);
 
   return (
-    <section
-      className="flex flex-1 flex-col overflow-hidden"
-      aria-label={`Conversation with ${name}`}
-    >
+    <section className="flex flex-1 flex-col overflow-hidden" aria-label={`Conversation with ${name}`}>
       <header className="border-b border-(--line) bg-(--surface) px-4 py-3">
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <h2 className="truncate text-sm font-semibold text-(--text-primary)">
-              {name}
-            </h2>
-            <p className="truncate text-xs text-(--text-secondary)">
-              End-to-end encrypted conversation
-            </p>
+            <h2 className="truncate text-sm font-semibold text-(--text-primary)">{name}</h2>
+            <p className="truncate text-xs text-(--text-secondary)">End-to-end encrypted conversation</p>
           </div>
 
           <div className="flex items-center gap-1">
@@ -126,8 +128,7 @@ export function ChatView({ conversationId, onTogglePanel }: ChatViewProps) {
       </div>
 
       <AddMembersModal
-        conversationId={conversationId}
-        members={conversation.members}
+        conversation={conversation}
         isOpen={isAddMembersOpen}
         onClose={() => setIsAddMembersOpen(false)}
         onMemberAdded={handleMemberAdded}
