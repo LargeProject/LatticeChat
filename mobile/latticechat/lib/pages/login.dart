@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:latticechat/pages/register.dart';
+import 'package:latticechat/theme.dart';
 import 'package:latticechat/logic/api.dart';
 import 'package:latticechat/logic/models/error.dart';
-import 'package:latticechat/theme.dart';
+import 'package:latticechat/pages/register.dart';
+import 'package:latticechat/pages/verify.dart';
+import 'package:latticechat/pages/chatList.dart';
+
+
 
 import 'home.dart';
 
@@ -33,7 +37,7 @@ class _LoginPageState extends State<LoginPage> {
     final password = _passwordController.text;
 
     if (email.isEmpty || password.isEmpty) { // you forgot something
-      debugPrint('Sign In button was pressed');
+      debugPrint('Sign In button was pressed with a field missing');
       return;
     }
 
@@ -47,14 +51,23 @@ class _LoginPageState extends State<LoginPage> {
       debugPrint('User-id: ${user.id}');
       debugPrint("User-name: ${user.username}");
 
-      // Switches to a temporary Home page
+      // Send user to ChatListPage (with their information attached?)
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => HomePage()),
+        MaterialPageRoute(builder: (context) => ChatListPage()),
       );
 
     } on ApiError catch (error) {
       debugPrint(error.toString());
+      switch (error.type) {
+        case "EMAIL_NOT_VERIFIED":
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => VerifyPage(email: email)),
+          );
+        case "INVALID_EMAIL_OR_PASSWORD":
+          // Display message somehow. Maybe a toast for simplicity.
+      }
     }
   }
 
@@ -67,7 +80,6 @@ class _LoginPageState extends State<LoginPage> {
   void _handleNoAccount() {
     debugPrint('No Account button was pressed');
 
-    // Temporary page navigation
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => RegisterPage()),
