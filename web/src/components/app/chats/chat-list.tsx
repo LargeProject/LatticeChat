@@ -12,8 +12,36 @@ type ChatRowProps = {
   isSelected: boolean;
 };
 
-const ChatRow = memo(function ChatRow({ conversation, isSelected }: ChatRowProps) {
-  const { convoId, setConvoId } = useAppState();
+const ChatIcon = memo(function ChatIcon({ conversation }: { conversation: Conversation }) {
+  return (
+    <>
+      {conversation.isDirectMessage ? (
+        <>
+          <div className="absolute inline-flex h-9 w-9 items-center justify-center rounded-full bg-(--line) text-xs font-semibold text-(--text-primary) ring-1"></div>
+        </>
+      ) : (
+        conversation.members.slice(0, 3).map((m, idx) => (
+          <div
+            key={m.id}
+            className="absolute inline-flex h-9 w-9 items-center justify-center rounded-full bg-(--line) text-xs font-semibold text-(--text-primary) ring-1"
+            style={{ left: idx * 16 }}
+            title={m.name}
+          >
+            {m.name
+              .split(' ')
+              .map((p) => p[0])
+              .slice(0, 2)
+              .join('')
+              .toUpperCase()}
+          </div>
+        ))
+      )}
+    </>
+  );
+});
+
+const ChatRow = function ChatRow({ conversation, isSelected }: ChatRowProps) {
+  const { setConvoId } = useAppState();
   const { name } = useConversation(conversation);
 
   function onClick() {
@@ -32,30 +60,20 @@ const ChatRow = memo(function ChatRow({ conversation, isSelected }: ChatRowProps
       aria-current={isSelected ? 'page' : undefined}
     >
       <div className="relative flex shrink-0" style={{ width: 40 }}>
-        {conversation.members.slice(0, 3).map((m, idx) => (
-          <div
-            key={m.id}
-            className="absolute inline-flex h-9 w-9 items-center justify-center rounded-full bg-(--line) text-xs font-semibold text-(--text-primary) ring-1"
-            style={{ left: idx * 16 }}
-            title={m.name}
-          >
-            {m.name
-              .split(' ')
-              .map((p) => p[0])
-              .slice(0, 2)
-              .join('')
-              .toUpperCase()}
-          </div>
-        ))}
+        <ChatIcon conversation={conversation} />
       </div>
 
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium text-(--text-primary)">{name}</p>
-        <p className="truncate text-xs text-(--text-secondary)">Tap to open conversation</p>
+        {conversation.isDirectMessage ? (
+          <></>
+        ) : (
+          <p className="truncate text-xs text-(--text-secondary)">`{conversation.members.length} members`</p>
+        )}
       </div>
     </button>
   );
-});
+};
 
 function normalize(value: string) {
   return value.trim().toLowerCase();
