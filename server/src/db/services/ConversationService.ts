@@ -54,6 +54,7 @@ export class ConversationService {
         $all: [memberId1, memberId2],
         $size: 2,
       },
+      isDirectMessage: true,
     });
 
     if (!conversation) {
