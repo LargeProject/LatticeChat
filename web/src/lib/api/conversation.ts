@@ -8,6 +8,7 @@ export type Conversation = {
   name: string;
   ownerId?: string;
   members: BasicUserInfo[];
+  isDirectMessage: boolean;
 };
 
 export type Message = {
@@ -18,18 +19,12 @@ export type Message = {
   createdAt: Date;
 };
 
-export async function fetchConversation(
-  conversationId: string,
-): Promise<Conversation | null> {
+export async function fetchConversation(conversationId: string): Promise<Conversation | null> {
   const userId = getLocalUserId();
   const jwt = getLocalJWT();
 
   const response = await fetch(
-    import.meta.env.VITE_API_BASE_URL +
-      '/users/' +
-      userId +
-      '/conversations/' +
-      conversationId,
+    import.meta.env.VITE_API_BASE_URL + '/users/' + userId + '/conversations/' + conversationId,
     {
       method: 'GET',
       headers: {
@@ -67,12 +62,11 @@ export async function fetchConversation(
     name: privateName ?? rawConversation.name,
     ownerId: rawConversation.ownerId,
     members: members,
+    isDirectMessage: rawConversation.isDirectMessage,
   };
 }
 
-export async function fetchConversations(
-  conversationIds: string[],
-): Promise<Conversation[]> {
+export async function fetchConversations(conversationIds: string[]): Promise<Conversation[]> {
   const conversations: Conversation[] = [];
   for (const conversationId of conversationIds) {
     const conversation = await fetchConversation(conversationId);
@@ -84,19 +78,12 @@ export async function fetchConversations(
   return conversations;
 }
 
-export async function fetchConversationMessages(
-  conversationId: string,
-): Promise<Message[]> {
+export async function fetchConversationMessages(conversationId: string): Promise<Message[]> {
   const userId = getLocalUserId();
   const jwt = getLocalJWT();
 
   const response = await fetch(
-    import.meta.env.VITE_API_BASE_URL +
-      '/users/' +
-      userId +
-      '/conversations/' +
-      conversationId +
-      '/messages',
+    import.meta.env.VITE_API_BASE_URL + '/users/' + userId + '/conversations/' + conversationId + '/messages',
     {
       method: 'GET',
       headers: {
