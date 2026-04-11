@@ -9,6 +9,7 @@ import {
   TargetNotFoundError,
   UserNotFoundError,
 } from '../../util/error';
+import { UserDocument } from '../schemas/User';
 
 export class UserService {
   static async findUser(userId: string, type: 'user' | 'target' = 'user') {
@@ -120,15 +121,15 @@ export class UserService {
 
   static async getBasicUserInfoByName(name: string) {
     const user = await User.findOne({ name: name });
-    return await this.getBasicUserInfo(user);
+    return this.getBasicUserInfo(user);
   }
 
   static async getBasicUserInfoById(userId: string) {
     const user = await User.findById(userId);
-    return await this.getBasicUserInfo(user);
+    return this.getBasicUserInfo(user);
   }
 
-  static getBasicUserInfo(user: any): any {
+  static getBasicUserInfo(user: UserDocument | null) {
     if (user == null) {
       throw new UserNotFoundError();
     }
