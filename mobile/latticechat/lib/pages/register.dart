@@ -42,15 +42,14 @@ class _RegisterPageState extends State<RegisterPage> {
     super.dispose();
   }
 
-  // Simulated API checks
   Future<bool> checkEmailAvailability(String email) async {
-    await Future.delayed(Duration(milliseconds: 500));
-    return !email.contains('test');
+    final api = ApiServices();
+    return !await api.isEmailTaken(email);
   }
 
   Future<bool> checkUsernameAvailability(String username) async {
-    await Future.delayed(Duration(milliseconds: 500));
-    return !username.contains('admin');
+    final api = ApiServices();
+    return !await api.isEmailTaken(username);
   }
   
   // A function meant to be called by the Sign Up button
