@@ -11,7 +11,6 @@ export const createConversation = z.object({
   ownerId: z.string().nonempty().optional(),
   name: z.string().nonempty().optional(),
   memberIds: z.array(z.string().nonempty()),
-  isDirectMessage: z.boolean(),
 });
 export type CreateConversation = z.infer<typeof createConversation>;
 
