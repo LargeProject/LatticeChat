@@ -30,58 +30,12 @@ const handleGetCurrentUser: types.Service = async (req, res) => {
   const userId = (req as any).userInfo?.id?.toString() ?? '';
 
   try {
-    const user = await UserService.findUser(userId);
-    if (!user) {
-      return res.status(404).send({
-        success: false,
-        message: 'User not found',
-      });
-    }
-
-    // Fetch and hydrate conversations
-    const conversationIds = user.conversationIds ?? [];
-    const conversations = await Promise.all(
-      conversationIds.map(async (convId) => {
-        const conv = await ConversationService.getConversation(convId.toString());
-
-        const members = await User.find({ _id: { $in: conv.memberIds ?? [] } });
-        return {
-          id: conv._id.toString(),
-          name: conv.name,
-          ownerId: conv.ownerId?.toString() ?? undefined,
-          members: members.map((m) => ({
-            id: m._id.toString(),
-            name: m.name,
-            biography: m.biography,
-            createdAt: m.createdAt,
-          })),
-        };
-      }),
-    );
-
-    // Fetch and hydrate friends
-    const friendIds = user.friendIds ?? [];
-    const friends = friendIds.length > 0 ? await User.find({ _id: { $in: friendIds } }) : [];
-    const friendList = friends.map((f) => ({
-      id: f._id.toString(),
-      name: f.name,
-      biography: f.biography,
-      createdAt: f.createdAt,
-    }));
-
-    const response: contracts.CurrentUserResponse = {
-      user: {
-        id: user._id.toString(),
-        name: user.name,
-        email: user.email,
-        biography: user.biography,
-        createdAt: user.createdAt,
-      },
-      conversations: conversations.filter(Boolean) as contracts.Conversation[],
-      friends: friendList,
-    };
-
-    res.status(200).send(response);
+    const hydratedUser = await UserService.findHydratedUser(userId);
+    res.status(200).send({
+      success: true,
+      message: 'User successfully found',
+      userInfo: hydratedUser,
+    });
   } catch (error) {
     handleHttpError(error, res);
   }

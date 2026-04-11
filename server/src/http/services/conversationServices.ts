@@ -8,7 +8,7 @@ const handleGetConversation: Service = async (req: UserRequest, res) => {
   const conversationId = req.params.conversation_id?.toString() ?? '';
 
   try {
-    const conversation = await ConversationService.getConversation(conversationId);
+    const conversation = await ConversationService.findConversation(conversationId);
     if (!conversation.hasMember(userId)) {
       res.status(401).send({
         success: false,
@@ -32,7 +32,7 @@ const handleGetConversationMessages: Service = async (req: UserRequest, res) => 
 
   try {
     // use hasMember here
-    const conversation = await ConversationService.getConversation(conversationId);
+    const conversation = await ConversationService.findConversation(conversationId);
     const userObjectId = new mongoose.Types.ObjectId(userId);
     if (!conversation.memberIds.includes(userObjectId)) {
       res.status(401).send({

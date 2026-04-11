@@ -17,6 +17,7 @@ export type BasicUserInfo = z.infer<typeof basicUserInfo>;
 export const conversation = z.object({
   id: z.string().nonempty(),
   name: z.string().nonempty(),
+  isDirectMessage: z.boolean(),
   ownerId: z.string().optional(),
   members: z.array(basicUserInfo),
 });

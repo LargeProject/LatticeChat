@@ -5,6 +5,9 @@ import { DBFieldAttribute } from '@better-auth/core/db';
 import { ObjectId } from 'mongodb';
 import { Account, Conversation, FriendRequest, User } from '../models';
 import { AccountNotFoundError } from '../../util/error';
+import { ConversationService } from '../services/ConversationService';
+import { UserService } from '../services/UserService';
+import { BasicUserInfo } from '@latticechat/shared';
 
 export const userSchema = new Schema(
   {
@@ -86,6 +89,23 @@ export const userSchema = new Schema(
 
         return account;
       },
+      getConversations: async function () {
+        const stringConversationIds = this.conversationIds.map((conversationId) => conversationId.toString())
+        const conversations = await ConversationService.findConversations(stringConversationIds);
+        return conversations;
+      },
+      getFriends: async function (): Promise<BasicUserInfo[]> {
+        const stringFriendIds = this.friendIds.map((friendId) => friendId.toString());
+        const friends = await UserService.getBasicUserInfosById(stringFriendIds);
+        return friends.map((friend) => {
+          return {
+            id: friend._id.toString(),
+            name: friend.name,
+            biography: friend.biography,
+            createdAt: friend.createdAt
+          }
+        });
+      }
     },
   },
 );

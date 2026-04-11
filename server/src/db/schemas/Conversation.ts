@@ -1,6 +1,8 @@
-import type { Types } from 'mongoose';
+import { HydratedDocument, InferSchemaType, Types } from 'mongoose';
 import mongoose, { Schema } from 'mongoose';
 import { User } from '../models';
+import { UserService } from '../services/UserService';
+import { BasicUserInfo } from '@latticechat/shared';
 
 export const messageSchema = new Schema({
   senderId: {
@@ -46,6 +48,7 @@ export const conversationSchema = new Schema(
     isDirectMessage: {
       type: Boolean,
       required: true,
+      default: true
     },
     name: {
       type: String,
@@ -73,9 +76,24 @@ export const conversationSchema = new Schema(
         const memberObjectId = new mongoose.Types.ObjectId(memberId);
         return this.memberIds.includes(memberObjectId);
       },
+      getMembers: async function(): Promise<BasicUserInfo[]> {
+        const stringMemberIds = this.memberIds.map((memberId) => memberId.toString());
+        const members = await UserService.getBasicUserInfosById(stringMemberIds);
+        return members.map((member) => {
+          return {
+            id: member._id.toString(),
+            name: member.name,
+            biography: member.biography,
+            createdAt: member.createdAt
+          }
+        });
+      }
     },
   },
 );
+
+type Conversation = InferSchemaType<typeof conversationSchema>;
+export type ConversationDocument = HydratedDocument<Conversation> & { getMembers: () => Promise<BasicUserInfo[]> };
 
 conversationSchema.pre('save', { document: true, query: true }, async function () {
   if (!this.isNew) return;

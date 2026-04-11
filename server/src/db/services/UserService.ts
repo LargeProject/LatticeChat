@@ -1,4 +1,4 @@
-import type { CreateConversation } from '@latticechat/shared';
+import  { BasicUserInfo, Conversation, CreateConversation, CurrentUserResponse } from '@latticechat/shared';
 import { FriendRequest, KeyExchangeRequest, User } from '../models';
 import { ConversationService } from './ConversationService';
 import {
@@ -14,8 +14,11 @@ import {
   UserNotFoundError,
 } from '../../util/error';
 import { UserDocument } from '../schemas/User';
+import { ConversationDocument } from '../schemas/Conversation';
+import * as contracts from '@latticechat/shared';
 
 export class UserService {
+
   static async findUser(userId: string, type: 'user' | 'target' = 'user') {
     const user = await User.findById(userId);
     if (user == null) {
@@ -28,6 +31,39 @@ export class UserService {
     }
 
     return user;
+  }
+
+  static async findHydratedUser(userId: string): Promise<CurrentUserResponse> {
+    const user = await this.findUser(userId);
+
+    const conversations: ConversationDocument[] = await user.getConversations();
+    const friends: BasicUserInfo[] = await user.getFriends();
+
+    const mappedConversations: Conversation[] = [];
+    for (const conversation of conversations) {
+      const mappedConversation: Conversation = {
+        id: conversation.id,
+        name: conversation.name ?? '',
+        isDirectMessage: conversation.isDirectMessage,
+        ownerId: conversation?.ownerId?.toString() ?? '',
+        members: await conversation.getMembers(),
+      };
+      mappedConversations.push(mappedConversation);
+    }
+
+    const response: contracts.CurrentUserResponse = {
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        biography: user.biography,
+        createdAt: user.createdAt,
+      },
+      conversations: mappedConversations,
+      friends: friends,
+    };
+
+    return response;
   }
 
   static async createFriendRequest(senderId: string, targetId: string) {
@@ -131,6 +167,10 @@ export class UserService {
   static async getBasicUserInfoById(userId: string) {
     const user = await User.findById(userId);
     return this.getBasicUserInfo(user);
+  }
+
+  static async getBasicUserInfosById(userIds: string[]): Promise<UserDocument[]> {
+    return (await User.find({ _id: { $in: userIds } })) ?? [];
   }
 
   static getBasicUserInfo(user: UserDocument | null) {

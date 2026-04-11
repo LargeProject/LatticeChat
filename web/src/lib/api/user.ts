@@ -26,7 +26,7 @@ export async function fetchUserInfo(): Promise<CurrentUserResponse | undefined> 
     throw new HttpError(response.status, body.code, body.message);
   }
 
-  return body as CurrentUserResponse;
+  return body.userInfo as CurrentUserResponse;
 }
 
 export async function fetchBasicUserInfo(

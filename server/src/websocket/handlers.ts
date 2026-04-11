@@ -69,7 +69,7 @@ export class WebsocketHandlers {
     try {
       const message = await MessageService.createMessage(data);
 
-      const conversation = await ConversationService.getConversation(data.conversationId);
+      const conversation = await ConversationService.findConversation(data.conversationId);
 
       const emitMessage = {
         id: message._id.toString(),
@@ -122,7 +122,7 @@ export class WebsocketHandlers {
       const result = await ConversationService.addMemberToConversation({ ...data, adderId });
 
       // Broadcast to all current members + the newly added member
-      const conversation = await ConversationService.getConversation(data.conversationId);
+      const conversation = await ConversationService.findConversation(data.conversationId);
       const memberIds = conversation.memberIds.map((m: any) => m.toString());
       if (!memberIds.includes(result.userId)) memberIds.push(result.userId);
 
