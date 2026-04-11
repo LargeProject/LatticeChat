@@ -6,6 +6,7 @@ import { fetchUserInfo, type BasicUserInfo } from '#/lib/api/user.ts';
 import { fetchFriendRequests } from '#/lib/api/friend.ts';
 import type { FriendRequest } from '#/lib/api/friend.ts';
 import type { Conversation } from '@latticechat/shared';
+import { fetchConversationsBySearch } from '#/lib/api/conversation.ts';
 
 export function UserProvider({ children }: { children: ReactNode }) {
   const [userInfo, setUserInfo] = useState<UserInfoState>({
@@ -44,6 +45,11 @@ export function UserProvider({ children }: { children: ReactNode }) {
     setFriendRequests(await fetchFriendRequests());
   };
 
+  const refreshConversations = async (search: string = '') => {
+    console.log('Refreshing Conversations...');
+    setConversations(await fetchConversationsBySearch(search));
+  };
+
   useEffect(() => {
     refreshUser();
   }, []);
@@ -54,6 +60,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         refreshUser,
         userInfo,
         friends,
+        refreshConversations,
         conversations,
         refreshFriendRequests,
         friendRequests,

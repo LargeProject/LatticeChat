@@ -8,6 +8,7 @@ import { AccountNotFoundError } from '../../util/error';
 import { ConversationService } from '../services/ConversationService';
 import { UserService } from '../services/UserService';
 import { BasicUserInfo } from '@latticechat/shared';
+import { Conversation as SharedConversation } from '@latticechat/shared';
 
 export const userSchema = new Schema(
   {
@@ -90,9 +91,36 @@ export const userSchema = new Schema(
         return account;
       },
       getConversations: async function () {
-        const stringConversationIds = this.conversationIds.map((conversationId) => conversationId.toString())
+        const stringConversationIds = this.conversationIds.map((conversationId) => conversationId.toString());
         const conversations = await ConversationService.findConversations(stringConversationIds);
         return conversations;
+      },
+      getHydratedConversations: async function () {
+        const conversations = await this.getConversations();
+        const hydratedConversations: SharedConversation[] = [];
+        for (const conversation of conversations) {
+          const hydratedConversation: SharedConversation = {
+            id: conversation.id,
+            name: conversation.name ?? '',
+            isDirectMessage: conversation.isDirectMessage,
+            ownerId: conversation?.ownerId?.toString() ?? '',
+            members: await conversation.getMembers(),
+          };
+          hydratedConversations.push(hydratedConversation);
+        }
+        return hydratedConversations;
+      },
+      getConversationsBySearch: async function (search: string) {
+        const conversations: SharedConversation[] = await this.getHydratedConversations();
+        const filteredConversations = conversations.filter((conversation) => {
+          if (conversation.isDirectMessage) {
+            const otherMember = conversation.members.filter((member) => member.id != this.id);
+            return otherMember[0]?.name.includes(search) ?? false;
+          } else {
+            return conversation?.name?.includes(search) ?? false;
+          }
+        });
+        return filteredConversations;
       },
       getFriends: async function (): Promise<BasicUserInfo[]> {
         const stringFriendIds = this.friendIds.map((friendId) => friendId.toString());
@@ -102,10 +130,10 @@ export const userSchema = new Schema(
             id: friend._id.toString(),
             name: friend.name,
             biography: friend.biography,
-            createdAt: friend.createdAt
-          }
+            createdAt: friend.createdAt,
+          };
         });
-      }
+      },
     },
   },
 );
