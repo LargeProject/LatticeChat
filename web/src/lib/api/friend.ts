@@ -11,10 +11,7 @@ export async function fetchFriendRequests(): Promise<FriendRequest[]> {
   const senderId = getLocalUserId();
   const jwt = getLocalJWT();
   const response = await fetch(
-    import.meta.env.VITE_API_BASE_URL +
-      '/users/' +
-      senderId +
-      '/friend-requests',
+    import.meta.env.VITE_API_BASE_URL + '/users/' + senderId + '/friend-requests',
     {
       method: 'GET',
       headers: {
@@ -56,10 +53,7 @@ export async function sendFriendRequest(targetId: string) {
 
   const requestBody = { targetId: targetId };
   const response = await fetch(
-    import.meta.env.VITE_API_BASE_URL +
-      '/users/' +
-      senderId +
-      '/friend-requests',
+    import.meta.env.VITE_API_BASE_URL + '/users/' + senderId + '/friend-requests',
     {
       method: 'POST',
       headers: {
@@ -85,12 +79,7 @@ export async function removeFriendRequest(
 
   const requestBody = { targetId: targetId };
   const response = await fetch(
-    import.meta.env.VITE_API_BASE_URL +
-      '/users/' +
-      senderId +
-      '/friend-requests' +
-      '?type=' +
-      type,
+    import.meta.env.VITE_API_BASE_URL + '/users/' + senderId + '/friend-requests' + '?type=' + type,
     {
       method: 'DELETE',
       headers: {
@@ -107,8 +96,27 @@ export async function removeFriendRequest(
   }
 }
 
-export async function removeFriend(userId: string) {
-  // TODO: implement remove friend api call
+export async function removeFriend(targetId: string) {
+  const senderId = getLocalUserId();
+  const jwt = getLocalJWT();
+
+  const requestBody = { targetId: targetId };
+  const response = await fetch(
+    import.meta.env.VITE_API_BASE_URL + '/users/' + senderId + '/friends',
+    {
+      method: 'DELETE',
+      headers: {
+        Authorization: 'Bearer ' + jwt,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
+    },
+  );
+
+  const body = await response.json();
+  if (!response.ok) {
+    throw new HttpError(response.status, body.code, body.message);
+  }
 }
 
 export async function fetchFriends(

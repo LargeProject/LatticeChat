@@ -34,11 +34,7 @@ export async function fetchBasicUserInfo(
   byName: boolean = false,
 ): Promise<BasicUserInfo | undefined> {
   const response = await fetch(
-    import.meta.env.VITE_API_BASE_URL +
-      '/users/' +
-      userId +
-      '?byName=' +
-      byName,
+    import.meta.env.VITE_API_BASE_URL + '/users/' + userId + '?byName=' + byName,
     {
       method: 'GET',
     },
