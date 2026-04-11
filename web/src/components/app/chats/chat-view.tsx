@@ -11,42 +11,28 @@ import { useConversation } from '#/components/hooks/useConversation';
 import type * as contracts from '@latticechat/shared';
 
 type ChatViewProps = {
-  conversationId: string;
+  conversation: contracts.Conversation;
   onTogglePanel: () => void;
 };
 
-export function ChatView({ conversationId, onTogglePanel }: ChatViewProps) {
-  const { conversations } = useUser();
-  const { createMessage: sendMessage, isAuthenticated } = useWebsocket();
+export function ChatView({ conversation, onTogglePanel }: ChatViewProps) {
+  const { createMessage, isAuthenticated } = useWebsocket();
   const { userInfo } = useUser();
   const [pendingMessages, setPendingMessages] = useState<Array<Message & { optimistic: true }>>([]);
   const [isAddMembersOpen, setIsAddMembersOpen] = useState(false);
   const [memberCount, setMemberCount] = useState(0);
 
-  const conversation = useMemo(() => {
-    return conversations.find((c) => c.id == conversationId);
-  }, [conversations]);
-
   // Listen for new members being added
   const handleNewMember = useCallback(
     (data: contracts.EmitMemberAdded) => {
-      if (data.conversationId === conversationId) {
+      if (data.conversationId === conversation.id) {
         setMemberCount((prev) => prev + 1);
       }
     },
-    [conversationId],
+    [conversation.id],
   );
 
   useWebsocketListener('newMember', handleNewMember, isAuthenticated);
-
-  if (!conversation) {
-    return <>Conversation not found!</>;
-  }
-
-  const { name, messages } = useConversation(conversation);
-
-  // Optimistic UI: merge pending messages with confirmed messages
-  const allMessages = [...messages, ...pendingMessages];
 
   const handleSend = useCallback(
     async (text: string) => {
@@ -64,7 +50,7 @@ export function ChatView({ conversationId, onTogglePanel }: ChatViewProps) {
       };
       setPendingMessages((msgs) => [...msgs, optimisticMsg]);
 
-      const result = await sendMessage({
+      const result = await createMessage({
         conversationId: conversation.id,
         senderId: userInfo.data.id,
         content: normalized,
@@ -79,12 +65,16 @@ export function ChatView({ conversationId, onTogglePanel }: ChatViewProps) {
         setPendingMessages((msgs) => msgs.filter((m) => m.id !== tempId));
       }
     },
-    [conversation, userInfo, sendMessage],
+    [conversation, userInfo, createMessage],
   );
 
   const handleMemberAdded = useCallback(() => {
     setIsAddMembersOpen(false);
   }, []);
+
+  const { name, messages } = useConversation(conversation);
+
+  const allMessages = [...messages, ...pendingMessages];
 
   return (
     <section className="flex flex-1 flex-col overflow-hidden" aria-label={`Conversation with ${name}`}>

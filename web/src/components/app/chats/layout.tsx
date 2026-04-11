@@ -1,20 +1,24 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ChatList } from './chat-list';
 import { ChatView } from './chat-view';
 import { EmptyState } from './empty-state';
 import { useAppState } from '#/lib/context/AppStateContext';
+import { useUser } from '#/lib/context/UserContext';
 
 const PANEL_BREAKPOINT = 1280;
 
 export default function ChatLayout() {
   const { convoId, setConvoId } = useAppState();
+  const { conversations } = useUser();
   const [isPanelOpen, setIsPanelOpen] = useState(true);
   const [userToggled, setUserToggled] = useState(false);
   const [isWideScreen, setIsWideScreen] = useState(() =>
-    typeof window !== 'undefined'
-      ? window.innerWidth >= PANEL_BREAKPOINT
-      : true,
+    typeof window !== 'undefined' ? window.innerWidth >= PANEL_BREAKPOINT : true,
   );
+
+  const conversation = useMemo(() => {
+    return conversations.find((c) => c.id == convoId);
+  }, [conversations, convoId]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -61,12 +65,12 @@ export default function ChatLayout() {
       </aside>
 
       <main className="flex min-w-0 flex-1 overflow-hidden">
-        {!convoId ? (
+        {!conversation ? (
           <EmptyState />
         ) : (
           <>
             <section className="flex min-w-0 flex-1 flex-col overflow-hidden">
-              <ChatView conversationId={convoId} onTogglePanel={togglePanel} />
+              <ChatView conversation={conversation} onTogglePanel={togglePanel} />
             </section>
 
             <aside
@@ -74,9 +78,7 @@ export default function ChatLayout() {
                 'hidden h-full shrink-0 border-l border-(--line) bg-(--surface)',
                 'xl:block',
                 'transition-[width,opacity] duration-300 ease-out',
-                showPanel
-                  ? 'w-72 opacity-100'
-                  : 'w-0 opacity-0 pointer-events-none',
+                showPanel ? 'w-72 opacity-100' : 'w-0 opacity-0 pointer-events-none',
               ].join(' ')}
               aria-hidden={!showPanel}
             >

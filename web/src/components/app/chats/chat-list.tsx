@@ -1,4 +1,4 @@
-import { memo, useDeferredValue, useMemo, useState } from 'react';
+import { memo, useDeferredValue, useEffect, useMemo, useState } from 'react';
 import { SearchField } from '@heroui/react';
 import { HiMagnifyingGlass } from 'react-icons/hi2';
 import { useUser } from '#/lib/context/UserContext.tsx';
@@ -13,11 +13,13 @@ type ChatRowProps = {
 };
 
 const ChatRow = memo(function ChatRow({ conversation, isSelected }: ChatRowProps) {
-  const { setConvoId } = useAppState();
+  const { convoId, setConvoId } = useAppState();
   const { name } = useConversation(conversation);
+
   function onClick() {
     setConvoId(conversation.id);
   }
+
   return (
     <button
       type="button"
