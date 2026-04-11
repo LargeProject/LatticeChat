@@ -1,15 +1,14 @@
 import type { Service, UserRequest } from '../types';
-import type {
-  RemovePrivateConversation,
-} from '@latticechat/shared';
+import type { CreateConversation, RemovePrivateConversation } from '@latticechat/shared';
 import { handleHttpError } from '../../util/error';
-import {ConversationService, UserService} from "../../db";
+import * as db from '../../db';
 
 const handleGetFriendRequests: Service = async (req: UserRequest, res) => {
   const userId = req.params.user_id?.toString() ?? '';
 
   try {
-    const friendRequests = await UserService.getFriendRequests(userId);
+    const friendRequests = await db.UserService.getFriendRequests(userId);
+    db.UserService;
 
     res.status(200).send({
       success: true,
@@ -26,7 +25,8 @@ const handleAddFriendRequest: Service = async (req: UserRequest, res) => {
   const targetId = req.body.targetId ?? '';
 
   try {
-    const friendRequest = await UserService.createFriendRequest(senderId, targetId);
+    const friendRequest = await db.UserService.createFriendRequest(senderId, targetId);
+
     if (!friendRequest) {
       res.status(200).send({
         success: true,
@@ -66,7 +66,7 @@ const handleRemoveFriendRequest: Service = async (req: UserRequest, res) => {
   }
 
   try {
-    await UserService.removeFriendRequest(fromId, toId);
+    await db.UserService.removeFriendRequest(fromId, toId);
     res.status(200).send({
       success: true,
       message: 'Friend request successfully deleted',
@@ -81,12 +81,14 @@ const handleRemoveFriend: Service = async (req: UserRequest, res) => {
   const targetId = req.body.targetId ?? '';
 
   try {
-    await UserService.removeFriend(senderId, targetId);
+    await db.UserService.removeFriend(senderId, targetId);
+    db.UserService;
 
     const removePrivateConversationData: RemovePrivateConversation = {
       memberIds: [senderId, targetId],
     };
-    await ConversationService.removePrivateConversation(removePrivateConversationData);
+    await db.ConversationService.removePrivateConversation(removePrivateConversationData);
+    db.ConversationService;
 
     res.status(200).send({
       success: true,

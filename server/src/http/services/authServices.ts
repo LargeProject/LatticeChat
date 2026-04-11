@@ -1,6 +1,6 @@
 import type { Service } from '../types';
 import { handleHttpError } from '../../util/error';
-import {UserService} from "../../db";
+import { UserService } from '../../db';
 
 const handleEmailTaken: Service = async (req, res) => {
   const email = (req.body?.email as string) ?? '';

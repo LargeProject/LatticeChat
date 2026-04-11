@@ -10,9 +10,11 @@ class DebouncedValidationField extends StatefulWidget {
   final Duration debounceDelay;
 
   // Customizable status messages
+
+  final String emptyMessage;
   final String checkingMessage;
   final String invalidFormatMessage;
-  final String validFormatMessage;
+  final String noContactMessage;
   final String availableMessage;
   final String unavailableMessage;
 
@@ -26,20 +28,21 @@ class DebouncedValidationField extends StatefulWidget {
     required this.validator,
     this.availabilityChecker,
     this.debounceDelay = const Duration(milliseconds: 500),
-    this.checkingMessage = 'Checking...',
+    this.emptyMessage = 'Enter to check availability.',
+    this.checkingMessage = 'Checking availability...',
     this.invalidFormatMessage = 'Invalid format',
-    this.validFormatMessage = 'Valid format',
-    this.availableMessage = '✅ Available',
-    this.unavailableMessage = '❌ Unavailable',
+    this.noContactMessage = 'Unable to contact server',
+    this.availableMessage = 'Available',
+    this.unavailableMessage = 'Unavailable',
     this.onValueChanged,
     this.onValidationChanged,
   });
 
   @override
-  DebouncedValidationFieldState createState() => DebouncedValidationFieldState();
+  State<DebouncedValidationField> createState() => _DebouncedValidationFieldState();
 }
 
-class DebouncedValidationFieldState extends State<DebouncedValidationField> {
+class _DebouncedValidationFieldState extends State<DebouncedValidationField> {
   final TextEditingController _controller = TextEditingController();
   final Debouncer _debouncer = Debouncer();
   String _statusMessage = '';
@@ -61,7 +64,7 @@ class DebouncedValidationFieldState extends State<DebouncedValidationField> {
         }
 
         if (widget.availabilityChecker == null) {
-          setState(() => _statusMessage = widget.validFormatMessage);
+          setState(() => _statusMessage = widget.noContactMessage);
           widget.onValueChanged?.call(value);
           return;
         }
@@ -104,9 +107,9 @@ class DebouncedValidationFieldState extends State<DebouncedValidationField> {
           _statusMessage,
           style: TextStyle(
             fontSize: 12,
-            color: _statusMessage.contains('✅')
+            color: _statusMessage.contains('Available')
                 ? Colors.green
-                : (_statusMessage.contains('❌') ? Colors.red : Colors.orange),
+                : (_statusMessage.contains('Unavailable') ? Colors.red : Colors.orange),
           ),
         ),
       ],

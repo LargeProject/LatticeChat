@@ -29,17 +29,18 @@ export class ConversationService {
     return conversation;
   }
 
-  static async createConversation(data: actions.CreateConversation) {
+  static async createConversation(data: actions.CreateConversation, isDirectMessage: boolean) {
     const { ownerId, memberIds } = data;
     const owner = await User.findById(ownerId);
 
     const members = await User.find({ _id: { $in: memberIds } });
-    const name = data.name ?? createConversationName(members.map((m) => m.name));
+    const name = isDirectMessage ? null : (data.name ?? createConversationName(members.map((m) => m.name)));
 
     const conversation = await Conversation.create({
       ...(owner != null && { owner: owner._id }),
       name,
       memberIds: members.map((m) => m._id),
+      isDirectMessage,
     });
 
     return conversation;
@@ -54,6 +55,7 @@ export class ConversationService {
         $all: [memberId1, memberId2],
         $size: 2,
       },
+      isDirectMessage: true,
     });
 
     if (!conversation) {

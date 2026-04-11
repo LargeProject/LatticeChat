@@ -9,16 +9,13 @@ import type { UserInfo } from '../api/user';
  * else:
  *   "<conversation.name>"
  */
-export function getConversationName(
-  user: UserInfo,
-  conversation: Conversation,
-) {
-  if (conversation.members.length == 2) {
+export function getConversationName(user: UserInfo, conversation: Conversation) {
+  if (conversation.isDirectMessage) {
     const otherMember = conversation.members.find((m) => m.id != user.id);
 
     if (!otherMember) return '';
 
-    return otherMember.username;
+    return '[DM] with ' + otherMember.name;
   } else {
     return conversation.name;
   }

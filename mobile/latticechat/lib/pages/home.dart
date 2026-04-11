@@ -1,22 +1,29 @@
+import 'package:flutter/material.dart';
+import 'package:latticechat/theme.dart';
 
-import 'package:flutter/cupertino.dart';
-
-class HomePage extends StatefulWidget {
+class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-
-  @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Text('LatticeChat Home'),
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            
+            primaryGradientText(context, 'Success!'),
+
+            const SizedBox(height: 16),
+
+            Text(
+              'This is a temporary landing page.',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+
+          ]
+        )
+      )
     );
   }
-
-
-
 }

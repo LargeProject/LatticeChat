@@ -3,8 +3,12 @@ import { FriendRequest, KeyExchangeRequest, User } from '../models';
 import { ConversationService } from './ConversationService';
 import {
   EmailNotFoundError,
-  FriendExistsError, FriendNotFoundError, FriendRequestExistsError,
-  FriendRequestNotFoundError, KeyExchangeExistsError, KeyExchangeNotFoundError,
+  FriendExistsError,
+  FriendNotFoundError,
+  FriendRequestExistsError,
+  FriendRequestNotFoundError,
+  KeyExchangeExistsError,
+  KeyExchangeNotFoundError,
   SelfFriendRequestError,
   TargetNotFoundError,
   UserNotFoundError,
@@ -52,7 +56,7 @@ export class UserService {
       target.addFriend(sender._id);
 
       const createConversationData: CreateConversation = { memberIds: [senderId, targetId] };
-      await ConversationService.createConversation(createConversationData);
+      await ConversationService.createConversation(createConversationData, true);
 
       return null;
     } else {
@@ -171,7 +175,7 @@ export class UserService {
     const keyExchangeRequests = await KeyExchangeRequest.find({
       toId: user._id,
     });
-    if(!keyExchangeRequests) {
+    if (!keyExchangeRequests) {
       throw new KeyExchangeNotFoundError();
     }
 

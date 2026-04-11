@@ -1,7 +1,7 @@
-import { Service, UserRequest } from '../types';
+import type { Service, UserRequest } from '../types';
 import { handleHttpError } from '../../util/error';
 import mongoose from 'mongoose';
-import {ConversationService} from "../../db";
+import { ConversationService } from '../../db';
 
 const handleGetConversation: Service = async (req: UserRequest, res) => {
   const userId = req.params.user_id?.toString() ?? '';

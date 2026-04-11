@@ -1,16 +1,18 @@
 import type { Server as HttpServer } from 'node:http';
 import { Server as IOServer } from 'socket.io';
 import { ENV } from '../../util/env';
-import type { RegisteredEvent, SocketWithAuth } from './types';
+import * as types from './types';
 import { UserConnectionManager } from './UserConnectionManager';
-import { EventDispatcher } from './EventDispatcher';
-import * as z from 'zod';
+import type { AckResponse } from '@latticechat/shared';
+
+export type AckCallback = (response: AckResponse) => void;
+export const ACK_SUCCESS = { success: true };
+export const ACK_FAIL = { success: false };
 
 export class WebsocketServer {
   private server: IOServer;
-  private events: RegisteredEvent[] = [];
+  private events: types.RegisteredEvent[] = [];
   private connectionManager: UserConnectionManager;
-  private eventDispatcher: EventDispatcher;
 
   constructor(httpServer: HttpServer) {
     this.server = new IOServer(httpServer, {
@@ -19,22 +21,20 @@ export class WebsocketServer {
       },
     });
     this.connectionManager = new UserConnectionManager();
-    this.eventDispatcher = new EventDispatcher();
   }
 
-  public registerEvent(event: RegisteredEvent): this {
+  public registerEvent(event: types.RegisteredEvent): this {
     this.events.push(event);
     return this;
   }
 
-  public registerEvents(events: RegisteredEvent[]): this {
+  public registerEvents(events: types.RegisteredEvent[]): this {
     events.forEach((event) => this.registerEvent(event));
     return this;
   }
 
   public start(): this {
-    this.server.on('connection', (socket: SocketWithAuth) => {
-      this.setupAuthHandshake(socket);
+    this.server.on('connection', (socket: types.SocketWithAuth) => {
       this.setupDisconnect(socket);
       this.setupEventListeners(socket);
     });
@@ -42,83 +42,68 @@ export class WebsocketServer {
     return this;
   }
 
-  private setupAuthHandshake(socket: SocketWithAuth) {
-    socket.on('initHandshake', async (data: any, ack?: (response: any) => void) => {
-      try {
-        const initHandshakeEvent = this.events.find((e) => e.name === 'initHandshake');
-        if (!initHandshakeEvent) {
-          ack?.({ success: false, error: 'Auth handler not configured' });
-          socket.disconnect(true);
-          return;
-        }
-
-        const parsed = initHandshakeEvent.payloadSchema.safeParse(data);
-        if (parsed.error) {
-          console.error('Handshake validation failed:', z.prettifyError(parsed.error));
-          ack?.({ success: false, error: 'Invalid handshake payload' });
-          socket.disconnect(true);
-          return;
-        }
-
-        const result = await initHandshakeEvent.handler(parsed.data, {
-          server: this.server,
-          socket,
-          userId: 'system',
-        });
-
-        if (result && typeof result === 'string') {
-          socket.data.userId = result;
-          this.connectionManager.addSocket(result, socket.id);
-          try {
-            socket.join(result);
-          } catch (e) {
-            console.error('Failed to join user room', e);
-          }
-          ack?.({ success: true, userId: result });
-          console.log(`User ${result} authenticated (socket: ${socket.id}) and joined room ${result}`);
-        } else {
-          ack?.({ success: false, error: 'Authentication failed' });
-          socket.disconnect(true);
-        }
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        console.error('Handshake error:', errorMessage);
-        ack?.({ success: false, error: errorMessage });
-        socket.disconnect(true);
-      }
-    });
-  }
-
-  private setupDisconnect(socket: SocketWithAuth) {
+  private setupDisconnect(socket: types.SocketWithAuth) {
     socket.on('disconnect', () => {
       this.connectionManager.disconnect(socket);
     });
   }
 
-  private setupEventListeners(socket: SocketWithAuth) {
-    // Skip auth and disconnect events
-    const eventNames = this.events
-      .filter((e) => e.name !== 'initHandshake')
-      .map((e) => e.name);
+  private dispatch(socket: types.SocketWithAuth, event: types.RegisteredEvent) {
+    socket.on(event.name, async (payload: any, ack?: AckCallback) => {
+      if (!socket.data.userId && !event.isPublic) {
+        console.log(socket.data);
+        console.warn(
+          `Event ${event.name} (${event.isPublic ? 'public' : 'protected'}) received from unauthenticated socket`,
+        );
+        ack?.(ACK_FAIL);
+        return;
+      }
 
-    for (const eventName of eventNames) {
-      const event = this.events.find((e) => e.name === eventName);
-      if (!event) continue;
+      try {
+        const parsed = await this.validatePayload(event.name, payload, event.payloadSchema);
+        const context: types.WebsocketContext = {
+          server: this.server,
+          connectionManager: this.connectionManager,
+          socket,
+          userId: socket.data.userId,
+        };
+        const result = await event.handler(parsed, context);
 
-      this.eventDispatcher.dispatch(
-        socket,
-        eventName,
-        async (context, payload) => {
-          const parsed = await this.eventDispatcher.emitWithValidation(
-            socket,
-            eventName,
-            payload,
-            event.payloadSchema
-          );
-          return event.handler(parsed, context);
-        },
-        this.server
+        ack?.(result);
+      } catch (error) {
+        if (error instanceof types.WebsocketError) {
+          console.error(`[${event.name}] ${error.code}: ${error.message}`);
+        } else {
+          console.error(`[${event.name}] Unexpected error:`, error);
+        }
+        ack?.(ACK_FAIL);
+      }
+    });
+  }
+
+  private async validatePayload(eventName: string, payload: any, schema: any): Promise<any> {
+    const parsed = schema.safeParse(payload);
+    if (parsed.error) {
+      try {
+        console.error(
+          `[${eventName}] payload validation failed:`,
+          parsed.error.format ? parsed.error.format() : parsed.error,
+        );
+      } catch (logErr) {
+        console.error(`[${eventName}] payload validation failed (unable to format error)`, parsed.error);
+      }
+      throw new types.WebsocketError(
+        `Invalid payload for ${eventName}: ${JSON.stringify(parsed.error.format ? parsed.error.format() : parsed.error)}`,
+        'VALIDATION_ERROR',
+        400,
       );
+    }
+    return parsed.data;
+  }
+
+  private setupEventListeners(socket: types.SocketWithAuth) {
+    for (const event of this.events) {
+      this.dispatch(socket, event);
     }
   }
 
