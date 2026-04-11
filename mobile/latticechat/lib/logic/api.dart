@@ -29,7 +29,7 @@ class ApiServices {
     });
 
     final body = jsonDecode(response.body);
-    body['jwt'] = response.headers['set-auth-token'];
+    body['jsonWT'] = response.headers['set-auth-token'];
 
     if (response.statusCode == 200) {
       return SignInResponse.fromJson(body)!;
@@ -84,9 +84,10 @@ class ApiServices {
 
     if(type == "post") {
       return await http.post(Uri.parse(url), headers: headers, body: jsonBody);
-    } else if(type == "get")
+    } else if(type == "get") {
       return await http.get(Uri.parse(url), headers: headers);
-    else
+    } else {
       return http.Response("{}", 500);
+    }
   }
 }

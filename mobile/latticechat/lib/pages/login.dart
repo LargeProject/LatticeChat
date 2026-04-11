@@ -41,21 +41,20 @@ class _LoginPageState extends State<LoginPage> {
       final api = ApiServices();
       final response = await api.attemptSignIn(email, password);
 
-      print('Sign in successful!');
+      debugPrint('Sign in successful!');
 
       var user = response.user;
-      print('User-id: ${user.id}');
-      print("User-name: ${user.username}");
+      debugPrint('User-id: ${user.id}');
+      debugPrint("User-name: ${user.username}");
 
+      // Switches to a temporary Home page
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => HomePage()),
       );
 
-
-
     } on ApiError catch (error) {
-      print(error);
+      debugPrint(error.toString());
     }
   }
 
@@ -84,7 +83,7 @@ class _LoginPageState extends State<LoginPage> {
           children: [
 
             // Animated Gradient Text title from theme.dart
-            titleGradientText(context, 'Welcome Back'),
+            primaryGradientText(context, 'Welcome Back'),
 
             const SizedBox(height: 16),
 

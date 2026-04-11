@@ -8,6 +8,7 @@ import 'package:latticechat/widgets/confirm_password_field.dart';
 import 'package:latticechat/utils/validators.dart';
 import 'package:latticechat/logic/models/error.dart';
 import 'package:latticechat/pages/login.dart';
+import 'package:latticechat/pages/verify.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -53,39 +54,42 @@ class _RegisterPageState extends State<RegisterPage> {
   }
   
   // A function meant to be called by the Sign Up button
-  // TODO: Consider adding a flicker effect when submitted with an invalid field
+  // TODO: Make status messages flicker when submitted with an invalid field?
+  // TODO: Display some kind of error when the API call fails.
   void _handleSignUp() async {
     if (!_isFormValid) {
       debugPrint('Sign Up button was pressed with an invalid form. Do nothing');
       return;
     }
 
+    // All fields should be valid and available from in here down
     try {
       final api = ApiServices();
-      await api.attemptSignUp(_username, _email, _password);
-      print("Sign up successful!");
 
-      await api.attemptSendEmailVerification(_email);
-      print("Sent email verification code");
+      if (!await api.attemptSignUp(_username, _email, _password)) {
+        debugPrint("Sign up unsuccessful, check information.");
+        return;
+      }
+      debugPrint("Sign up successful!");
+
+      if (!await api.attemptSendEmailVerification(_email)) {
+        debugPrint("Failed to send email verification code, check information.");
+        return;
+      }
+      debugPrint("Sent email verification code. Proceeding to Verify page...");
+
+      // Switches to the Verify page and passes the email
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => VerifyPage(email: _email),
+        ),
+      );
 
     } on ApiError catch (error) {
-      print(error);
+      debugPrint(error.toString());
+      return;
     }
-
-    // All fields should be valid and available from in here
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Sign Up Attempt'),
-        content: Text('Email: $_email\nUsername: $_username\nPassword: $_password'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
   }
 
   // A function meant to be called by the Already Have Account button
@@ -107,7 +111,7 @@ class _RegisterPageState extends State<RegisterPage> {
           mainAxisSize: MainAxisSize.min,
           children: [
 
-            titleGradientText(context, 'Create Account'),
+            primaryGradientText(context, 'Create Account'),
 
             const SizedBox(height: 8),
 

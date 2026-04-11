@@ -7,6 +7,7 @@ final backgroundColor = TwColors.zinc.shade950; // trueblack
 final foregroundColor = TwColors.zinc.shade900; // offblack
 final borderColor = TwColors.zinc.shade800;
 final fadedTextColor = TwColors.zinc.shade500;
+final medialTextColor = TwColors.zinc.shade300;
 const primaryColor = Color(0xFFE1E1E1);   // offwhite
 const secondaryColor = Color(0xFFE2E2E2); // underwhite
 const tertiaryColor = Color(0xFFA3A3A3);  // concrete
@@ -56,7 +57,7 @@ final ThemeData darkTheme = ThemeData.dark().copyWith(
     // Your custom text styles
     bodyLarge: const TextStyle(color: primaryColor),  // for large body text
     bodyMedium: TextStyle(color: fadedTextColor),       // for medium body text
-    bodySmall: const TextStyle(color: tertiaryColor), // for small body text
+    bodySmall: TextStyle(color: medialTextColor),       // for small body text
     // Additional text styles needed for login page
     headlineLarge: const TextStyle(
       fontSize: 36,
@@ -142,12 +143,13 @@ class AppButtonStyles {
   );
 
   static ButtonStyle secondaryElevated = ElevatedButton.styleFrom(
-    backgroundColor: Colors.transparent,
-    foregroundColor: TwColors.zinc.shade100,
-    side: BorderSide(color: TwColors.zinc.shade100),
     minimumSize: const Size(double.infinity, 0),
     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-    textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+    textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.normal),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+    disabledForegroundColor: tertiaryColor,
+    disabledBackgroundColor: quatenaryColor,
+    
   );
 
   static ButtonStyle dangerElevated = ElevatedButton.styleFrom(
@@ -168,8 +170,8 @@ final class AppContainerStyles {
   );
 }
 
-// Animated Gradient Title
-AnimatedGradientText titleGradientText(BuildContext context, String text) {
+// Animated Gradient Text Styles
+AnimatedGradientText primaryGradientText(BuildContext context, String text) {
   return AnimatedGradientText(
     text: text,
     textStyle: Theme.of(context).textTheme.headlineLarge, // fallback
@@ -182,3 +184,23 @@ AnimatedGradientText titleGradientText(BuildContext context, String text) {
     ],
   );
 }
+AnimatedGradientText secondaryGradientText(BuildContext context, String text) {
+  return AnimatedGradientText(
+    text: text,
+    textStyle: TextStyle(
+      color: primaryColor,
+      fontSize: 30,
+      fontWeight: FontWeight.w700,
+    ), // fallback
+    colors: [
+      // Title gradient
+      TwColors.green.shade400,
+      TwColors.teal.shade400,
+      TwColors.cyan.shade400,
+      TwColors.green.shade400,
+    ],
+  );
+}
+
+// TODO: Create a StatusMessage type made out of a Box and Text
+//  to be used in the register.dart page
