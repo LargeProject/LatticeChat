@@ -4,7 +4,7 @@ import mongoose from 'mongoose';
 import { ConversationService, UserService } from '../../db';
 
 const handleGetConversation: Service = async (req: UserRequest, res) => {
-  const userId = req.params.user_id?.toString() ?? '';
+  const userId = req.userInfo?.id ?? '';
   const conversationId = req.params.conversation_id?.toString() ?? '';
 
   try {
@@ -27,7 +27,7 @@ const handleGetConversation: Service = async (req: UserRequest, res) => {
 };
 
 const handleGetConversationsBySearch: Service = async (req: UserRequest, res) => {
-  const userId = req.params.user_id?.toString() ?? '';
+  const userId = req.userInfo?.id ?? '';
   const search = req.query?.search?.toString() ?? '';
 
   try {
@@ -45,7 +45,7 @@ const handleGetConversationsBySearch: Service = async (req: UserRequest, res) =>
 };
 
 const handleGetConversationMessages: Service = async (req: UserRequest, res) => {
-  const userId = req.params.user_id?.toString() ?? '';
+  const userId = req.userInfo?.id ?? '';
   const conversationId = req.params.conversation_id?.toString() ?? '';
 
   try {

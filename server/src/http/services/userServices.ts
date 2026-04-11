@@ -3,10 +3,11 @@ import { ConversationService, UserService } from '../../db';
 import { handleHttpError } from '../../util/error';
 import { Conversation, User } from '../../db/models';
 import * as contracts from '@latticechat/shared';
+import { UserRequest } from '../types';
 
 const handleGetBasicUserInformation: types.Service = async (req, res) => {
   const userId = req.params.user_id?.toString() ?? '';
-  const byName = req.query.byName ?? false;
+  const byName = req.query.byName ?? 'false';
 
   try {
     let userInformation;
@@ -41,8 +42,8 @@ const handleGetCurrentUser: types.Service = async (req, res) => {
   }
 };
 
-const handleDeleteUser: types.Service = async (req, res) => {
-  const userId = req.params.user_id?.toString() ?? '';
+const handleDeleteUser: types.Service = async (req: UserRequest, res) => {
+  const userId = req.userInfo.id ?? '';
 
   try {
     await UserService.deleteUser(userId);
