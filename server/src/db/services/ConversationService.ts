@@ -29,7 +29,7 @@ export class ConversationService {
     return conversation;
   }
 
-  static async createConversation(data: actions.CreateConversation) {
+  static async createConversation(data: actions.CreateConversation, isDirectMessage: boolean) {
     const { ownerId, memberIds } = data;
     const owner = await User.findById(ownerId);
 
@@ -40,6 +40,7 @@ export class ConversationService {
       ...(owner != null && { owner: owner._id }),
       name,
       memberIds: members.map((m) => m._id),
+      isDirectMessage,
     });
 
     return conversation;

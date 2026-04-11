@@ -96,7 +96,7 @@ export class WebsocketHandlers {
     context: WebsocketContext,
   ): Promise<actions.AckResponse> {
     try {
-      const conversation = await ConversationService.createConversation(data);
+      const conversation = await ConversationService.createConversation(data, false);
 
       // Notify all members of the new conversation
       broadcastToUserList(
