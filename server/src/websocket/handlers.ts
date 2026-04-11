@@ -73,8 +73,8 @@ export class WebsocketHandlers {
 
       const emitMessage = {
         id: message._id.toString(),
-        conversationId: message.conversationId.toString(),
-        senderId: message.senderId.toString(),
+        conversationId: message.conversationId,
+        senderId: message.senderId,
         content: message.content,
         createdAt: message.createdAt,
       };
@@ -106,7 +106,7 @@ export class WebsocketHandlers {
         conversation,
       );
 
-      return ACK_SUCCESS;
+      return { ...ACK_SUCCESS, conversationId: conversation._id.toString() };
     } catch (error) {
       if (error instanceof WebsocketError) {
         throw error;

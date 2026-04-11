@@ -1,24 +1,9 @@
 import { createContext, useContext } from 'react';
 import type { Socket } from 'socket.io-client';
 import type * as contracts from '@latticechat/shared';
+import type { ClientEventMap, ServerEventMap } from './WebsocketProvider';
 
 export type WebsocketConnectionState = 'disconnected' | 'connecting' | 'connected' | 'authenticated' | 'error';
-
-type ClientEventMap = {
-  initHandshake: contracts.InitHandshake;
-  createMessage: contracts.CreateMessage;
-  createConversation: contracts.CreateConversation;
-  removePrivateConversation: contracts.RemovePrivateConversation;
-  addMember: contracts.AddMember;
-};
-
-type ServerEventMap = {
-  newMessage: contracts.EmitMessage;
-  newConversation: any;
-  newMember: contracts.EmitMemberAdded;
-};
-
-type AckResponse = contracts.AckResponse;
 
 export type WebsocketContextType = {
   socket: Socket | null;
@@ -32,7 +17,7 @@ export type WebsocketContextType = {
     event: K,
     data: ClientEventMap[K],
     timeoutMs?: number,
-  ) => Promise<AckResponse>;
+  ) => Promise<contracts.AckResponse>;
 };
 
 export const WebsocketContext = createContext<WebsocketContextType | undefined>(undefined);
