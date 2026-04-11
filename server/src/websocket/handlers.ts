@@ -68,10 +68,6 @@ export class WebsocketHandlers {
   ): Promise<actions.AckResponse> {
     try {
       const message = await MessageService.createMessage(data);
-      if (message instanceof Error) {
-        console.error('[MessageService] createMessage returned invalid result', message);
-        throw new WebsocketError('Failed to create message', 'MESSAGE_CREATE_FAILED', 400);
-      }
 
       const conversation = await ConversationService.getConversation(data.conversationId);
 
