@@ -34,7 +34,7 @@ export class ConversationService {
     const owner = await User.findById(ownerId);
 
     const members = await User.find({ _id: { $in: memberIds } });
-    const name = data.name ?? createConversationName(members.map((m) => m.name));
+    const name = isDirectMessage ? null : (data.name ?? createConversationName(members.map((m) => m.name)));
 
     const conversation = await Conversation.create({
       ...(owner != null && { owner: owner._id }),
