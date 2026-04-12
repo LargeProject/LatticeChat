@@ -232,7 +232,7 @@ class StatusMessage extends StatelessWidget {
         textColor = Colors.orange;
         break;
       case Severity.critical:
-        textColor = badboyRed;
+        textColor = Colors.red;
         break;
     }
     return Text(

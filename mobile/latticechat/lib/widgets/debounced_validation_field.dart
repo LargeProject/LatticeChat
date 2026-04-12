@@ -68,8 +68,20 @@ class DebouncedValidationField extends StatefulWidget {
 class _DebouncedValidationFieldState extends State<DebouncedValidationField> {
   final TextEditingController _controller = TextEditingController();
   final Debouncer _debouncer = Debouncer();
-  // Default upon opening the page or initializing the widget.
-  StatusMessage _status = StatusMessage(message: '', severity: Severity.unknown);
+  StatusMessage _status = const StatusMessage(message: '', severity: Severity.unknown);
+
+  @override
+  void initState() {
+    super.initState();
+    _status = widget.startingStatus;
+  }
+
+  @override
+  void dispose() {
+    _debouncer.cancel();
+    _controller.dispose();
+    super.dispose();
+  }
 
   void _notifyParent(String value, bool isValid) {
     widget.onValueChanged?.call(value);
@@ -110,13 +122,6 @@ class _DebouncedValidationFieldState extends State<DebouncedValidationField> {
         _notifyParent(value, available);
       },
     );
-  }
-
-  @override
-  void dispose() {
-    _debouncer.cancel();
-    _controller.dispose();
-    super.dispose();
   }
 
   @override
