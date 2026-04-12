@@ -1,17 +1,62 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { ShineBorder } from '@/components/ui/shine-border';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { authClient } from '#/lib/auth.ts';
+import type { ZXCVBNFeedback } from 'zxcvbn';
 
 function ForgotPassword() {
   const [email, setEmail] = useState('');
   const [step, setStep] = useState<1 | 2>(1);
   const [otp, setOtp] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [passwordStrength, setPasswordStrength] = useState<{
+    score: number;
+    label: string;
+    feedback: ZXCVBNFeedback | null;
+  }>({
+    score: 0,
+    label: '',
+    feedback: null,
+  });
   const [message, setMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!message) return;
+    const timer = setTimeout(() => setMessage(null), 3000);
+    return () => clearTimeout(timer);
+  }, [message]);
+
+  useEffect(() => {
+    if (!newPassword) {
+      setPasswordStrength({
+        score: 0,
+        label: '',
+        feedback: null,
+      });
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      const { default: zxcvbn } = await import('zxcvbn');
+
+      const { score, feedback } = zxcvbn(newPassword);
+
+      const labels = ['Extremely weak', 'Very Weak', 'Weak', 'Okay', 'Strong'];
+
+      setPasswordStrength({
+        score,
+        label: labels[score],
+        feedback,
+      });
+    }, 200);
+
+    return () => clearTimeout(timer);
+  }, [newPassword]);
+
+  const isPasswordStrong = passwordStrength.score >= 3;
 
   const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 
@@ -38,8 +83,8 @@ function ForgotPassword() {
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!otp || newPassword.length < 8) {
-      setMessage('Enter OTP and a valid new password.');
+    if (!otp || !isPasswordStrong) {
+      setMessage('Ensure you have entered the correct OTP and a strong new password.');
       return;
     }
 
@@ -59,7 +104,23 @@ function ForgotPassword() {
   };
 
   return (
-    <main className="min-h-screen bg-black text-zinc-100 flex items-center justify-center px-4 py-16">
+    <main className="min-h-screen bg-black text-zinc-100 flex flex-col items-center justify-center px-4 py-16">
+      <AnimatePresence>
+        {message && (
+          <motion.div
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+            className="mb-4 w-full max-w-lg"
+          >
+            <div className="bg-red-500/15 border border-red-500/40 text-red-100 rounded-xl backdrop-blur px-4 py-3 shadow-lg shadow-red-500/20">
+              <p className="text-sm font-medium">{message}</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="w-full max-w-lg rounded-2xl border border-zinc-800 bg-zinc-950/80 backdrop-blur-lg p-8 shadow-2xl space-y-6">
         <ShineBorder shineColor={['#ef4444', '#3b82f6']} />
         <div className="space-y-2 text-center">
@@ -123,15 +184,29 @@ function ForgotPassword() {
                   className="w-full bg-zinc-900 text-zinc-200 placeholder:text-zinc-500 border border-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500 px-3 py-2"
                 />
               </div>
+              <div
+                className={`mt-2 rounded-lg border px-3 py-2 text-xs ${
+                  isPasswordStrong
+                    ? 'border-emerald-500/40 bg-emerald-500/5 text-emerald-300'
+                    : 'border-rose-500/40 bg-rose-500/5 text-rose-200'
+                }`}
+              >
+                <p className="font-mono">
+                  Password strength: {passwordStrength.label}
+                </p>
+                {!isPasswordStrong && (
+                  <p className="text-[11px] text-rose-300/90">
+                    Use 8+ chars with upper, lower, numbers, and symbols.
+                    <br></br>
+                  </p>
+                )}
+                <p>
+                  <br></br>
+                  Encryption strength relies on password complexity, so a stronger
+                  password is recommended for better security.
+                </p>
+              </div>
             </>
-          )}
-
-          {message && (
-            <p
-              className={`text-xs ${message.includes('valid') || step === 2 ? 'text-amber-300' : 'text-red-300'}`}
-            >
-              {message}
-            </p>
           )}
 
           <motion.button
