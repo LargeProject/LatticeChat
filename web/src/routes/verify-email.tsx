@@ -9,6 +9,7 @@ function VerifyEmail() {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const isComplete = code.every(Boolean);
 
   const verifyCode = async () => {
@@ -28,11 +29,10 @@ function VerifyEmail() {
         },
         {
           onSuccess: () => {
-            alert('Verification successful')
             navigate({ to: '/' });
           },
           onError: (ctx) => {
-            alert(ctx.error.message);
+            setError(ctx.error.message);
           },
         },
       );
@@ -121,6 +121,7 @@ function VerifyEmail() {
         </p>
 
         <form onSubmit={handleSubmit} noValidate className="space-y-6">
+          {error && <p className="text-sm text-red-500 text-center">{error}</p>}
           <div className="flex justify-between">
             {code.map((digit, index) => (
               <input
