@@ -34,7 +34,7 @@ class AuthServices {
     body['jsonWT'] = response.headers['set-auth-token'];
 
     if (response.statusCode == 200) {
-      return SignInResponse.fromJson(body)!;
+      return SignInResponse.fromJson(body);
     } else {
       throw ApiError.fromBody(body);
     }

@@ -11,7 +11,7 @@ class SignInResponse {
 
   SignInResponse._({required this.jsonWT});
 
-  static SignInResponse? fromJson(Map<String, dynamic> json) {
+  static SignInResponse fromJson(Map<String, dynamic> json) {
     return SignInResponse._(
         jsonWT: json['jsonWT']
     );

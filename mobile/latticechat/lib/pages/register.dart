@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:latticechat/logic/api.dart';
 import 'dart:async';
 import 'package:latticechat/theme.dart';
 import 'package:latticechat/widgets/debounced_validation_field.dart';
@@ -7,9 +6,11 @@ import 'package:latticechat/widgets/password_validation_field.dart';
 import 'package:latticechat/widgets/confirm_password_field.dart';
 import 'package:latticechat/utils/validators.dart';
 import 'package:latticechat/utils/severity.dart';
-import 'package:latticechat/logic/models/error.dart';
 import 'package:latticechat/pages/login.dart';
 import 'package:latticechat/pages/verify.dart';
+
+import '../logic/services/api.dart';
+import '../logic/util/error.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -44,13 +45,13 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Future<bool> checkEmailAvailability(String email) async {
-    final api = ApiServices();
-    return !await api.isEmailTaken(email);
+    final authApi = ApiServices.getAuthServices();
+    return await authApi.isEmailAvailable(email);
   }
 
   Future<bool> checkUsernameAvailability(String username) async {
-    final api = ApiServices();
-    return !await api.isEmailTaken(username);
+    final authApi = ApiServices.getAuthServices();
+    return await authApi.isEmailAvailable(username);
   }
   
   // A function meant to be called by the Sign Up button
@@ -64,15 +65,15 @@ class _RegisterPageState extends State<RegisterPage> {
 
     // All fields should be valid and available from in here down
     try {
-      final api = ApiServices();
+      final authApi = ApiServices.getAuthServices();
 
-      if (!await api.attemptSignUp(_username, _email, _password)) {
+      if (!await authApi.signUp(_username, _email, _password)) {
         debugPrint("Sign up unsuccessful, check information.");
         return;
       }
       debugPrint("Sign up successful!");
 
-      if (!await api.attemptSendEmailVerification(_email)) {
+      if (!await authApi.sendEmailVerification(_email)) {
         debugPrint("Failed to send email verification code, check information.");
         return;
       }

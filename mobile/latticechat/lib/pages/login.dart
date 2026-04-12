@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:latticechat/theme.dart';
-import 'package:latticechat/logic/api.dart';
-import 'package:latticechat/logic/models/error.dart';
 import 'package:latticechat/pages/register.dart';
 import 'package:latticechat/pages/verify.dart';
 import 'package:latticechat/pages/chatList.dart';
+
+import '../logic/services/api.dart';
+import '../logic/util/error.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -38,14 +39,11 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     try {
-      final api = ApiServices();
-      final response = await api.attemptSignIn(email, password);
+      final authApi = ApiServices.getAuthServices();
+      final response = await authApi.signIn(email, password);
+      final jsonWT = response.jsonWT;
 
       debugPrint('Sign in successful!');
-
-      var user = response.user;
-      debugPrint('User-id: ${user.id}');
-      debugPrint("User-name: ${user.username}");
 
       // Send user to ChatListPage (with their information attached?)
       Navigator.push(
