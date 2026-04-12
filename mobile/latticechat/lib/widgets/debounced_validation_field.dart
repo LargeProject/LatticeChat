@@ -30,11 +30,11 @@ class DebouncedValidationField extends StatefulWidget {
     required this.availabilityChecker,
     this.debounceDelay = const Duration(milliseconds: 500),
     this.startingStatus = const StatusMessage(
-      message: '',
+      message: 'Enter field to check for availability',
       severity: Severity.unknown
     ),
     this.emptyStatus = const StatusMessage(
-      message: 'Field required',
+      message: 'Field is required',
       severity: Severity.major
     ),
     this.validatingStatus = const StatusMessage(
@@ -43,7 +43,7 @@ class DebouncedValidationField extends StatefulWidget {
     ),
     this.requestingStatus = const StatusMessage(
       message: 'Requesting availability...',
-      severity: Severity.unknown
+      severity: Severity.minor
     ),
     this.noContactStatus = const StatusMessage(
       message: 'Unable to contact server',
@@ -138,7 +138,7 @@ class _DebouncedValidationFieldState extends State<DebouncedValidationField> {
           onChanged: _onTextChanged,
         ),
 
-        const SizedBox(height: 4),
+        const SizedBox(height: 8),
         
         _status,
       ],

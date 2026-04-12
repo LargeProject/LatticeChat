@@ -215,29 +215,52 @@ class StatusMessage extends StatelessWidget {
     required this.severity,
   });
 
-  @override
-  Widget build(BuildContext context) {
-    Color textColor;
+  Color _getContainerColor() {
     switch (severity) {
       case Severity.none:
-        textColor = Colors.green;
-        break;
+        return Colors.green;
       case Severity.unknown:
-        textColor = fadedTextColor;
-        break;
+        return fadedTextColor;
       case Severity.minor:
-        textColor = Colors.amber;
-        break;
+        return Colors.amber;
       case Severity.major:
-        textColor = Colors.orange;
-        break;
+        return Colors.orange;
       case Severity.critical:
-        textColor = Colors.red;
-        break;
+        return badboyRed;
     }
-    return Text(
-      message,
-      style: TextStyle(fontSize: 12, color: textColor),
+  }
+
+  Color _getTextColor() {
+    switch (severity) {
+      case Severity.none:
+        return goodboyGreen;
+      case Severity.unknown:
+        return fadedTextColor;
+      case Severity.minor:
+        return Colors.yellow;
+      case Severity.major:
+        return Colors.amber;
+      case Severity.critical:
+        return Colors.red;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final containerColor = _getContainerColor();
+    final textColor = _getTextColor();
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: containerColor.withAlpha(10),
+        border: Border.all(color: containerColor.withAlpha(180), width: 1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        message,
+        style: TextStyle(fontSize: 12, color: textColor),
+      ),
     );
   }
 }

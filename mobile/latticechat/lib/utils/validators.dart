@@ -26,8 +26,8 @@ final regex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
 StatusMessage? usernameValidator(String username) {
   if (username.length < 3 || username.length > 20) {
     return StatusMessage(
-      message: 'Username must be between 3-20 characters',
-      severity: Severity.minor
+      message: 'Username length must be between 3-20 characters (inclusive)',
+      severity: Severity.major
     );
   }
   final regex = RegExp(r'^[a-zA-Z0-9_.]{3,}$');
