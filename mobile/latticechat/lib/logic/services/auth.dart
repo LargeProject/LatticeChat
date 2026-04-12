@@ -68,6 +68,34 @@ class AuthServices {
     }
   }
 
+  Future<bool> sendPasswordResetVerification(String email) async {
+    final response = await HttpUtil.sendPost('$_baseUrl/auth/email-otp/request-password-reset', {
+      'email': email
+    });
+
+    if (response.statusCode == 200) {
+      return true;
+    } else {
+      final body = jsonDecode(response.body);
+      throw ApiError.fromBody(body);
+    }
+  }
+
+  Future<bool> resetPassword(String email, String code, String password) async {
+    final response = await HttpUtil.sendPost('$_baseUrl/auth/email-otp/reset-password', {
+      'email': email,
+      'otp': code,
+      'password': password
+    });
+
+    if (response.statusCode == 200) {
+      return true;
+    } else {
+      final body = jsonDecode(response.body);
+      throw ApiError.fromBody(body);
+    }
+  }
+
   Future<bool> isUsernameAvailable(String username) async {
     final response = await HttpUtil.sendGet('$_baseUrl/auth/username-taken?username=$username');
     final body = jsonDecode(response.body);
