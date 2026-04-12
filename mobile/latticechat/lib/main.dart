@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
 my test main file, used for testing pages in isolation. This is not the actual entry point of the app, which is in login.dart
 import 'package:flutter/material.dart';
 import 'package:latticechat/theme.dart';
-import 'pages/chatList.dart';
+import 'pages/chat_list.dart';
 
 void main() => runApp(const MyApp());
 

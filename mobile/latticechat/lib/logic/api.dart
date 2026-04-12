@@ -3,6 +3,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:latticechat/logic/models/error.dart';
 import 'package:latticechat/logic/models/response.dart';
+import 'package:latticechat/logic/models/conversation.dart';
 
 class ApiServices {
   static final String _baseUrl = dotenv.env['API_BASE_URL']!;
@@ -72,7 +73,7 @@ class ApiServices {
   }
 
   Future<http.Response> _get(String url) async {
-    return await _fetch("post", url, {});
+    return await _fetch("get", url, {});
   }
 
   Future<http.Response> _fetch(String type, String url, Map<String, dynamic> body) async {
@@ -90,4 +91,20 @@ class ApiServices {
       return http.Response("{}", 500);
     }
   }
+
+  Future<List<ConversationModel>> fetchConversations() async {
+    final response = await _get('$_baseUrl/conversations');
+
+    final body = jsonDecode(response.body);
+
+    if (response.statusCode == 200) {
+      final List<dynamic> conversationsJson = body['conversations'] ?? [];
+      return conversationsJson
+          .map((conversation) => ConversationModel.fromJson(conversation))
+          .toList();
+    } else {
+      throw ApiError(type: body['code'], message: body['message']);
+    }
+  }
+
 }
