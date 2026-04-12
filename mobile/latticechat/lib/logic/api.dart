@@ -87,6 +87,7 @@ class ApiServices {
     return await _fetch("post", url, body);
   }
 
+  // ignore: unused_element
   Future<http.Response> _get(String url) async {
     return await _fetch("post", url, {});
   }
