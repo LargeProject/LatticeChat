@@ -44,6 +44,26 @@ export async function fetchFriendRequests(): Promise<FriendRequest[]> {
   return friendRequests;
 }
 
+export async function acceptFriendRequest(targetId: string) {
+  const senderId = getLocalUserId();
+  const jwt = getLocalJWT();
+
+  const requestBody = { targetId: targetId };
+  const response = await fetch(import.meta.env.VITE_API_BASE_URL + '/users/' + senderId + '/friend-requests', {
+    method: 'PATCH',
+    headers: {
+      Authorization: 'Bearer ' + jwt,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(requestBody),
+  });
+
+  const body = await response.json();
+  if (!response.ok) {
+    throw new HttpError(response.status, body.code, body.message);
+  }
+}
+
 export async function sendFriendRequest(targetId: string) {
   const senderId = getLocalUserId();
   const jwt = getLocalJWT();
@@ -64,13 +84,13 @@ export async function sendFriendRequest(targetId: string) {
   }
 }
 
-export async function removeFriendRequest(targetId: string, type: 'incoming' | 'outgoing') {
+export async function removeFriendRequest(targetId: string) {
   const senderId = getLocalUserId();
   const jwt = getLocalJWT();
 
   const requestBody = { targetId: targetId };
   const response = await fetch(
-    import.meta.env.VITE_API_BASE_URL + '/users/' + senderId + '/friend-requests' + '?type=' + type,
+    import.meta.env.VITE_API_BASE_URL + '/users/' + senderId + '/friend-requests',
     {
       method: 'DELETE',
       headers: {
@@ -119,5 +139,3 @@ export async function fetchFriends(friendIds: string[]): Promise<BasicUserInfo[]
 
   return friends;
 }
-
-export { BasicUserInfo };

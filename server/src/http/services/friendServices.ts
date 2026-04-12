@@ -19,24 +19,33 @@ const handleGetFriendRequests: Service = async (req: UserRequest, res) => {
   }
 };
 
+const handleAcceptFriendRequest: Service = async(req: UserRequest, res) => {
+  const senderId = req.userInfo?.id ?? '';
+  const targetId = req.body.targetId ?? '';
+
+  try {
+    await db.UserService.acceptFriendRequest(targetId, senderId);
+
+    res.status(200).send({
+      success: true,
+      message: 'Friend request successfully accepted',
+    });
+  } catch (error) {
+    handleHttpError(error, res);
+  }
+}
+
 const handleAddFriendRequest: Service = async (req: UserRequest, res) => {
   const senderId = req.userInfo?.id ?? '';
   const targetId = req.body.targetId ?? '';
 
   try {
-    const friendRequest = await db.UserService.createFriendRequest(senderId, targetId);
+    await db.UserService.createFriendRequest(senderId, targetId);
 
-    if (!friendRequest) {
-      res.status(200).send({
-        success: true,
-        message: 'Friend successfully added',
-      });
-    } else {
-      res.status(200).send({
-        success: true,
-        message: 'Friend request successfully sent',
-      });
-    }
+    res.status(200).send({
+      success: true,
+      message: 'Friend request successfully sent',
+    });
   } catch (error) {
     handleHttpError(error, res);
   }
@@ -78,4 +87,4 @@ const handleRemoveFriend: Service = async (req: UserRequest, res) => {
   }
 };
 
-export { handleGetFriendRequests, handleAddFriendRequest, handleRemoveFriendRequest, handleRemoveFriend };
+export { handleGetFriendRequests, handleAddFriendRequest, handleRemoveFriendRequest, handleRemoveFriend, handleAcceptFriendRequest };

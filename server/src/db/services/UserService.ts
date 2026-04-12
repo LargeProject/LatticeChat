@@ -52,6 +52,23 @@ export class UserService {
     return response;
   }
 
+  static async acceptFriendRequest(senderId: string, targetId: string) {
+    const sender = await this.findUser(senderId, 'user');
+    const target = await this.findUser(targetId, 'target');
+
+    const friendRequest = await sender.getFriendRequestTo(target._id);
+    if(friendRequest == null) {
+      throw new FriendRequestNotFoundError();
+    }
+
+    await friendRequest.deleteOne();
+    sender.addFriend(target._id);
+    target.addFriend(sender._id);
+
+    const createConversationData: CreateConversation = { memberIds: [senderId, targetId] };
+    await ConversationService.createConversation(createConversationData, true);
+  }
+
   static async createFriendRequest(senderId: string, targetId: string) {
     const sender = await this.findUser(senderId, 'user');
     const target = await this.findUser(targetId, 'target');
@@ -64,29 +81,20 @@ export class UserService {
       throw new FriendExistsError();
     }
 
-    const friendRequest = await sender.getFriendRequestTo(target._id);
-    if (friendRequest != null) {
+    const friendRequest = await FriendRequest.findOne({
+      $or: [
+        {fromId: sender._id, toId: target._id},
+        {fromId: target._id, toId: sender._id}
+      ]
+    });
+    if(friendRequest != null) {
       throw new FriendRequestExistsError();
     }
 
-    const targetFriendRequest = await target.getFriendRequestTo(sender._id);
-
-    // check if target has pending request
-    if (targetFriendRequest != null) {
-      await targetFriendRequest.deleteOne();
-      sender.addFriend(target._id);
-      target.addFriend(sender._id);
-
-      const createConversationData: CreateConversation = { memberIds: [senderId, targetId] };
-      await ConversationService.createConversation(createConversationData, true);
-
-      return null;
-    } else {
-      return await FriendRequest.create({
-        fromId: sender.id,
-        toId: target.id,
-      });
-    }
+    return await FriendRequest.create({
+      fromId: sender.id,
+      toId: target.id,
+    });
   }
 
   static async removeFriendRequest(fromId: string, toId: string) {

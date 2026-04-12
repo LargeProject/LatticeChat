@@ -56,6 +56,19 @@ class UserServices {
     }
   }
 
+  Future<bool> acceptFriendRequest(String senderJWT, String targetId) async {
+    final response = await HttpUtil.sendAuthPatch(senderJWT, '$_baseUrl/users/me/friend-requests', {
+      'targetId': targetId
+    });
+
+    if (response.statusCode == 200) {
+      return true;
+    } else {
+      final body = jsonDecode(response.body);
+      throw ApiError.fromBody(body);
+    }
+  }
+
   Future<bool> sendFriendRequest(String senderJWT, String targetId) async {
     final response = await HttpUtil.sendAuthPost(senderJWT, '$_baseUrl/users/me/friend-requests', {
       'targetId': targetId
