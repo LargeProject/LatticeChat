@@ -8,34 +8,26 @@ const Label = () => {
 
         <p className="text-zinc-400 text-base leading-relaxed">
           End-to-end encrypted messaging powered by
-          <span className="text-zinc-200 font-semibold">
-            {' '}
-            post-quantum cryptography
+          <span className="text-zinc-200 font-semibold"> post-quantum cryptography</span>.{' '}
+          <span className="text-rose-500 font-semibold">
+            In progress demo project-use at your own risk. We cannot guarantee protection against nation state actors.
           </span>
-          .
         </p>
 
         <p className="text-black-500 text-sm leading-relaxed">
           Key exchange uses the
-          <span className="text-purple-400 font-semibold">
-            {' '}
-            Kyber lattice algorithm
-          </span>
-          , designed to remain secure even against future quantum computers.
+          <span className="text-purple-400 font-semibold"> Kyber lattice algorithm</span>, designed to remain secure
+          even against future quantum computers.
         </p>
 
         <div className="flex gap-4 justify-center pt-2 text-[12px] font-mono text-black-500">
           <span className="border border-zinc-800 px-2 py-1 rounded">E2EE</span>
-          <span className="border border-zinc-800 px-2 py-1 rounded">
-            Post-Quantum
-          </span>
-          <span className="border border-zinc-800 px-2 py-1 rounded">
-            Kyber KEM
-          </span>
+          <span className="border border-zinc-800 px-2 py-1 rounded">Post-Quantum</span>
+          <span className="border border-zinc-800 px-2 py-1 rounded">Kyber KEM</span>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Label
+export default Label;
