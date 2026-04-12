@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:latticechat/theme.dart';
+import 'package:latticechat/utils/severity.dart';
 import 'package:zxcvbn/zxcvbn.dart';
 
 class PasswordField extends StatefulWidget {
@@ -25,7 +26,7 @@ class PasswordField extends StatefulWidget {
 class _PasswordFieldState extends State<PasswordField> {
   final TextEditingController _controller = TextEditingController();
   final zxcvbnEvaluator = Zxcvbn();
-  String _statusMessage = 'Password strength:';
+  StatusMessage _status = const StatusMessage(message: 'Password strength:', severity: Severity.unknown);
 
   void _notifyParent(String value, bool isValid) {
     widget.onValueChanged?.call(value);
@@ -35,13 +36,16 @@ class _PasswordFieldState extends State<PasswordField> {
   void _onTextChanged(String value) {
     setState(() {
       if (value.isEmpty) {
-        _statusMessage = 'Password strength: Literally couldn\'t be weaker';
+        _status = const StatusMessage(
+          message: 'Password strength: Literally the weakest',
+          severity: Severity.critical
+        );
         widget.onValueChanged?.call(value);
         widget.onValidationChanged?.call(false);
         return;
       }
       // Only changed to true when score >= 3
-      bool isStrong = false;
+      bool isStrongEnough = false;
 
       // Evaluate the strength of the password
       final result = zxcvbnEvaluator.evaluate(value);
@@ -49,25 +53,40 @@ class _PasswordFieldState extends State<PasswordField> {
       // Set the status message
       switch (result.score) {
         case 4:
-          _statusMessage = 'Password strength: Strong';
+          _status = const StatusMessage(
+            message: 'Password strength: Strong',
+            severity: Severity.none
+          );
           break;
         case 3:
-          _statusMessage = 'Password strength: Okay';
+          _status = const StatusMessage(
+            message: 'Password strength: Okay',
+            severity: Severity.minor
+          );
           break;
         case 2:
-          _statusMessage = 'Password strength: Weak';
+          _status = const StatusMessage(
+            message: 'Password strength: Weak',
+            severity: Severity.major
+          );
           break;
         case 1:
-          _statusMessage = 'Password strength: Very weak';
+          _status = const StatusMessage(
+            message: 'Password strength: Very weak',
+            severity: Severity.major
+          );
           break;
         default:
-          _statusMessage = 'Password strength: Extremely weak';
+          _status = const StatusMessage(
+            message: 'Password strength: Extremely weak',
+            severity: Severity.critical
+          );
       }
 
-      isStrong = (result.score! >= 3);
+      isStrongEnough = (result.score! >= 3);
 
       // Called after changing, allowing for response before server sees it
-      _notifyParent(value, isStrong);
+      _notifyParent(value, isStrongEnough);
     });
   }
 
@@ -92,21 +111,9 @@ class _PasswordFieldState extends State<PasswordField> {
           onChanged: _onTextChanged,
         ),
 
-        const SizedBox(height: 4),
+        const SizedBox(height: 8),
 
-        Text(
-          _statusMessage,
-          style: TextStyle(
-            fontSize: 12,
-            color: _statusMessage.contains('trong')
-                  ? Colors.green
-                : (_statusMessage.contains('eak')
-                  ? Colors.red
-                :_statusMessage.contains('kay')
-                  ?Colors.orange
-                : tertiaryColor),
-          ),
-        ),
+        _status,
       ],
     );
   }
