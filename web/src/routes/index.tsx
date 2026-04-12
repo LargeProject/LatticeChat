@@ -182,7 +182,7 @@ export default function Auth() {
                         </p>
                         {!isPasswordStrong && (
                           <p className="text-[11px] text-rose-300/90">
-                            Use 12+ chars with upper, lower, numbers, and
+                            Use 8+ chars with upper, lower, numbers, and
                             symbols.<br></br>
                           </p>
                         )}
