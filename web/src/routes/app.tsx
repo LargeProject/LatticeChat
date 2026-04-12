@@ -21,19 +21,16 @@ function RouteComponent() {
     return <ChatLayout />;
   }, [activeSection]);
 
-  if (!userInfo || userInfo.isLoading) {
+  if (userInfo.isLoading) {
     return <div>Loading!</div>;
   } else if (!userInfo.data) {
-    // navigate({ to: '/' });
+    navigate({ to: '/' });
   }
 
   return (
     <main className="flex h-screen overflow-hidden bg-(--bg-base) text-(--sea-ink)">
       <AppStateProvider>
-        <Sidebar
-          activeSection={activeSection}
-          onSelectSection={setActiveSection}
-        />
+        <Sidebar activeSection={activeSection} onSelectSection={setActiveSection} />
         <div className="flex-1">{content}</div>
       </AppStateProvider>
     </main>

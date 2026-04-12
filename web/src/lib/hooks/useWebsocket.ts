@@ -16,14 +16,14 @@ export function useWebsocket() {
 
       try {
         const ack = await context.emitWithAck('createMessage', data);
-        return { success: ack.success };
+        return ack;
       } catch (error) {
         console.error('Error sending message:', error);
         messageQueueRef.current.push(data);
         return { success: false, queued: true };
       }
     },
-    [context.emitWithAck, context.socket, context.isAuthenticated]
+    [context.emitWithAck, context.socket, context.isAuthenticated],
   );
 
   const createConversation = useCallback(
@@ -35,13 +35,13 @@ export function useWebsocket() {
 
       try {
         const ack = await context.emitWithAck('createConversation', data);
-        return { success: ack.success };
+        return ack;
       } catch (error) {
         console.error('Error creating conversation:', error);
         return { success: false };
       }
     },
-    [context.emitWithAck, context.socket, context.isAuthenticated]
+    [context.emitWithAck, context.socket, context.isAuthenticated],
   );
 
   const addMember = useCallback(
@@ -53,13 +53,13 @@ export function useWebsocket() {
 
       try {
         const ack = await context.emitWithAck('addMember', { conversationId, userId });
-        return { success: ack.success, error: ack.error };
+        return ack;
       } catch (error) {
         console.error('Error adding member:', error);
-        return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+        return { success: false };
       }
     },
-    [context.emitWithAck, context.socket, context.isAuthenticated]
+    [context.emitWithAck, context.socket, context.isAuthenticated],
   );
 
   const getMessageQueue = useCallback(() => {

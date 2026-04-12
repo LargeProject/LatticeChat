@@ -6,11 +6,7 @@ import {
   handleRemoveFriend,
   handleRemoveFriendRequest,
 } from '../services/friendServices';
-import {
-  handleDeleteUser,
-  handleGetBasicUserInformation,
-  handleGetCurrentUser,
-} from '../services/userServices';
+import { handleDeleteUser, handleGetBasicUserInformation, handleGetCurrentUser } from '../services/userServices';
 import conversationRouter from './conversationRouter';
 import {
   handleCreateKeyExchangeRequest,
@@ -19,6 +15,7 @@ import {
   handleGetPublicKey,
   handleSetPublicKey,
 } from '../services/keyExchangeServices';
+import { handleGetConversationsBySearch } from '../services/conversationServices';
 
 const userRouter = Router({ mergeParams: true });
 
@@ -32,6 +29,7 @@ userRouter.use(attachSession, validateUser);
 userRouter.delete('/', handleDeleteUser);
 
 userRouter.use('/conversations/:conversation_id', conversationRouter);
+userRouter.get('/conversations', handleGetConversationsBySearch);
 
 userRouter.get('/friend-requests', handleGetFriendRequests);
 userRouter.post('/friend-requests', handleAddFriendRequest);

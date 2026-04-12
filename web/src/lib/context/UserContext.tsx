@@ -12,6 +12,7 @@ type UserContextType = {
   refreshUser: () => Promise<void>;
   userInfo: UserInfoState;
   friends: BasicUserInfo[];
+  refreshConversations: (search: string) => Promise<void>;
   conversations: Conversation[];
   refreshFriendRequests: () => Promise<void>;
   friendRequests: FriendRequest[];

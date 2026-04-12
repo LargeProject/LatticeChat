@@ -14,7 +14,10 @@ interface WebsocketProviderProps {
   onError?: (error: string) => void;
 }
 
-type ClientEventMap = {
+/**
+ * Events client can emit
+ */
+export type ClientEventMap = {
   initHandshake: contracts.InitHandshake;
   createMessage: contracts.CreateMessage;
   createConversation: contracts.CreateConversation;
@@ -22,13 +25,13 @@ type ClientEventMap = {
   addMember: contracts.AddMember;
 };
 
-type ServerEventMap = {
+/**
+ * Events client can receive from server
+ */
+export type ServerEventMap = {
   newMessage: contracts.EmitMessage;
-  newConversation: any;
   newMember: contracts.EmitMemberAdded;
 };
-
-type AckResponse = contracts.AckResponse;
 
 export function WebsocketProvider({ children, wsUrl, onError }: WebsocketProviderProps) {
   const [connectionState, setConnectionState] = useState<WebsocketConnectionState>('disconnected');
@@ -80,11 +83,11 @@ export function WebsocketProvider({ children, wsUrl, onError }: WebsocketProvide
   }, [wsUrl, onError]);
 
   const emitWithAck = useCallback(
-    async <K extends keyof ClientEventMap>(
-      event: K,
-      data: ClientEventMap[K],
+    async <T extends keyof ClientEventMap>(
+      event: T,
+      data: ClientEventMap[T],
       timeoutMs: number = 5000,
-    ): Promise<AckResponse> => {
+    ): Promise<contracts.AckResponse> => {
       const sock = socketRef.current;
       if (!sock) {
         throw new Error('Socket not initialized');
@@ -97,7 +100,7 @@ export function WebsocketProvider({ children, wsUrl, onError }: WebsocketProvide
           reject(new Error(`${String(event)} acknowledgement timed out`));
         }, timeoutMs);
 
-        sock.emit(event, data, (response: AckResponse) => {
+        sock.emit(event, data, (response: contracts.AckResponse) => {
           clearTimeout(timer);
           if (timedOut) return;
           resolve(response);
@@ -107,14 +110,14 @@ export function WebsocketProvider({ children, wsUrl, onError }: WebsocketProvide
     [],
   );
 
-  const emit = useCallback(<K extends keyof ServerEventMap>(event: K, data: ServerEventMap[K]) => {
+  const emit = useCallback(<T extends keyof ServerEventMap>(event: T, data: ServerEventMap[T]) => {
     socketRef.current?.emit(event, data);
   }, []);
 
   const performHandshake = useCallback(
     async (socket: Socket) => {
       const jwt = getLocalJWT();
-      let id = getLocalUserId();
+      const id = getLocalUserId();
 
       if (!jwt) {
         setError('No authentication token available (missing JWT)');
@@ -127,10 +130,7 @@ export function WebsocketProvider({ children, wsUrl, onError }: WebsocketProvide
       if (!id) {
         try {
           const response = await fetchUserInfo();
-          if (response?.user.id) {
-            id = response.user.id;
-            setLocalUserId(id);
-          }
+          setLocalUserId(response.user.id);
         } catch (err) {
           console.error('[Websocket] Failed to fetch user info:', err);
         }

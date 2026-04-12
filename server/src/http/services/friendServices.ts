@@ -4,11 +4,10 @@ import { handleHttpError } from '../../util/error';
 import * as db from '../../db';
 
 const handleGetFriendRequests: Service = async (req: UserRequest, res) => {
-  const userId = req.params.user_id?.toString() ?? '';
+  const userId = req.userInfo?.id ?? '';
 
   try {
     const friendRequests = await db.UserService.getFriendRequests(userId);
-    db.UserService;
 
     res.status(200).send({
       success: true,
@@ -21,7 +20,7 @@ const handleGetFriendRequests: Service = async (req: UserRequest, res) => {
 };
 
 const handleAddFriendRequest: Service = async (req: UserRequest, res) => {
-  const senderId = req.params.user_id?.toString() ?? '';
+  const senderId = req.userInfo?.id ?? '';
   const targetId = req.body.targetId ?? '';
 
   try {
@@ -44,29 +43,11 @@ const handleAddFriendRequest: Service = async (req: UserRequest, res) => {
 };
 
 const handleRemoveFriendRequest: Service = async (req: UserRequest, res) => {
-  const type = req.query.type;
-
-  const senderId = req.params.user_id?.toString() ?? '';
+  const senderId = req.userInfo?.id ?? '';
   const targetId = req.body.targetId ?? '';
 
-  let fromId = '';
-  let toId = '';
-  if (type === 'outgoing') {
-    fromId = senderId;
-    toId = targetId;
-  } else if (type === 'incoming') {
-    fromId = targetId;
-    toId = senderId;
-  } else {
-    res.status(409).send({
-      success: false,
-      message: 'Unknown friend request type: ' + type,
-    });
-    return;
-  }
-
   try {
-    await db.UserService.removeFriendRequest(fromId, toId);
+    await db.UserService.removeFriendRequest(senderId, targetId);
     res.status(200).send({
       success: true,
       message: 'Friend request successfully deleted',
@@ -77,18 +58,16 @@ const handleRemoveFriendRequest: Service = async (req: UserRequest, res) => {
 };
 
 const handleRemoveFriend: Service = async (req: UserRequest, res) => {
-  const senderId = req.params.user_id?.toString() ?? '';
+  const senderId = req.userInfo?.id ?? '';
   const targetId = req.body.targetId ?? '';
 
   try {
     await db.UserService.removeFriend(senderId, targetId);
-    db.UserService;
 
     const removePrivateConversationData: RemovePrivateConversation = {
       memberIds: [senderId, targetId],
     };
     await db.ConversationService.removePrivateConversation(removePrivateConversationData);
-    db.ConversationService;
 
     res.status(200).send({
       success: true,

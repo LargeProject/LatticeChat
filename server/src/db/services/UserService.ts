@@ -1,4 +1,4 @@
-import  { BasicUserInfo, Conversation, CreateConversation, CurrentUserResponse } from '@latticechat/shared';
+import { BasicUserInfo, Conversation, CreateConversation, CurrentUserResponse } from '@latticechat/shared';
 import { FriendRequest, KeyExchangeRequest, User } from '../models';
 import { ConversationService } from './ConversationService';
 import {
@@ -14,11 +14,9 @@ import {
   UserNotFoundError,
 } from '../../util/error';
 import { UserDocument } from '../schemas/User';
-import { ConversationDocument } from '../schemas/Conversation';
 import * as contracts from '@latticechat/shared';
 
 export class UserService {
-
   static async findUser(userId: string, type: 'user' | 'target' = 'user') {
     const user = await User.findById(userId);
     if (user == null) {
@@ -36,20 +34,8 @@ export class UserService {
   static async findHydratedUser(userId: string): Promise<CurrentUserResponse> {
     const user = await this.findUser(userId);
 
-    const conversations: ConversationDocument[] = await user.getConversations();
+    const conversations: Conversation[] = await user.getHydratedConversations();
     const friends: BasicUserInfo[] = await user.getFriends();
-
-    const mappedConversations: Conversation[] = [];
-    for (const conversation of conversations) {
-      const mappedConversation: Conversation = {
-        id: conversation.id,
-        name: conversation.name ?? '',
-        isDirectMessage: conversation.isDirectMessage,
-        ownerId: conversation?.ownerId?.toString() ?? '',
-        members: await conversation.getMembers(),
-      };
-      mappedConversations.push(mappedConversation);
-    }
 
     const response: contracts.CurrentUserResponse = {
       user: {
@@ -59,7 +45,7 @@ export class UserService {
         biography: user.biography,
         createdAt: user.createdAt,
       },
-      conversations: mappedConversations,
+      conversations: conversations,
       friends: friends,
     };
 
@@ -107,7 +93,12 @@ export class UserService {
     const sender = await this.findUser(fromId, 'user');
     const target = await this.findUser(toId, 'target');
 
-    const friendRequest = await FriendRequest.findOne({ fromId: sender._id, toId: target._id });
+    const friendRequest = await FriendRequest.findOne({
+      $or: [
+        { fromId: sender._id, toId: target._id },
+        { fromId: target._id, toId: sender._id },
+      ],
+    });
     if (friendRequest == null) {
       throw new FriendRequestNotFoundError();
     }

@@ -2,6 +2,7 @@ import { fetchBasicUserInfo } from '#/lib/api/user.ts';
 import type { BasicUserInfo } from '#/lib/api/user.ts';
 import { HttpError } from '#/lib/util/error.ts';
 import { getLocalJWT, getLocalUserId } from '#/lib/util/storage.ts';
+import type { Conversation as SharedConversation } from '@latticechat/shared';
 
 export type Conversation = {
   id: string;
@@ -76,6 +77,27 @@ export async function fetchConversations(conversationIds: string[]): Promise<Con
   }
 
   return conversations;
+}
+
+export async function fetchConversationsBySearch(search: string) {
+  const userId = getLocalUserId();
+  const jwt = getLocalJWT();
+
+  const response = await fetch(
+    import.meta.env.VITE_API_BASE_URL + '/users/' + userId + '/conversations?search=' + search,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: 'Bearer ' + jwt,
+      },
+    },
+  );
+  const body = await response.json();
+  if (!response.ok) {
+    throw new HttpError(response.status, body.code, body.message);
+  }
+
+  return body.conversations as SharedConversation[];
 }
 
 export async function fetchConversationMessages(conversationId: string): Promise<Message[]> {

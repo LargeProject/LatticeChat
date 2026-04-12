@@ -1,9 +1,10 @@
 import type * as types from '../types';
 import { handleHttpError } from '../../util/error';
 import { UserService } from '../../db';
+import { UserRequest } from '../types';
 
-const handleSetPublicKey: types.Service = async (req, res) => {
-  const userId = req.params.user_id?.toString() ?? '';
+const handleSetPublicKey: types.Service = async (req: UserRequest, res) => {
+  const userId = req.userInfo?.id ?? '';
   const publicKey = req.body.publicKey;
 
   try {
@@ -38,8 +39,8 @@ const handleGetPublicKey: types.Service = async (req, res) => {
   }
 };
 
-const handleCreateKeyExchangeRequest: types.Service = async (req, res) => {
-  const fromId = req.params.user_id?.toString() ?? '';
+const handleCreateKeyExchangeRequest: types.Service = async (req: UserRequest, res) => {
+  const fromId = req.userInfo?.id ?? '';
   const toId = req.body.targetId ?? '';
   const cipher = req.body.cipher ?? '';
 

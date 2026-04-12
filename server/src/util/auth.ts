@@ -33,7 +33,7 @@ const auth = betterAuth({
   database: mongodbAdapter(db, { client }),
   emailAndPassword: {
     enabled: true,
-    minPasswordLength: 3,
+    minPasswordLength: 8,
     maxPasswordLength: 100,
     requireEmailVerification: true,
     onExistingUserSignUp: async ({ user }, request) => {
@@ -93,7 +93,7 @@ const auth = betterAuth({
           });
         }
 
-        if (!/^[a-zA-Z0-9_-]+$/.test(name)) {
+        if (!/^[\w.]+$/.test(name)) {
           throw ctx.error(400, {
             code: 'INVALID_USERNAME_PATTERN',
             message: 'Username must only contain letters and numbers',
