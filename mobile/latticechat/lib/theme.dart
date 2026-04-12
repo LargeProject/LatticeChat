@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tailwind_flutter/tailwind_flutter.dart';
 import 'package:animated_gradient_text/animated_gradient_text.dart';
+import 'package:latticechat/utils/severity.dart';
 
 const focusedColor = Color(0xFF34C759);   // for active toggles
 final backgroundColor = TwColors.zinc.shade950; // trueblack
@@ -204,5 +205,39 @@ AnimatedGradientText secondaryGradientText(BuildContext context, String text) {
   );
 }
 
-// TODO: Create a StatusMessage type made out of a Box and Text
-//  to be used in the register.dart page
+class StatusMessage extends StatelessWidget {
+  final String message;
+  final Severity severity;
+
+  const StatusMessage({
+    super.key,
+    required this.message,
+    required this.severity,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    Color textColor;
+    switch (severity) {
+      case Severity.none:
+        textColor = Colors.green;
+        break;
+      case Severity.unknown:
+        textColor = fadedTextColor;
+        break;
+      case Severity.minor:
+        textColor = Colors.amber;
+        break;
+      case Severity.major:
+        textColor = Colors.orange;
+        break;
+      case Severity.critical:
+        textColor = badboyRed;
+        break;
+    }
+    return Text(
+      message,
+      style: TextStyle(fontSize: 12, color: textColor),
+    );
+  }
+}
