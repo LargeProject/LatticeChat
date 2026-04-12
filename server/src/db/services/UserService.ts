@@ -93,7 +93,12 @@ export class UserService {
     const sender = await this.findUser(fromId, 'user');
     const target = await this.findUser(toId, 'target');
 
-    const friendRequest = await FriendRequest.findOne({ fromId: sender._id, toId: target._id });
+    const friendRequest = await FriendRequest.findOne({
+      $or: [
+        { fromId: sender._id, toId: target._id },
+        { fromId: target._id, toId: sender._id },
+      ],
+    });
     if (friendRequest == null) {
       throw new FriendRequestNotFoundError();
     }
