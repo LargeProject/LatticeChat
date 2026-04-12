@@ -38,7 +38,7 @@ function ForgotPassword() {
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!otp || newPassword.length < 3) {
+    if (!otp || newPassword.length < 8) {
       setMessage('Enter OTP and a valid new password.');
       return;
     }
