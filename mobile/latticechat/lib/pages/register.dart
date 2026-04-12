@@ -6,6 +6,7 @@ import 'package:latticechat/widgets/debounced_validation_field.dart';
 import 'package:latticechat/widgets/password_validation_field.dart';
 import 'package:latticechat/widgets/confirm_password_field.dart';
 import 'package:latticechat/utils/validators.dart';
+import 'package:latticechat/utils/severity.dart';
 import 'package:latticechat/logic/models/error.dart';
 import 'package:latticechat/pages/login.dart';
 import 'package:latticechat/pages/verify.dart';
@@ -42,15 +43,14 @@ class _RegisterPageState extends State<RegisterPage> {
     super.dispose();
   }
 
-  // Simulated API checks
   Future<bool> checkEmailAvailability(String email) async {
-    await Future.delayed(Duration(milliseconds: 500));
-    return !email.contains('test');
+    final api = ApiServices();
+    return !await api.isEmailTaken(email);
   }
 
   Future<bool> checkUsernameAvailability(String username) async {
-    await Future.delayed(Duration(milliseconds: 500));
-    return !username.contains('admin');
+    final api = ApiServices();
+    return !await api.isEmailTaken(username);
   }
   
   // A function meant to be called by the Sign Up button
@@ -132,20 +132,28 @@ class _RegisterPageState extends State<RegisterPage> {
 
                   DebouncedValidationField(
                     label: 'Email',
-                    validator: isValidEmail,
+                    validator: emailValidator,
                     availabilityChecker: checkEmailAvailability,
                     onValueChanged: (value) => _email = value,
                     onValidationChanged: (isValid) => setState(() => _isEmailValid = isValid),
+                    emptyStatus: const StatusMessage(
+                      message: 'Email is required',
+                      severity: Severity.major
+                    )
                   ),
 
                   const SizedBox(height: 16),
 
                   DebouncedValidationField(
                     label: 'Username',
-                    validator: isValidUsername,
+                    validator: usernameValidator,
                     availabilityChecker: checkUsernameAvailability,
                     onValueChanged: (value) => _username = value,
                     onValidationChanged: (isValid) => setState(() => _isUsernameValid = isValid),
+                    emptyStatus: const StatusMessage(
+                      message: 'Username is required',
+                      severity: Severity.major
+                    )
                   ),
 
                   const SizedBox(height: 16),
@@ -167,7 +175,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   const SizedBox(height: 16),
 
                   ElevatedButton(
-                    onPressed: _handleSignUp,
+                    onPressed: _isFormValid ? _handleSignUp : null,
                     style: AppButtonStyles.primaryElevated,
                     child: const Text('Sign Up')
                   )

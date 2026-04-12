@@ -67,10 +67,27 @@ class ApiServices {
     }
   }
 
+  Future<bool> isUsernameTaken(String username) async {
+    // TODO: Actual logic will get put here when it is implemented.
+    // The await and if statement can be deleted.
+    await Future.delayed(Duration(milliseconds: 500));
+    if (username.contains('admin')) return true;
+    return false;
+  }
+
+  Future<bool> isEmailTaken(String email) async {
+    // TODO: Actual logic will get put here when it is implemented
+    // The await and if statement can be deleted.
+    await Future.delayed(Duration(milliseconds: 500));
+    if (email.contains('admin')) return true;
+    return false;
+  }
+
   Future<http.Response> _post(String url, Map<String, dynamic> body) async {
     return await _fetch("post", url, body);
   }
 
+  // ignore: unused_element
   Future<http.Response> _get(String url) async {
     return await _fetch("post", url, {});
   }
