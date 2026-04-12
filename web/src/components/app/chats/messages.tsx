@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useRef } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import type { Message } from '#/lib/api/conversation';
 
 export type MessageRole = 'user' | 'assistant';
@@ -89,6 +89,7 @@ export function MessageList({
   smoothScroll = true,
 }: MessageListProps) {
   const viewportRef = useRef<HTMLDivElement>(null);
+  const [isUserNearBottom, setIsUserNearBottom] = useState(true);
   const lastMessageId = useMemo(
     () => messages[messages.length - 1]?.id,
     [messages],
@@ -98,17 +99,31 @@ export function MessageList({
     const viewport = viewportRef.current;
     if (!viewport) return;
 
-    const distanceFromBottom =
-      viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight;
-    const isNearBottom = distanceFromBottom <= SCROLL_THRESHOLD_PX;
+    const updateIsNearBottom = () => {
+      const distanceFromBottom =
+        viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight;
+      setIsUserNearBottom(distanceFromBottom <= SCROLL_THRESHOLD_PX);
+    };
 
-    if (!isNearBottom && messages.length > 1) return;
+    updateIsNearBottom();
+    viewport.addEventListener('scroll', updateIsNearBottom);
+
+    return () => {
+      viewport.removeEventListener('scroll', updateIsNearBottom);
+    };
+  }, []);
+
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+
+    if (!isUserNearBottom && messages.length > 1) return;
 
     viewport.scrollTo({
       top: viewport.scrollHeight,
       behavior: smoothScroll ? 'smooth' : 'auto',
     });
-  }, [lastMessageId, messages.length, smoothScroll]);
+  }, [lastMessageId, messages.length, smoothScroll, isUserNearBottom]);
 
   return (
     <div
