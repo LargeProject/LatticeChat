@@ -140,6 +140,8 @@ class AppButtonStyles {
     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
     shape: RoundedRectangleBorder(),  // remove outline
+    disabledForegroundColor: tertiaryColor,
+    disabledBackgroundColor: quatenaryColor,
   );
 
   static ButtonStyle secondaryElevated = ElevatedButton.styleFrom(

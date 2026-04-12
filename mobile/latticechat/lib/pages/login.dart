@@ -6,10 +6,6 @@ import 'package:latticechat/pages/register.dart';
 import 'package:latticechat/pages/verify.dart';
 import 'package:latticechat/pages/chatList.dart';
 
-
-
-import 'home.dart';
-
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
