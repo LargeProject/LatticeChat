@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_debouncer/flutter_debouncer.dart';
-
-typedef ValueValidator = String? Function(String value);
+import 'package:latticechat/theme.dart';
+import 'package:latticechat/utils/severity.dart';
+import 'package:latticechat/utils/validators.dart';
 
 class DebouncedValidationField extends StatefulWidget {
   final String label;
@@ -10,12 +11,13 @@ class DebouncedValidationField extends StatefulWidget {
   final Duration debounceDelay;
 
   // Customizable status messages
-
-  final String emptyMessage;
-  final String checkingMessage;
-  final String noContactMessage;
-  final String availableMessage;
-  final String unavailableMessage;
+  final StatusMessage startingStatus;
+  final StatusMessage emptyStatus;
+  final StatusMessage validatingStatus;
+  final StatusMessage requestingStatus;
+  final StatusMessage noContactStatus;
+  final StatusMessage availableStatus;
+  final StatusMessage unavailableStatus;
 
   // Callbacks for when the field has stabilized (debounced)
   final ValueChanged<String>? onValueChanged;
@@ -27,11 +29,34 @@ class DebouncedValidationField extends StatefulWidget {
     required this.validator,
     required this.availabilityChecker,
     this.debounceDelay = const Duration(milliseconds: 500),
-    this.emptyMessage = 'Enter somethin\' will ya?',
-    this.checkingMessage = 'Checking availability...',
-    this.noContactMessage = 'Unable to contact server',
-    this.availableMessage = 'Available',
-    this.unavailableMessage = 'Unavailable',
+    this.startingStatus = const StatusMessage(
+      message: '',
+      severity: Severity.unknown
+    ),
+    this.emptyStatus = const StatusMessage(
+      message: 'Field required',
+      severity: Severity.major
+    ),
+    this.validatingStatus = const StatusMessage(
+      message: 'Checking validity...',
+      severity: Severity.unknown
+    ),
+    this.requestingStatus = const StatusMessage(
+      message: 'Requesting availability...',
+      severity: Severity.unknown
+    ),
+    this.noContactStatus = const StatusMessage(
+      message: 'Unable to contact server',
+      severity: Severity.critical
+    ),
+    this.availableStatus = const StatusMessage(
+      message: 'Available',
+      severity: Severity.none
+    ),
+    this.unavailableStatus = const StatusMessage(
+      message: 'Unavailable',
+      severity: Severity.critical
+    ),
     this.onValueChanged,
     this.onValidationChanged,
   });
@@ -44,7 +69,7 @@ class _DebouncedValidationFieldState extends State<DebouncedValidationField> {
   final TextEditingController _controller = TextEditingController();
   final Debouncer _debouncer = Debouncer();
   // Default upon opening the page or initializing the widget.
-  String _statusMessage = '';
+  StatusMessage _status = StatusMessage(message: '', severity: Severity.unknown);
 
   void _notifyParent(String value, bool isValid) {
     widget.onValueChanged?.call(value);
@@ -55,28 +80,30 @@ class _DebouncedValidationFieldState extends State<DebouncedValidationField> {
     _debouncer.debounce(
       duration: widget.debounceDelay,
       onDebounce: () async {
-        setState(() => _statusMessage = widget.checkingMessage);
+        // Begin checking
+        setState(() => _status = widget.validatingStatus);
 
         if (value.isEmpty) {
-          setState(() => _statusMessage = widget.emptyMessage);
+          setState(() => _status = widget.emptyStatus);
           return;
         }
 
-        final validatorError = widget.validator(value);
-        if (validatorError != null) {
-          setState(() => _statusMessage = validatorError);
+        final validatorMessage = widget.validator(value);
+        if (validatorMessage != null) {
+          setState(() => _status = validatorMessage);
           return;
         }
 
+        setState(() => _status = widget.requestingStatus);
         if (widget.availabilityChecker == null) {
-          setState(() => _statusMessage = widget.noContactMessage);
+          setState(() => _status = widget.noContactStatus);
           widget.onValueChanged?.call(value);
           return;
         }
 
         final bool available = await widget.availabilityChecker!(value);
         setState(() {
-          _statusMessage = available ? widget.availableMessage : widget.unavailableMessage;
+          _status = available ? widget.availableStatus : widget.unavailableStatus;
         });
 
         // Called after debouncing, allowing for response before server sees it
@@ -108,15 +135,7 @@ class _DebouncedValidationFieldState extends State<DebouncedValidationField> {
 
         const SizedBox(height: 4),
         
-        Text(
-          _statusMessage,
-          style: TextStyle(
-            fontSize: 12,
-            color: _statusMessage.contains('Available')
-                ? Colors.green
-                : (_statusMessage.contains('Unavailable') ? Colors.red : Colors.orange),
-          ),
-        ),
+        _status,
       ],
     );
   }

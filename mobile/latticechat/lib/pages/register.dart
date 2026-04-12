@@ -6,6 +6,7 @@ import 'package:latticechat/widgets/debounced_validation_field.dart';
 import 'package:latticechat/widgets/password_validation_field.dart';
 import 'package:latticechat/widgets/confirm_password_field.dart';
 import 'package:latticechat/utils/validators.dart';
+import 'package:latticechat/utils/severity.dart';
 import 'package:latticechat/logic/models/error.dart';
 import 'package:latticechat/pages/login.dart';
 import 'package:latticechat/pages/verify.dart';
@@ -135,7 +136,10 @@ class _RegisterPageState extends State<RegisterPage> {
                     availabilityChecker: checkEmailAvailability,
                     onValueChanged: (value) => _email = value,
                     onValidationChanged: (isValid) => setState(() => _isEmailValid = isValid),
-                    emptyMessage: "Email is required",
+                    emptyStatus: const StatusMessage(
+                      message: 'Email is required',
+                      severity: Severity.major
+                    )
                   ),
 
                   const SizedBox(height: 16),
@@ -146,7 +150,10 @@ class _RegisterPageState extends State<RegisterPage> {
                     availabilityChecker: checkUsernameAvailability,
                     onValueChanged: (value) => _username = value,
                     onValidationChanged: (isValid) => setState(() => _isUsernameValid = isValid),
-                    emptyMessage: "Username is required",
+                    emptyStatus: const StatusMessage(
+                      message: 'Username is required',
+                      severity: Severity.major
+                    )
                   ),
 
                   const SizedBox(height: 16),
