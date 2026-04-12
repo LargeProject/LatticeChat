@@ -131,20 +131,22 @@ class _RegisterPageState extends State<RegisterPage> {
 
                   DebouncedValidationField(
                     label: 'Email',
-                    validator: isValidEmail,
+                    validator: emailValidator,
                     availabilityChecker: checkEmailAvailability,
                     onValueChanged: (value) => _email = value,
                     onValidationChanged: (isValid) => setState(() => _isEmailValid = isValid),
+                    emptyMessage: "Email is required",
                   ),
 
                   const SizedBox(height: 16),
 
                   DebouncedValidationField(
                     label: 'Username',
-                    validator: isValidUsername,
+                    validator: usernameValidator,
                     availabilityChecker: checkUsernameAvailability,
                     onValueChanged: (value) => _username = value,
                     onValidationChanged: (isValid) => setState(() => _isUsernameValid = isValid),
+                    emptyMessage: "Username is required",
                   ),
 
                   const SizedBox(height: 16),
@@ -166,7 +168,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   const SizedBox(height: 16),
 
                   ElevatedButton(
-                    onPressed: _handleSignUp,
+                    onPressed: _isFormValid ? _handleSignUp : null,
                     style: AppButtonStyles.primaryElevated,
                     child: const Text('Sign Up')
                   )

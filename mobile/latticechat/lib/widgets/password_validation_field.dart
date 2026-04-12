@@ -35,7 +35,7 @@ class _PasswordFieldState extends State<PasswordField> {
   void _onTextChanged(String value) {
     setState(() {
       if (value.isEmpty) {
-        _statusMessage = 'Password strength:';
+        _statusMessage = 'Password strength: Literally couldn\'t be weaker';
         widget.onValueChanged?.call(value);
         widget.onValidationChanged?.call(false);
         return;

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_debouncer/flutter_debouncer.dart';
 
-typedef ValueValidator = bool Function(String value);
+typedef ValueValidator = String? Function(String value);
 
 class DebouncedValidationField extends StatefulWidget {
   final String label;
@@ -13,7 +13,6 @@ class DebouncedValidationField extends StatefulWidget {
 
   final String emptyMessage;
   final String checkingMessage;
-  final String invalidFormatMessage;
   final String noContactMessage;
   final String availableMessage;
   final String unavailableMessage;
@@ -26,11 +25,10 @@ class DebouncedValidationField extends StatefulWidget {
     super.key,
     required this.label,
     required this.validator,
-    this.availabilityChecker,
+    required this.availabilityChecker,
     this.debounceDelay = const Duration(milliseconds: 500),
-    this.emptyMessage = 'Enter to check availability.',
+    this.emptyMessage = 'Enter somethin\' will ya?',
     this.checkingMessage = 'Checking availability...',
-    this.invalidFormatMessage = 'Invalid format',
     this.noContactMessage = 'Unable to contact server',
     this.availableMessage = 'Available',
     this.unavailableMessage = 'Unavailable',
@@ -45,6 +43,7 @@ class DebouncedValidationField extends StatefulWidget {
 class _DebouncedValidationFieldState extends State<DebouncedValidationField> {
   final TextEditingController _controller = TextEditingController();
   final Debouncer _debouncer = Debouncer();
+  // Default upon opening the page or initializing the widget.
   String _statusMessage = '';
 
   void _notifyParent(String value, bool isValid) {
@@ -58,8 +57,14 @@ class _DebouncedValidationFieldState extends State<DebouncedValidationField> {
       onDebounce: () async {
         setState(() => _statusMessage = widget.checkingMessage);
 
-        if (!widget.validator(value)) {
-          setState(() => _statusMessage = widget.invalidFormatMessage);
+        if (value.isEmpty) {
+          setState(() => _statusMessage = widget.emptyMessage);
+          return;
+        }
+
+        final validatorError = widget.validator(value);
+        if (validatorError != null) {
+          setState(() => _statusMessage = validatorError);
           return;
         }
 
