@@ -3,7 +3,7 @@ import type { Message } from '#/lib/api/conversation';
 import type { BasicUserInfo } from '#/lib/api/user';
 
 export type MessageRole = 'user' | 'assistant';
-
+const SYSTEM_USER_ID = 'system';
 
 type MessageBubbleProps = {
   message: Message;
@@ -30,6 +30,16 @@ function Avatar({ name }: { name: string }) {
 }
 
 export const MessageBubble = memo(function MessageBubble({ message, isOwnMessage, members = [] }: MessageBubbleProps) {
+  if (message.senderId === SYSTEM_USER_ID) {
+    return (
+      <li className="flex w-full justify-center">
+        <div className="text-gray-400 italic text-xs font-normal py-1 px-2 text-center w-full select-none">
+          {message.content}
+        </div>
+      </li>
+    );
+  }
+
   const bubbleClass = isOwnMessage ? userBubbleClass : assistantBubbleClass;
   const alignment = isOwnMessage ? 'justify-end' : 'justify-start';
 
