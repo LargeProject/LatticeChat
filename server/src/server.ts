@@ -17,7 +17,7 @@ const corsOptions = {
 const app = express();
 app.use(cors(corsOptions));
 app.use(express.json());
-app.use(logger);
+if(ENV.HTTP_LOG_LEVEL == 'info') app.use(logger);
 app.use('/api', apiRouter);
 
 export const server = http.createServer(app);
