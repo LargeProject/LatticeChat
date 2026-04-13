@@ -1,5 +1,3 @@
-import 'dart:js_interop';
-
 import 'package:latticechat/logic/models/conversation.dart';
 import 'package:latticechat/logic/models/friend_request.dart';
 import 'package:latticechat/logic/models/user.dart';
@@ -53,8 +51,8 @@ class FetchFriendRequestsResponse {
   FetchFriendRequestsResponse._({required this.friendRequests, required this.message});
 
   static FetchFriendRequestsResponse fromJson(Map<String, dynamic> json) {
-    JSArray jsFriends = json['friendRequests'];
-    final friendRequests = jsFriends.toDart.map((jsonFriendRequest) => FriendRequestModel.fromJson(jsonFriendRequest as Map<String, dynamic>)).toList();
+    List<dynamic> jsFriends = json['friendRequests'];
+    final friendRequests = jsFriends.map((jsonFriendRequest) => FriendRequestModel.fromJson(jsonFriendRequest as Map<String, dynamic>)).toList();
 
     return FetchFriendRequestsResponse._(
       friendRequests: friendRequests,
@@ -70,8 +68,8 @@ class FetchConversationsResponse {
   FetchConversationsResponse._({required this.conversations, required this.message});
 
   static FetchConversationsResponse fromJson(Map<String, dynamic> json) {
-    JSArray jsConversations = json['conversations'];
-    final conversations = jsConversations.toDart.map((jsonConversation) => ConversationModel.fromJson(jsonConversation as Map<String, dynamic>)).toList();
+    List<dynamic> jsConversations = json['conversations'];
+    final conversations = jsConversations.map((jsonConversation) => ConversationModel.fromJson(jsonConversation as Map<String, dynamic>)).toList();
 
     return FetchConversationsResponse._(
         conversations: conversations,
@@ -87,8 +85,8 @@ class FetchConversationMessagesResponse {
   FetchConversationMessagesResponse._({required this.messages, required this.message});
 
   static FetchConversationMessagesResponse fromJson(Map<String, dynamic> json) {
-    JSArray jsMessages = json['messages'];
-    final messages = jsMessages.toDart.map((jsonMessage) => MessageModel.fromJson(jsonMessage as Map<String, dynamic>)).toList();
+    List<dynamic> jsMessages = json['messages'];
+    final messages = jsMessages.map((jsonMessage) => MessageModel.fromJson(jsonMessage as Map<String, dynamic>)).toList();
 
     return FetchConversationMessagesResponse._(
         messages: messages,

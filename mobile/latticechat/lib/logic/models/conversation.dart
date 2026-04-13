@@ -1,5 +1,3 @@
-import 'dart:js_interop';
-
 import 'package:latticechat/logic/models/user.dart';
 
 class ConversationModel {
@@ -19,8 +17,8 @@ class ConversationModel {
   });
 
   static ConversationModel fromJson(Map<String, dynamic> json) {
-    JSArray jsMembers = json['members'];
-    final members = jsMembers.toDart.map((jsonFriend) => BasicUserModel.fromJson(jsonFriend as Map<String, dynamic>)).toList();
+    List<dynamic> jsMembers = json['members'];
+    final members = jsMembers.map((jsonFriend) => BasicUserModel.fromJson(jsonFriend as Map<String, dynamic>)).toList();
 
     return ConversationModel._(
       id: json['id'],
