@@ -2,7 +2,13 @@ import { useEffect, useRef, useState } from 'react';
 import { Check, X, User, UserPlus, Inbox, Send, UserMinus, Users } from 'lucide-react';
 import { useUser } from '#/lib/context/UserContext.tsx';
 import { removeFriendRequest, sendFriendRequest, removeFriend  } from '#/lib/api/friend.ts';
-import type {FriendRequest} from '#/lib/api/friend.ts';
+import {
+  removeFriendRequest,
+  sendFriendRequest,
+  removeFriend,
+  type FriendRequest,
+  acceptFriendRequest,
+} from '#/lib/api/friend.ts';
 import { fetchBasicUserInfo } from '#/lib/api/user.ts';
 import { useAsyncEffect } from '#/components/hooks/useAsyncEffect.ts';
 
@@ -130,7 +136,8 @@ export default function FriendsLayout() {
 
   const handleAccept = async (id: string) => {
     try {
-      await sendFriendRequest(id);
+      await acceptFriendRequest(id);
+      await refreshUser();
     } catch (error: any) {
       pushMessage(`Error Occurred: ${error.message}`, 'error');
       return;
@@ -140,7 +147,7 @@ export default function FriendsLayout() {
 
   const handleDecline = async (id: string) => {
     try {
-      await removeFriendRequest(id, 'incoming');
+      await removeFriendRequest(id);
     } catch (error: any) {
       pushMessage(`Error Occurred: ${error.message}`, 'error');
       return;
@@ -150,7 +157,7 @@ export default function FriendsLayout() {
 
   const handleCancelSent = async (id: string) => {
     try {
-      await removeFriendRequest(id, 'outgoing');
+      await removeFriendRequest(id);
     } catch (error: any) {
       pushMessage(`Error Occurred: ${error.message}`, 'error');
       return;

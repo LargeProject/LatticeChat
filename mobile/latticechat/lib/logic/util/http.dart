@@ -29,6 +29,14 @@ class HttpUtil {
     return _fetch('DELETE', jwt, url, body);
   }
 
+  static Future<http.Response> sendPatch(String url, Map<String, dynamic> body) async {
+    return sendAuthPatch('', url, body);
+  }
+
+  static Future<http.Response> sendAuthPatch(String jwt, String url, Map<String, dynamic> body) async {
+    return _fetch('PATCH', jwt, url, body);
+  }
+
   static Future<http.Response> _fetch(String type, String jwt, String url, Map<String, dynamic> body) async {
     var headers = {
       'Content-Type': 'application/json',
@@ -49,6 +57,8 @@ class HttpUtil {
         return await http.get(uri, headers: headers);
       case "DELETE":
         return await http.delete(uri, headers: headers, body: jsonBody);
+      case "PATCH":
+        return await http.patch(uri, headers: headers, body: jsonBody);
       default:
         return http.Response("{}", 500);
     }

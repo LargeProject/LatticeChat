@@ -1,5 +1,3 @@
-import 'dart:js_interop';
-
 import 'conversation.dart';
 
 class UserModel {
@@ -23,11 +21,11 @@ class UserModel {
   static UserModel fromJson(Map<String, dynamic> json) {
     final user = json['user'];
 
-    JSArray jsConversations = json['conversations'];
-    JSArray jsFriends = json['friends'];
+    List<Map<String, dynamic>> jsonConversations = json['conversations'].cast<Map<String, dynamic>>();
+    List<Map<String, dynamic>> jsonFriends = json['friends'].cast<Map<String, dynamic>>();
 
-    final conversations = jsConversations.toDart.map((jsonConversation) => ConversationModel.fromJson(jsonConversation as Map<String, dynamic>)).toList();
-    final friends = jsFriends.toDart.map((jsonFriend) => BasicUserModel.fromJson(jsonFriend as Map<String, dynamic>)).toList();
+    final conversations = jsonConversations.map((jsonConversation) => ConversationModel.fromJson(jsonConversation)).toList();
+    final friends = jsonFriends.map((jsonFriend) => BasicUserModel.fromJson(jsonFriend)).toList();
 
     return UserModel._(
       id: user['id'],
