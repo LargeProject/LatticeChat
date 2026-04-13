@@ -32,6 +32,9 @@ class ApiServices {
     final body = jsonDecode(response.body);
     body['jsonWT'] = response.headers['set-auth-token'];
 
+    print('SIGN IN STATUS: ${response.statusCode}');
+    print('SIGN IN BODY: $body');
+
     if (response.statusCode == 200) {
       return SignInResponse.fromJson(body)!;
     } else {

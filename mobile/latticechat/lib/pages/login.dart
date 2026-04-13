@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:latticechat/pages/register.dart';
+import 'package:latticechat/pages/chat_list.dart';
 import 'package:latticechat/logic/api.dart';
 import 'package:latticechat/logic/models/error.dart';
 import 'package:latticechat/theme.dart';
-
-import 'home.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -13,11 +12,12 @@ class LoginPage extends StatefulWidget {
   State<LoginPage> createState() => _LoginPageState();
 }
 
-// TODO: Link the pages with their respective buttons
-
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+
+  bool _isLoading = false;
+  String? _errorMessage;
 
   @override
   void dispose() {
@@ -26,48 +26,71 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  // A function meant to be called by the Sign In button
-  void _handleLogin() async {
-
-    final email = _emailController.text;
+  Future<void> _handleLogin() async {
+    final email = _emailController.text.trim();
     final password = _passwordController.text;
 
-    if (email.isEmpty || password.isEmpty) { // you forgot something
-      debugPrint('Sign In button was pressed');
+    if (email.isEmpty || password.isEmpty) {
+      setState(() {
+        _errorMessage = 'Please enter your email and password.';
+      });
       return;
     }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
 
     try {
       final api = ApiServices();
       final response = await api.attemptSignIn(email, password);
 
       debugPrint('Sign in successful!');
+      debugPrint('User-id: ${response.user.id}');
+      debugPrint('User-name: ${response.user.username}');
+      debugPrint('JWT: ${response.jsonWT}');
 
-      var user = response.user;
-      debugPrint('User-id: ${user.id}');
-      debugPrint("User-name: ${user.username}");
+      if (!mounted) return;
 
-      // Switches to a temporary Home page
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => HomePage()),
+        MaterialPageRoute(
+          builder: (context) => ChatListPage(currentUser: response.user),
+        ),
       );
-
     } on ApiError catch (error) {
+      if (!mounted) return;
+
+      setState(() {
+        _errorMessage = error.message;
+      });
+
       debugPrint(error.toString());
+    } catch (error) {
+      if (!mounted) return;
+
+      setState(() {
+        _errorMessage = 'Something went wrong while signing in.';
+      });
+
+      debugPrint(error.toString());
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
-  // A function meant to be called by the Forgot Password button
   void _handleForgotPass() {
     debugPrint('Forgot Pass button was pressed');
   }
 
-  // A function meant to be called by the No Account button
   void _handleNoAccount() {
     debugPrint('No Account button was pressed');
 
-    // Temporary page navigation
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => RegisterPage()),
@@ -81,65 +104,66 @@ class _LoginPageState extends State<LoginPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-
-            // Animated Gradient Text title from theme.dart
             primaryGradientText(context, 'Welcome Back'),
-
             const SizedBox(height: 16),
-
             Text(
               'Sign in to continue your encrypted chats',
               style: Theme.of(context).textTheme.bodyMedium,
             ),
-            
             const SizedBox(height: 16),
-
-            Container(  // Login label
+            Container(
               width: 300,
-              padding: EdgeInsets.fromLTRB(16, 32, 16, 8),
+              padding: const EdgeInsets.fromLTRB(16, 32, 16, 8),
               decoration: AppContainerStyles.genericBox,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-
                   TextField(
                     controller: _emailController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Email',
                     ),
                   ),
-                  
                   const SizedBox(height: 16),
-
                   TextField(
                     controller: _passwordController,
-                    obscureText: true,  // cuz it's a password
-                    decoration: InputDecoration(
+                    obscureText: true,
+                    decoration: const InputDecoration(
                       labelText: 'Password',
                     ),
                   ),
-
-                  const SizedBox(height: 16),
-
+                  const SizedBox(height: 12),
+                  if (_errorMessage != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Text(
+                        _errorMessage!,
+                        style: const TextStyle(color: Colors.redAccent),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
                   ElevatedButton(
-                    onPressed: _handleLogin,
+                    onPressed: _isLoading ? null : _handleLogin,
                     style: AppButtonStyles.primaryElevated,
-                    child: const Text('Sign In'),
+                    child: _isLoading
+                        ? const SizedBox(
+                      height: 18,
+                      width: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                        : const Text('Sign In'),
                   ),
-
                   const SizedBox(height: 8),
-
                   TextButton(
                     onPressed: _handleForgotPass,
-                    child: const Text('Forgot Password?')
+                    child: const Text('Forgot Password?'),
                   ),
                 ],
               ),
             ),
-
             TextButton(
               onPressed: _handleNoAccount,
-              child: const Text('Don\'t have an account? Sign up')
+              child: const Text('Don\'t have an account? Sign up'),
             ),
           ],
         ),
