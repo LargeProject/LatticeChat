@@ -17,8 +17,8 @@ class ConversationModel {
   });
 
   static ConversationModel fromJson(Map<String, dynamic> json) {
-    List<dynamic> jsMembers = json['members'];
-    final members = jsMembers.map((jsonFriend) => BasicUserModel.fromJson(jsonFriend as Map<String, dynamic>)).toList();
+    List<Map<String, dynamic>> jsonMembers = json['members'].cast<Map<String, dynamic>>();
+    final members = jsonMembers.map((jsonMember) => BasicUserModel.fromJson(jsonMember)).toList();
 
     return ConversationModel._(
       id: json['id'],

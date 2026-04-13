@@ -51,8 +51,8 @@ class FetchFriendRequestsResponse {
   FetchFriendRequestsResponse._({required this.friendRequests, required this.message});
 
   static FetchFriendRequestsResponse fromJson(Map<String, dynamic> json) {
-    List<dynamic> jsFriends = json['friendRequests'];
-    final friendRequests = jsFriends.map((jsonFriendRequest) => FriendRequestModel.fromJson(jsonFriendRequest as Map<String, dynamic>)).toList();
+    List<Map<String, dynamic>> jsonFriendRequests = json['friendRequests'].cast<Map<String, dynamic>>();
+    final friendRequests = jsonFriendRequests.map((jsonFriendRequest) => FriendRequestModel.fromJson(jsonFriendRequest)).toList();
 
     return FetchFriendRequestsResponse._(
       friendRequests: friendRequests,
@@ -68,8 +68,8 @@ class FetchConversationsResponse {
   FetchConversationsResponse._({required this.conversations, required this.message});
 
   static FetchConversationsResponse fromJson(Map<String, dynamic> json) {
-    List<dynamic> jsConversations = json['conversations'];
-    final conversations = jsConversations.map((jsonConversation) => ConversationModel.fromJson(jsonConversation as Map<String, dynamic>)).toList();
+    List<Map<String, dynamic>> jsonConversations = json['conversations'].cast<Map<String, dynamic>>();
+    final conversations = jsonConversations.map((jsonConversation) => ConversationModel.fromJson(jsonConversation)).toList();
 
     return FetchConversationsResponse._(
         conversations: conversations,
@@ -85,8 +85,8 @@ class FetchConversationMessagesResponse {
   FetchConversationMessagesResponse._({required this.messages, required this.message});
 
   static FetchConversationMessagesResponse fromJson(Map<String, dynamic> json) {
-    List<dynamic> jsMessages = json['messages'];
-    final messages = jsMessages.map((jsonMessage) => MessageModel.fromJson(jsonMessage as Map<String, dynamic>)).toList();
+    List<Map<String, dynamic>> jsonMessages = json['messages'].cast<Map<String, dynamic>>();
+    final messages = jsonMessages.map((jsonMessage) => MessageModel.fromJson(jsonMessage)).toList();
 
     return FetchConversationMessagesResponse._(
         messages: messages,
