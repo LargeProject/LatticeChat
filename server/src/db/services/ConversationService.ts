@@ -103,8 +103,8 @@ export class ConversationService {
     }
 
     // // Add member to conversation and add conversation to user's conversationIds
-    // await Conversation.updateOne({ _id: conversation._id }, { $addToSet: { memberIds: target._id } });
-    // await User.updateOne({ _id: target._id }, { $addToSet: { conversationIds: conversation._id } });
+    await Conversation.updateOne({ _id: conversation._id }, { $addToSet: { memberIds: target._id } });
+    await User.updateOne({ _id: target._id }, { $addToSet: { conversationIds: conversation._id } });
 
     return {
       conversationId: conversation._id.toString(),
