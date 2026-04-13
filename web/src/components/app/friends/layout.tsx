@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { Check, X, User, UserPlus, Inbox, Send, UserMinus, Users } from 'lucide-react';
 import { useUser } from '#/lib/context/UserContext.tsx';
-import { removeFriendRequest, sendFriendRequest, removeFriend, type FriendRequest } from '#/lib/api/friend.ts';
+import { removeFriendRequest, sendFriendRequest, removeFriend  } from '#/lib/api/friend.ts';
+import type {FriendRequest} from '#/lib/api/friend.ts';
 import { fetchBasicUserInfo } from '#/lib/api/user.ts';
 import { useAsyncEffect } from '#/components/hooks/useAsyncEffect.ts';
 
@@ -106,7 +107,7 @@ export default function FriendsLayout() {
     let targetUser = null;
     try {
       targetUser = await fetchBasicUserInfo(normalizedInput, true);
-      await sendFriendRequest(targetUser!.id);
+      await sendFriendRequest(targetUser.id);
     } catch (error: any) {
       // TODO: add specific http errors
       pushMessage(`Error Occurred: ${error.message}`, 'error');

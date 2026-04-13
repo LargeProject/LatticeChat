@@ -1,9 +1,9 @@
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import type { Message } from '#/lib/api/conversation';
+import type { BasicUserInfo } from '#/lib/api/user';
 
 export type MessageRole = 'user' | 'assistant';
 
-import type { BasicUserInfo } from '#/lib/api/user';
 
 type MessageBubbleProps = {
   message: Message;
@@ -11,7 +11,7 @@ type MessageBubbleProps = {
   members?: BasicUserInfo[];
 };
 
-const bubbleBaseClass = 'max-w-[78%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed shadow-sm ring-1';
+const bubbleBaseClass = 'max-w-[100%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed shadow-sm ring-1';
 const userBubbleClass = 'bg-[var(--accent,#14b8a6)] text-white ring-transparent rounded-br-md';
 const assistantBubbleClass = 'bg-(--surface) text-(--text-primary) ring-(--line) rounded-bl-md';
 

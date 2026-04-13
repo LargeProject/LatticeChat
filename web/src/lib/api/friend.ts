@@ -1,4 +1,5 @@
-import { type BasicUserInfo, fetchBasicUserInfo } from '#/lib/api/user.ts';
+import {  fetchBasicUserInfo } from '#/lib/api/user.ts';
+import type {BasicUserInfo} from '#/lib/api/user.ts';
 import { HttpError } from '#/lib/util/error.ts';
 import { getLocalJWT, getLocalUserId } from '#/lib/util/storage.ts';
 
@@ -36,7 +37,7 @@ export async function fetchFriendRequests(): Promise<FriendRequest[]> {
 
     const friendRequest: FriendRequest = {
       type: requestType ?? 'incoming',
-      associatedUser: associatedUser!,
+      associatedUser: associatedUser,
     };
     friendRequests.push(friendRequest);
   }
@@ -108,7 +109,7 @@ export async function removeFriend(targetId: string) {
 }
 
 export async function fetchFriends(friendIds: string[]): Promise<BasicUserInfo[]> {
-  let friends: BasicUserInfo[] = [];
+  const friends: BasicUserInfo[] = [];
   for (const friendId of friendIds) {
     const friend = await fetchBasicUserInfo(friendId);
 

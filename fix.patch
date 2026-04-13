@@ -1,0 +1,9 @@
+--- web/src/components/app/chats/messages.tsx
++++ web/src/components/app/chats/messages.tsx
+@@ -2,6 +2,7 @@
+ import type { Message } from '#/lib/api/conversation';
+ import type { BasicUserInfo } from '#/lib/api/user';
+ 
+ export type MessageRole = 'user' | 'assistant';
+ 
+ type MessageBubbleProps = {

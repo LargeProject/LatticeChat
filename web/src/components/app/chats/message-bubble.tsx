@@ -1,4 +1,3 @@
-import type { Message } from './messages'
 import { MessageBubble as SharedMessageBubble } from './messages'
 
 type MessageBubbleProps = {
