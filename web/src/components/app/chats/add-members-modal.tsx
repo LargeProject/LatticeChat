@@ -65,7 +65,7 @@ export function AddMembersModal({ conversation, isOpen, onClose, onMemberAdded }
     };
 
     window.addEventListener('keydown', handleEscape);
-    return () => window.removeEventListener('keydown', handleEscape);g
+    return () => window.removeEventListener('keydown', handleEscape);
   }, [isOpen, onClose]);
 
   // Close on backdrop click

@@ -1,4 +1,4 @@
-import { BasicUserInfo, Conversation, CreateConversation, CurrentUserResponse } from '@latticechat/shared';
+import type { BasicUserInfo, Conversation, CreateConversation, CurrentUserResponse } from '@latticechat/shared';
 import { FriendRequest, KeyExchangeRequest, User } from '../models';
 import { ConversationService } from './ConversationService';
 import {
@@ -13,8 +13,8 @@ import {
   TargetNotFoundError,
   UserNotFoundError,
 } from '../../util/error';
-import { UserDocument } from '../schemas/User';
-import * as contracts from '@latticechat/shared';
+import type { UserDocument } from '../schemas/User';
+import type * as contracts from '@latticechat/shared';
 
 export class UserService {
   static async findUser(userId: string, type: 'user' | 'target' = 'user') {
@@ -57,7 +57,7 @@ export class UserService {
     const target = await this.findUser(targetId, 'target');
 
     const friendRequest = await sender.getFriendRequestTo(target._id);
-    if(friendRequest == null) {
+    if (friendRequest == null) {
       throw new FriendRequestNotFoundError();
     }
 
@@ -83,11 +83,11 @@ export class UserService {
 
     const friendRequest = await FriendRequest.findOne({
       $or: [
-        {fromId: sender._id, toId: target._id},
-        {fromId: target._id, toId: sender._id}
-      ]
+        { fromId: sender._id, toId: target._id },
+        { fromId: target._id, toId: sender._id },
+      ],
     });
-    if(friendRequest != null) {
+    if (friendRequest != null) {
       throw new FriendRequestExistsError();
     }
 

@@ -5,6 +5,7 @@ import {
   ConversationNotFoundError,
   DirectMessageInviteError,
   MemberExistsError,
+  UserNotFoundError,
   NotFriendsError,
   NotMemberError,
 } from '../../util/error';
@@ -32,7 +33,7 @@ export class ConversationService {
   }
 
   static async findConversations(conversationsId: string[]): Promise<ConversationDocument[]> {
-    return (await Conversation.find({ _id: { $in: conversationsId } })) ?? [];
+    return await Conversation.find({ _id: { $in: conversationsId } });
   }
 
   static async createConversation(data: actions.CreateConversation, isDirectMessage: boolean) {
@@ -84,10 +85,12 @@ export class ConversationService {
       throw new NotMemberError();
     }
 
-    // Import UserService locally to avoid circular deps
-    const { UserService } = require('./UserService');
-    const adder = await UserService.findUser(data.adderId, 'user');
-    const target = await UserService.findUser(data.userId, 'target');
+    const adder = await User.findById(data.adderId);
+    const target = await User.findById(data.userId);
+
+    if (!adder || !target) {
+      throw new UserNotFoundError();
+    }
 
     // Only allow adding users who are friends of the adder
     if (!adder.hasFriend(target._id)) {
@@ -99,9 +102,9 @@ export class ConversationService {
       throw new MemberExistsError();
     }
 
-    // Add member to conversation and add conversation to user's conversationIds
-    await Conversation.updateOne({ _id: conversation._id }, { $addToSet: { memberIds: target._id } });
-    await User.updateOne({ _id: target._id }, { $addToSet: { conversationIds: conversation._id } });
+    // // Add member to conversation and add conversation to user's conversationIds
+    // await Conversation.updateOne({ _id: conversation._id }, { $addToSet: { memberIds: target._id } });
+    // await User.updateOne({ _id: target._id }, { $addToSet: { conversationIds: conversation._id } });
 
     return {
       conversationId: conversation._id.toString(),
