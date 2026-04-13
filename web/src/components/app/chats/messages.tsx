@@ -110,7 +110,7 @@ export function MessageList({
 
     viewport.scrollTo({
       top: viewport.scrollHeight,
-      behavior: smoothScroll ? 'smooth' : 'auto',
+      behavior: 'auto',
     });
   }, [lastMessageId, messages.length, smoothScroll, isUserNearBottom]);
 
