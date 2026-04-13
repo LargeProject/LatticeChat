@@ -8,6 +8,7 @@ export function useWebsocketListener<T extends keyof ServerEventMap>(
   eventName: T,
   callback: EventCallback<ServerEventMap[T]>,
   enabled: boolean = true,
+  deps: any[] = []
 ) {
   const context = useWebsocketContext();
   const callbackRef = useRef(callback);
@@ -18,6 +19,7 @@ export function useWebsocketListener<T extends keyof ServerEventMap>(
   }, [callback]);
 
   useEffect(() => {
+    const effectCallback = callbackRef.current;
     if (!enabled || !context.socket) {
       return;
     }
@@ -27,10 +29,10 @@ export function useWebsocketListener<T extends keyof ServerEventMap>(
       return;
     }
 
-    context.socket.on(eventName as string, callbackRef.current);
+    context.socket.on(eventName as string, effectCallback);
 
     return () => {
-      context.socket?.off(eventName as string, callbackRef.current);
+      context.socket?.off(eventName as string, effectCallback);
     };
-  }, [eventName, enabled, context.socket, context.isAuthenticated]);
+  }, [eventName, enabled, context.socket, context.isAuthenticated, ...deps]);
 }

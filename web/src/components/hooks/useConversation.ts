@@ -43,7 +43,7 @@ export function useConversation(conversation: Conversation) {
     }
   };
 
-  useWebsocketListener('newMessage', onMessageReceive, isAuthenticated);
+  useWebsocketListener('newMessage', onMessageReceive, isAuthenticated, [conversation.id]);
 
   const addMessage = (message: Message) => {
     setMessages((m) => {
