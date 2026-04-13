@@ -1,0 +1,39 @@
+@startuml
+|User|
+start
+:Visit app (HTTP GET /);
+:Submit login/register (HTTP POST /api/auth/*);
+|Server|
+:Validate credentials;
+:Issue JWT on success;
+|User|
+:Store JWT locally;
+:Establish WebSocket connection (WS connect);
+|Server|
+:Require JWT in handshake;
+:Validate JWT;
+:If valid, authenticate socket;
+|User|
+:Request user info (HTTP GET /api/user);
+|Server|
+:Validate JWT/session;
+:Return user info;
+|User|
+:Access chat room (HTTP GET /api/user/conversations/:id);
+|Server|
+:Check membership & auth;
+:Return conversation info;
+repeat
+  :Send message (WS createMessage);
+  |Server|
+  :Validate WS auth & payload;
+  :Persist message;
+  :Emit newMessage to members;
+  |User|
+  :Receive newMessage (WS event);
+repeat while (chatting)
+:Logout (HTTP POST /api/auth/logout);
+|Server|
+:Invalidate session/JWT;
+stop
+@enduml
