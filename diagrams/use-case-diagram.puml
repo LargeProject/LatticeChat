@@ -1,0 +1,30 @@
+@startuml
+' LatticeChat Use Case Diagram
+
+actor User
+actor Guest
+
+User --> (Register)
+User --> (Login)
+User --> (Logout)
+User --> (Edit Profile)
+User --> (CRUD Conversation)
+User --> (Add Friend)
+User --> (Remove Friend)
+User --> (Join Group Chat)
+User --> (Leave Group Chat)
+User --> (Receive Notification)
+User --> (Change Settings)
+User --> (Verify Email)
+User --> (Reset Password)
+User --> (Real-time Updates)
+
+Guest --> (Register)
+Guest --> (Login)
+
+
+(Login) <.. (Register) : include
+(Verify Email) <.. (Register) : include
+(Reset Password) <.. (Login) : extend
+
+@enduml
