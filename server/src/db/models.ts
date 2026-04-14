@@ -4,6 +4,7 @@ import { conversationSchema, messageSchema } from './schemas/Conversation';
 import { friendRequestSchema } from './schemas/FriendRequest';
 import { accountSchema } from './schemas/Account';
 import { keyExchangeRequestSchema } from './schemas/KeyExchangeRequest';
+import { verificationSchema } from './schemas/Verification';
 
 export const User = model('User', userSchema);
 export const FriendRequest = model('FriendRequest', friendRequestSchema);
@@ -11,3 +12,4 @@ export const Message = model('Message', messageSchema);
 export const Conversation = model('Conversation', conversationSchema);
 export const Account = model('Account', accountSchema);
 export const KeyExchangeRequest = model('KeyExchangeRequest', keyExchangeRequestSchema);
+export const Verification = model('Verification', verificationSchema);
