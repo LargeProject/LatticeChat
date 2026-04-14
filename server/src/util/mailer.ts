@@ -3,7 +3,9 @@ import { ENV } from './env';
 
 const PLACEHOLDER_KEY = 'SG.';
 
-sendgridMailer.setApiKey(ENV.SENDGRID_API_KEY);
+if (ENV.SENDGRID_API_KEY != PLACEHOLDER_KEY) {
+  sendgridMailer.setApiKey(ENV.SENDGRID_API_KEY);
+}
 
 const sendEmailVerificationOTP = async (receiverEmail: string, otp: string) => {
   sendEmailOTP(receiverEmail, 'Email Verification Code', otp, (otp) => `<p>Verification Code: ${otp}</p>`);
