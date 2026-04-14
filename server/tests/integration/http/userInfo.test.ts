@@ -28,15 +28,6 @@ describe('GET /api/users/me', () => {
   });
 });
 
-describe('when input is invalid', () => {
-  it('should return 401 and INVALID_TOKEN', async () => {
-    const response = await request.fetchUserInfo('I-am-a-very-valid-jwt-please-accept-me-please');
-
-    expect(response.status).toBe(401);
-    expect(response.body.code).toBe('INVALID_TOKEN');
-  });
-});
-
 describe('GET api/users/:user_id', () => {
   it('should return 200 and basic user info', async () => {
     const { userId } = await request.createAndSignIn({
@@ -52,9 +43,14 @@ describe('GET api/users/:user_id', () => {
       name: 'test',
     });
   });
-});
 
-describe('when input is invalid', () => {
+  it('should return 401 and INVALID_TOKEN', async () => {
+    const response = await request.fetchUserInfo('I-am-a-very-valid-jwt-please-accept-me-please');
+
+    expect(response.status).toBe(401);
+    expect(response.body.code).toBe('INVALID_TOKEN');
+  });
+
   it('should return 404 and USER_NOT_FOUND', async () => {
     const invalidUserId = '69dd90e1da7c1c0bf396791b';
     const response = await request.fetchBasicUserInfo(invalidUserId);

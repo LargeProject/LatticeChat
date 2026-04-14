@@ -39,7 +39,7 @@ jobs:
       - name: Run API Integration Tests
         run: |
           cd ./server
-          yarn vitest --no-file-parallelism --reporter=verbose
+          yarn vitest --no-file-parallelism --reporter=verbose --slow-test-threshold=1500
         env:
           HOST: ${{ secrets.HOST }}
           PORT: ${{ secrets.PORT }}
