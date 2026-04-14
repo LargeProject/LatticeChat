@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { request, wait } from '../util/http';
+import { request } from '../util/http';
 import { database, resetDatabase } from '../util/database';
 
 beforeEach(async () => {

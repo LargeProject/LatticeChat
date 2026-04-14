@@ -64,6 +64,13 @@ class Request {
       .get('/api/users/' + userId)
       .send();
   }
+
+  async deleteUser(jwt: string) {
+    return await supertest(server)
+      .delete('/api/users/me')
+      .set('Authorization', 'Bearer ' + jwt)
+      .send();
+  }
 }
 
 export const request = new Request();
