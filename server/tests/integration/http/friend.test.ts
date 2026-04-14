@@ -98,12 +98,17 @@ describe('PATCH api/users/me/friend-requests', () => {
 
     const userInfoResponse = await request.fetchUserInfo(account1.jwt);
     const friends = userInfoResponse?.body?.userInfo?.friends ?? null;
+    const conversations = userInfoResponse?.body?.userInfo?.conversations ?? null;
 
     expect(acceptRequestResponse.status).toBe(200);
     expect(acceptRequestResponse.body.success).toBe(true);
     expect(friends.length).toBe(1);
     expect(friends[0]).toMatchObject({
       id: account2.userId,
+    });
+    expect(conversations.length).toBe(1);
+    expect(conversations[0]).toMatchObject({
+      members: [{ id: account1.userId }, { id: account2.userId }],
     });
   });
 

@@ -2,7 +2,8 @@ import supertest, { Response } from 'supertest';
 import { server } from '../../../src/server';
 import { User } from '../../../src/db/models';
 
-type AccountInfo = {
+export type AccountInfo = {
+  username: string;
   userId: string;
   jwt: string;
 };
@@ -32,8 +33,9 @@ class Request {
     const response: Response = await this.signIn(credentials);
 
     const userId = response.body.user.id;
+    const username = response.body.user.name;
     const jwt = response.headers['set-auth-token'];
-    const account: AccountInfo = { jwt, userId };
+    const account: AccountInfo = { jwt, userId, username };
 
     return account;
   }
@@ -115,14 +117,14 @@ class Request {
 
   async searchConversation(jwt: string, search: string) {
     return await supertest(server)
-      .post('/api/users/me/conversations?search=' + search)
+      .get('/api/users/me/conversations?search=' + search)
       .set('Authorization', 'Bearer ' + jwt)
       .send();
   }
 
   async fetchConversationMessages(jwt: string, conversationId: string) {
     return await supertest(server)
-      .post('/api/users/me/conversations/' + conversationId + '/messages')
+      .get('/api/users/me/conversations/' + conversationId + '/messages')
       .set('Authorization', 'Bearer ' + jwt)
       .send();
   }

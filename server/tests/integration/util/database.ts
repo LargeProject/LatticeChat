@@ -1,16 +1,18 @@
 import mongoose from 'mongoose';
-import { Verification } from '../../../src/db/models';
+import { Conversation, Message, User, Verification } from '../../../src/db/models';
 
 export async function resetDatabase() {
-  await mongoose.connection.dropDatabase();
+  const connection = mongoose.connection;
+  await connection.dropDatabase();
 
-  await mongoose.connection.db?.createCollection('accounts');
-  await mongoose.connection.db?.createCollection('conversations');
-  await mongoose.connection.db?.createCollection('friendrequests');
-  await mongoose.connection.db?.createCollection('messages');
-  await mongoose.connection.db?.createCollection('session');
-  await mongoose.connection.db?.createCollection('users');
-  await mongoose.connection.db?.createCollection('verification');
+  const db = connection.db;
+  await db?.createCollection('accounts');
+  await db?.createCollection('conversations');
+  await db?.createCollection('friendrequests');
+  await db?.createCollection('messages');
+  await db?.createCollection('session');
+  await db?.createCollection('users');
+  await db?.createCollection('verification');
 }
 
 export class Database {
@@ -20,6 +22,26 @@ export class Database {
     });
 
     return verification?.value.replace(':0', '') ?? null;
+  }
+
+  async createFakePrivateConversation(memberIds: string[]) {
+    const conversation = await Conversation.create({
+      isDirectMessage: true,
+      memberIds: memberIds.map((memberId) => new mongoose.Types.ObjectId(memberId)),
+    });
+
+    await User.updateMany({ _id: { $in: memberIds } }, { $addToSet: { conversationIds: conversation._id } });
+
+    return conversation;
+  }
+
+  async createFakeDirectMessage(conversationId: string, senderId: string, content: string) {
+    return await Message.create({
+      createdAt: Date.now(),
+      senderId: senderId,
+      conversationId: new mongoose.Types.ObjectId(conversationId),
+      content: content,
+    });
   }
 }
 
