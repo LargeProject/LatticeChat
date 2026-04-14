@@ -39,7 +39,7 @@ jobs:
       - name: Run API Integration Tests
         run: |
           cd ./server
-          yarn vitest
+          vitest --no-file-parallelism
         env:
           HOST: ${{ secrets.HOST }}
           PORT: ${{ secrets.PORT }}
