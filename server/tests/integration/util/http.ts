@@ -71,6 +71,55 @@ class Request {
       .set('Authorization', 'Bearer ' + jwt)
       .send();
   }
+
+  async fetchFriendRequests(jwt: string) {
+    return await supertest(server)
+      .get('/api/users/me/friend-requests')
+      .set('Authorization', 'Bearer ' + jwt)
+      .send();
+  }
+
+  async sendFriendRequest(jwt: string, targetId: string) {
+    return await supertest(server)
+      .post('/api/users/me/friend-requests')
+      .set('Authorization', 'Bearer ' + jwt)
+      .send({ targetId: targetId });
+  }
+
+  async acceptFriendRequest(jwt: string, targetId: string) {
+    return await supertest(server)
+      .patch('/api/users/me/friend-requests')
+      .set('Authorization', 'Bearer ' + jwt)
+      .send({ targetId: targetId });
+  }
+
+  async removeFriendRequest(jwt: string, targetId: string) {
+    return await supertest(server)
+      .delete('/api/users/me/friend-requests')
+      .set('Authorization', 'Bearer ' + jwt)
+      .send({ targetId: targetId });
+  }
+
+  async removeFriend(jwt: string, targetId: string) {
+    return await supertest(server)
+      .delete('/api/users/me/friends')
+      .set('Authorization', 'Bearer ' + jwt)
+      .send({ targetId: targetId });
+  }
+
+  async searchConversation(jwt: string, search: string) {
+    return await supertest(server)
+      .post('/api/users/me/conversations?search=' + search)
+      .set('Authorization', 'Bearer ' + jwt)
+      .send();
+  }
+
+  async fetchConversationMessages(jwt: string, conversationId: string) {
+    return await supertest(server)
+      .post('/api/users/me/conversations/' + conversationId + '/messages')
+      .set('Authorization', 'Bearer ' + jwt)
+      .send();
+  }
 }
 
 export const request = new Request();
