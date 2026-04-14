@@ -1,6 +1,5 @@
 import type { Service, UserRequest } from '../types';
 import { handleHttpError } from '../../util/error';
-import mongoose from 'mongoose';
 import { ConversationService, UserService } from '../../db';
 
 const handleGetConversation: Service = async (req: UserRequest, res) => {

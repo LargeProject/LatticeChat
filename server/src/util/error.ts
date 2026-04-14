@@ -87,18 +87,6 @@ export class SelfFriendRequestError extends TypeError {
   }
 }
 
-export class KeyExchangeExistsError extends TypeError {
-  constructor() {
-    super(409, 'KEY_EXCHANGE_REQUEST_EXISTS', 'Key exchange request exists');
-  }
-}
-
-export class KeyExchangeNotFoundError extends TypeError {
-  constructor() {
-    super(404, 'KEY_EXCHANGE_REQUEST_NOT_FOUND', 'Key exchange not found');
-  }
-}
-
 export class DirectMessageInviteError extends TypeError {
   constructor() {
     super(403, 'DIRECT_MESSAGE_INVITE', 'Members cannot be added to a direct message');

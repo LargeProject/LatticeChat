@@ -7,22 +7,14 @@ import {
   handleRemoveFriend,
   handleRemoveFriendRequest,
 } from '../services/friendServices';
-import { handleDeleteUser, handleGetBasicUserInformation, handleGetCurrentUser } from '../services/userServices';
+import { handleDeleteUser, handleGetBasicUserInformation } from '../services/userServices';
 import conversationRouter from './conversationRouter';
-import {
-  handleCreateKeyExchangeRequest,
-  handleDeleteKeyExchangeRequests,
-  handleGetKeyExchangeRequests,
-  handleGetPublicKey,
-  handleSetPublicKey,
-} from '../services/keyExchangeServices';
 import { handleGetConversationsBySearch } from '../services/conversationServices';
 
 const userRouter = Router({ mergeParams: true });
 
 // non-auth restricted endpoints
 userRouter.get('/', handleGetBasicUserInformation);
-userRouter.get('/public-key', handleGetPublicKey);
 
 // auth restricted endpoints
 userRouter.use(attachSession, validateUser);
@@ -34,13 +26,8 @@ userRouter.get('/conversations', handleGetConversationsBySearch);
 
 userRouter.get('/friend-requests', handleGetFriendRequests);
 userRouter.post('/friend-requests', handleAddFriendRequest);
-userRouter.patch('/friend-requests', handleAcceptFriendRequest)
+userRouter.patch('/friend-requests', handleAcceptFriendRequest);
 userRouter.delete('/friend-requests', handleRemoveFriendRequest);
 userRouter.delete('/friends', handleRemoveFriend);
-
-userRouter.post('/public-key', handleSetPublicKey);
-userRouter.post('/key-exchange-requests', handleCreateKeyExchangeRequest);
-userRouter.get('/key-exchange-requests', handleGetKeyExchangeRequests);
-userRouter.delete('/key-exchange-requests', handleDeleteKeyExchangeRequests);
 
 export default userRouter;

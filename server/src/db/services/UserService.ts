@@ -1,5 +1,5 @@
 import type { BasicUserInfo, Conversation, CreateConversation, CurrentUserResponse } from '@latticechat/shared';
-import { FriendRequest, KeyExchangeRequest, User } from '../models';
+import { FriendRequest, User } from '../models';
 import { ConversationService } from './ConversationService';
 import {
   EmailNotFoundError,
@@ -7,8 +7,6 @@ import {
   FriendNotFoundError,
   FriendRequestExistsError,
   FriendRequestNotFoundError,
-  KeyExchangeExistsError,
-  KeyExchangeNotFoundError,
   SelfFriendRequestError,
   TargetNotFoundError,
   UserNotFoundError,
@@ -183,48 +181,5 @@ export class UserService {
       biography: user.biography ?? '',
       createdAt: user.createdAt ?? Date.now(),
     };
-  }
-
-  static async createKeyExchangeRequest(fromId: string, toId: string, cipher: string) {
-    const sender = await this.findUser(fromId, 'user');
-    const target = await this.findUser(toId, 'target');
-
-    const keyExchangeRequest = await KeyExchangeRequest.findOne({
-      $or: [
-        { fromId: sender.id, toId: target.id },
-        { fromId: target.id, toId: sender.id },
-      ],
-    });
-
-    if (keyExchangeRequest != null) {
-      throw new KeyExchangeExistsError();
-    }
-
-    await KeyExchangeRequest.create({
-      fromId: sender.id,
-      toId: target.id,
-      cipher: cipher,
-    });
-    return;
-  }
-
-  static async findKeyExchangeRequestsTo(userId: string) {
-    const user = await this.findUser(userId);
-
-    const keyExchangeRequests = await KeyExchangeRequest.find({
-      toId: user._id,
-    });
-    if (!keyExchangeRequests) {
-      throw new KeyExchangeNotFoundError();
-    }
-
-    return keyExchangeRequests;
-  }
-
-  static async deleteKeyExchangeRequestsTo(userId: string) {
-    const user = await this.findUser(userId);
-
-    await KeyExchangeRequest.deleteMany({ toId: user.id });
-    return;
   }
 }
