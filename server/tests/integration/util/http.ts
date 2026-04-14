@@ -1,20 +1,6 @@
-import mongoose from 'mongoose';
-import supertest from 'supertest';
-import { server } from '../src/server';
-import { User, Verification } from '../src/db/models';
-import { Response } from 'supertest';
-
-export async function resetDatabase() {
-  await mongoose.connection.dropDatabase();
-
-  await mongoose.connection.db?.createCollection('accounts');
-  await mongoose.connection.db?.createCollection('conversations');
-  await mongoose.connection.db?.createCollection('friendrequests');
-  await mongoose.connection.db?.createCollection('messages');
-  await mongoose.connection.db?.createCollection('session');
-  await mongoose.connection.db?.createCollection('users');
-  await mongoose.connection.db?.createCollection('verification');
-}
+import supertest, { Response } from 'supertest';
+import { server } from '../../../src/server';
+import { User } from '../../../src/db/models';
 
 export async function wait(time: number) {
   await new Promise((resolve) => setTimeout(resolve, time));
@@ -39,7 +25,11 @@ class Request {
   async createAndSignIn(credentials: { name: string; email: string; password: string }) {
     await this.signUpVerified(credentials);
     const response: Response = await this.signIn(credentials);
-    return response;
+
+    const userId = response.body.user.id;
+    const jwt = response.headers['set-auth-token'];
+
+    return { userId, jwt };
   }
 
   async sendEmailVerification(body: { email: string }) {
@@ -66,15 +56,4 @@ class Request {
   }
 }
 
-class Database {
-  async getOtp(email: string): Promise<string | null> {
-    const verification = await Verification.findOne({
-      identifier: { $regex: email, $options: 'i' },
-    });
-
-    return verification?.value.replace(':0', '') ?? null;
-  }
-}
-
 export const request = new Request();
-export const database = new Database();
