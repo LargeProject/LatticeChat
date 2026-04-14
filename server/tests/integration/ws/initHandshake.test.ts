@@ -11,8 +11,8 @@ beforeEach(async () => {
   server = await startSocketServer();
 });
 
-afterEach(() => {
-  server.stop();
+afterEach(async () => {
+  await server.stop();
 });
 
 describe('socket io init hand shake', () => {
