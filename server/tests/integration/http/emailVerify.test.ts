@@ -15,10 +15,11 @@ describe('POST /api/auth/email-otp/send-verification-code', () => {
     });
 
     const response = await request.sendEmailVerification({ email: 'test@gmail.com' });
+    const otp = await database.getOtp('test@gmail.com');
 
     expect(response.status).toBe(200);
     expect(response.body.success).toBe(true);
-    expect(await database.getOtp('test@gmail.com')).toBeDefined();
+    expect(otp).toBeDefined();
   });
 });
 
@@ -31,10 +32,11 @@ describe('POST /api/auth/email-otp/verify-email', () => {
     });
 
     await request.sendEmailVerification({ email: 'test@gmail.com' });
+    const otp = await database.getOtp('test@gmail.com');
 
     const response = await request.verifyEmail({
       email: 'test@gmail.com',
-      otp: await database.getOtp('test@gmail.com'),
+      otp: otp,
     });
 
     expect(response.status).toBe(200);

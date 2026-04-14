@@ -32,6 +32,16 @@ class Request {
     return { userId, jwt };
   }
 
+  async sendPasswordResetVerification(body: { email: string }) {
+    return await supertest(server)
+      .post('/api/auth/email-otp/send-verification-otp')
+      .send({ ...body, type: 'forget-password' });
+  }
+
+  async verifyPasswordReset(body: { email: string; otp: string; password: string }) {
+    return await supertest(server).post('/api/auth/email-otp/reset-password').send(body);
+  }
+
   async sendEmailVerification(body: { email: string }) {
     return await supertest(server)
       .post('/api/auth/email-otp/send-verification-otp')
