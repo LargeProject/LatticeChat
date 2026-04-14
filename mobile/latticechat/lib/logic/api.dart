@@ -25,7 +25,7 @@ class ApiServices {
     if (response.statusCode == 200) {
       return true;
     } else {
-      Map<String, dynamic> body = jsonDecode(response.body);
+      final body = jsonDecode(response.body);
       throw ApiError(type: body['code'], message: body['message']);
     }
   }
@@ -38,10 +38,6 @@ class ApiServices {
 
     final body = jsonDecode(response.body);
     body['jsonWT'] = response.headers['set-auth-token'];
-
-    print('SIGN IN STATUS: ${response.statusCode}');
-    print('SIGN IN BODY: $body');
-    print('SIGN IN TOKEN HEADER: ${response.headers['set-auth-token']}');
 
     if (response.statusCode == 200) {
       final signInResponse = SignInResponse.fromJson(body)!;
@@ -87,11 +83,7 @@ class ApiServices {
 
   Future<UserModel> fetchBasicUserByName(String username) async {
     final response = await _get('$_baseUrl/users/$username?byName=true');
-
     final body = jsonDecode(response.body);
-
-    print('FIND USER STATUS: ${response.statusCode}');
-    print('FIND USER BODY: $body');
 
     if (response.statusCode == 200) {
       return UserModel.fromJson(body['basicUserInfo']);
@@ -112,9 +104,6 @@ class ApiServices {
     );
 
     final body = response.body.isNotEmpty ? jsonDecode(response.body) : {};
-    print('SEND FRIEND REQUEST STATUS: ${response.statusCode}');
-    print('SEND FRIEND REQUEST BODY: $body');
-    print('TOKEN BEING SENT: ${ApiServices.token}');
 
     if (response.statusCode == 200) {
       return true;
@@ -128,13 +117,15 @@ class ApiServices {
 
   Future<List<dynamic>> fetchFriendRequests(String currentUserId) async {
     final response = await _get('$_baseUrl/users/$currentUserId/friend-requests');
-
     final body = jsonDecode(response.body);
 
     if (response.statusCode == 200) {
       return body['friendRequests'] ?? [];
     } else {
-      throw ApiError(type: body['code'], message: body['message']);
+      throw ApiError(
+        type: body['code'] ?? 'unknown_error',
+        message: body['message'] ?? 'Failed to fetch friend requests',
+      );
     }
   }
 
@@ -150,11 +141,15 @@ class ApiServices {
       },
     );
 
+    final body = response.body.isNotEmpty ? jsonDecode(response.body) : {};
+
     if (response.statusCode == 200) {
       return true;
     } else {
-      final body = jsonDecode(response.body);
-      throw ApiError(type: body['code'], message: body['message']);
+      throw ApiError(
+        type: body['code'] ?? 'unknown_error',
+        message: body['message'] ?? 'Failed to remove friend request',
+      );
     }
   }
 
@@ -166,24 +161,76 @@ class ApiServices {
       },
     );
 
+    final body = response.body.isNotEmpty ? jsonDecode(response.body) : {};
+
     if (response.statusCode == 200) {
       return true;
     } else {
-      final body = jsonDecode(response.body);
-      throw ApiError(type: body['code'], message: body['message']);
+      throw ApiError(
+        type: body['code'] ?? 'unknown_error',
+        message: body['message'] ?? 'Failed to remove friend',
+      );
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> fetchConversations(
+      String currentUserId, {
+        String search = '',
+      }) async {
+    final response = await _get(
+      '$_baseUrl/users/$currentUserId/conversations?search=${Uri.encodeQueryComponent(search)}',
+    );
+
+    final body = jsonDecode(response.body);
+
+    if (response.statusCode == 200) {
+      final raw = body['conversations'] ?? [];
+      if (raw is List) {
+        return raw.whereType<Map>().map((e) => Map<String, dynamic>.from(e)).toList();
+      }
+      return [];
+    } else {
+      throw ApiError(
+        type: body['code'] ?? 'unknown_error',
+        message: body['message'] ?? 'Failed to fetch conversations',
+      );
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> fetchConversationMessages(
+      String currentUserId,
+      String conversationId,
+      ) async {
+    final response = await _get(
+      '$_baseUrl/users/$currentUserId/conversations/$conversationId/messages',
+    );
+
+    final body = jsonDecode(response.body);
+
+    if (response.statusCode == 200) {
+      final raw = body['messages'] ?? [];
+      if (raw is List) {
+        return raw.whereType<Map>().map((e) => Map<String, dynamic>.from(e)).toList();
+      }
+      return [];
+    } else {
+      throw ApiError(
+        type: body['code'] ?? 'unknown_error',
+        message: body['message'] ?? 'Failed to fetch messages',
+      );
     }
   }
 
   Future<http.Response> _post(String url, Map<String, dynamic> body) async {
-    return await _fetch("post", url, body);
+    return await _fetch('post', url, body);
   }
 
   Future<http.Response> _get(String url) async {
-    return await _fetch("get", url, {});
+    return await _fetch('get', url, {});
   }
 
   Future<http.Response> _delete(String url, Map<String, dynamic> body) async {
-    return await _fetch("delete", url, body);
+    return await _fetch('delete', url, body);
   }
 
   Future<http.Response> _fetch(
@@ -199,16 +246,11 @@ class ApiServices {
 
     final jsonBody = jsonEncode(body);
 
-    print('REQUEST TYPE: $type');
-    print('REQUEST URL: $url');
-    print('REQUEST HEADERS: $headers');
-    print('REQUEST BODY: $jsonBody');
-
-    if (type == "post") {
+    if (type == 'post') {
       return await http.post(Uri.parse(url), headers: headers, body: jsonBody);
-    } else if (type == "get") {
+    } else if (type == 'get') {
       return await http.get(Uri.parse(url), headers: headers);
-    } else if (type == "delete") {
+    } else if (type == 'delete') {
       return await http.delete(Uri.parse(url), headers: headers, body: jsonBody);
     } else {
       return http.Response("{}", 500);
