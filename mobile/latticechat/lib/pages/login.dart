@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:latticechat/pages/register.dart';
-import 'package:latticechat/logic/api.dart';
-import 'package:latticechat/logic/models/error.dart';
 import 'package:latticechat/theme.dart';
+import 'package:latticechat/pages/register.dart';
+import 'package:latticechat/pages/verify.dart';
+import 'package:latticechat/pages/chat_list.dart';
 
-import 'home.dart';
+import '../logic/services/api.dart';
+import '../logic/util/error.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -33,28 +34,34 @@ class _LoginPageState extends State<LoginPage> {
     final password = _passwordController.text;
 
     if (email.isEmpty || password.isEmpty) { // you forgot something
-      debugPrint('Sign In button was pressed');
+      debugPrint('Sign In button was pressed with a field missing');
       return;
     }
 
     try {
-      final api = ApiServices();
-      final response = await api.attemptSignIn(email, password);
+      final authApi = ApiServices.getAuthServices();
+      final response = await authApi.signIn(email, password);
+      final jsonWT = response.jsonWT;
 
       debugPrint('Sign in successful!');
 
-      var user = response.user;
-      debugPrint('User-id: ${user.id}');
-      debugPrint("User-name: ${user.username}");
-
-      // Switches to a temporary Home page
+      // Send user to ChatListPage (with their information attached?)
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => HomePage()),
+        MaterialPageRoute(builder: (context) => ChatListPage(jwt: jsonWT)),
       );
 
     } on ApiError catch (error) {
       debugPrint(error.toString());
+      switch (error.type) {
+        case "EMAIL_NOT_VERIFIED":
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => VerifyPage(email: email)),
+          );
+        case "INVALID_EMAIL_OR_PASSWORD":
+          // Display message somehow. Maybe a toast for simplicity.
+      }
     }
   }
 
@@ -67,7 +74,6 @@ class _LoginPageState extends State<LoginPage> {
   void _handleNoAccount() {
     debugPrint('No Account button was pressed');
 
-    // Temporary page navigation
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => RegisterPage()),

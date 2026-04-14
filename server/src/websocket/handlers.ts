@@ -1,9 +1,9 @@
 import type * as actions from '@latticechat/shared';
-import { ConversationService, MessageService } from '../db';
+import { ConversationService, MessageService, UserService } from '../db';
+import { ACK_SUCCESS } from '../lib/websocket';
 import type { WebsocketContext } from '../lib/websocket/types';
 import { WebsocketError } from '../lib/websocket/types';
 import auth from '../util/auth';
-import { ACK_SUCCESS } from '../lib/websocket';
 
 function broadcastToConversationMembers(context: WebsocketContext, members: any[], eventName: string, data: any) {
   const { server } = context;
@@ -68,7 +68,6 @@ export class WebsocketHandlers {
   ): Promise<actions.AckResponse> {
     try {
       const message = await MessageService.createMessage(data);
-
       const conversation = await ConversationService.findConversation(data.conversationId);
 
       const emitMessage = {
@@ -127,6 +126,30 @@ export class WebsocketHandlers {
       if (!memberIds.includes(result.userId)) memberIds.push(result.userId);
 
       broadcastToConversationMembers(context, memberIds, 'newMember', result);
+
+      // Emit a system message to all members
+      try {
+        const adderUser = await UserService.findUser(result.addedBy, 'user');
+        const addedUser = await UserService.findUser(result.userId, 'target');
+
+        const message = await MessageService.createMessage({
+          conversationId: conversation._id.toString(),
+          senderId: 'system',
+          content: `${addedUser.name} was added by ${adderUser.name}`,
+        });
+
+        const emitMessage = {
+          id: message._id.toString(),
+          conversationId: message.conversationId,
+          senderId: message.senderId,
+          content: message.content,
+          createdAt: message.createdAt,
+        };
+
+        broadcastToConversationMembers(context, conversation.memberIds, 'newMessage', emitMessage);
+      } catch (e) {
+        console.error(e);
+      }
 
       return ACK_SUCCESS;
     } catch (error) {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tailwind_flutter/tailwind_flutter.dart';
 import 'package:animated_gradient_text/animated_gradient_text.dart';
+import 'package:latticechat/utils/severity.dart';
 
 const focusedColor = Color(0xFF34C759);   // for active toggles
 final backgroundColor = TwColors.zinc.shade950; // trueblack
@@ -140,6 +141,8 @@ class AppButtonStyles {
     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
     shape: RoundedRectangleBorder(),  // remove outline
+    disabledForegroundColor: tertiaryColor,
+    disabledBackgroundColor: quatenaryColor,
   );
 
   static ButtonStyle secondaryElevated = ElevatedButton.styleFrom(
@@ -202,5 +205,62 @@ AnimatedGradientText secondaryGradientText(BuildContext context, String text) {
   );
 }
 
-// TODO: Create a StatusMessage type made out of a Box and Text
-//  to be used in the register.dart page
+class StatusMessage extends StatelessWidget {
+  final String message;
+  final Severity severity;
+
+  const StatusMessage({
+    super.key,
+    required this.message,
+    required this.severity,
+  });
+
+  Color _getContainerColor() {
+    switch (severity) {
+      case Severity.none:
+        return Colors.green;
+      case Severity.unknown:
+        return fadedTextColor;
+      case Severity.minor:
+        return Colors.amber;
+      case Severity.major:
+        return Colors.orange;
+      case Severity.critical:
+        return badboyRed;
+    }
+  }
+
+  Color _getTextColor() {
+    switch (severity) {
+      case Severity.none:
+        return goodboyGreen;
+      case Severity.unknown:
+        return fadedTextColor;
+      case Severity.minor:
+        return Colors.yellow;
+      case Severity.major:
+        return Colors.amber;
+      case Severity.critical:
+        return Colors.red;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final containerColor = _getContainerColor();
+    final textColor = _getTextColor();
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: containerColor.withAlpha(10),
+        border: Border.all(color: containerColor.withAlpha(180), width: 1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        message,
+        style: TextStyle(fontSize: 12, color: textColor),
+      ),
+    );
+  }
+}

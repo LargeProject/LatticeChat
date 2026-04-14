@@ -1,12 +1,11 @@
 import type * as actions from '@latticechat/shared';
-import { Conversation, Message, User } from '../models';
 import { ConversationNotFoundError, UserNotFoundError } from '../../util/error';
+import { Conversation, Message, User } from '../models';
 
 export class MessageService {
-  
   static async createMessage(data: actions.CreateMessage) {
     const { senderId, conversationId, content } = data;
-    const sender = await User.findById(senderId);
+    const sender = senderId == 'system' ? { _id: senderId } : await User.findById(senderId);
     if (!sender) {
       console.error(`createMessage: sender ${senderId} not found`);
       throw new UserNotFoundError();
@@ -19,7 +18,7 @@ export class MessageService {
     }
 
     const message = await Message.create({
-      senderId: sender._id,
+      senderId: senderId === 'system' ? 'system' : sender._id.toString(),
       conversationId: conversation._id,
       content,
     });

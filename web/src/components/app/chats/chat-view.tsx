@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Info, UserPlus } from 'lucide-react';
 import { MessageList } from './messages';
 import { ChatInput } from './chat-input';
@@ -21,6 +21,10 @@ export function ChatView({ conversation, onTogglePanel }: ChatViewProps) {
   const [pendingMessages, setPendingMessages] = useState<Array<Message & { optimistic: true }>>([]);
   const [isAddMembersOpen, setIsAddMembersOpen] = useState(false);
   const [memberCount, setMemberCount] = useState(0);
+
+  useEffect(() => {
+    setPendingMessages([]);
+  }, [conversation.id]);
 
   // Listen for new members being added
   const handleNewMember = useCallback(
@@ -56,13 +60,9 @@ export function ChatView({ conversation, onTogglePanel }: ChatViewProps) {
         content: normalized,
       });
 
-      if (!result.success) {
-        // Remove optimistic message and show error
-        setPendingMessages((msgs) => msgs.filter((m) => m.id !== tempId));
+      setPendingMessages((msgs) => msgs.filter((m) => m.id !== tempId));
+      if ((result as any).success === false && !(result as any).queued) {
         alert('Failed to send message.');
-      } else {
-        // Remove optimistic message (will be replaced by real one from server)
-        setPendingMessages((msgs) => msgs.filter((m) => m.id !== tempId));
       }
     },
     [conversation, userInfo, createMessage],

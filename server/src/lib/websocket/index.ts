@@ -42,6 +42,11 @@ export class WebsocketServer {
     return this;
   }
 
+  public async stop(): Promise<this> {
+    await this.server.close();
+    return this;
+  }
+
   private setupDisconnect(socket: types.SocketWithAuth) {
     socket.on('disconnect', () => {
       this.connectionManager.disconnect(socket);

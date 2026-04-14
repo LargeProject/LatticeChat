@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:latticechat/logic/api.dart';
-import 'package:latticechat/logic/models/user.dart';
+import 'package:latticechat/logic/services/api.dart';
 import 'open_chat.dart';
 
 class ChatListPage extends StatelessWidget {
-  final UserModel currentUser;
+  final String jwt;
 
   const ChatListPage({
     super.key,
-    required this.currentUser,
+    required this.jwt,
   });
 
   @override
@@ -46,7 +45,7 @@ class ChatListPage extends StatelessWidget {
             onPressed: () {
               showDialog(
                 context: context,
-                builder: (context) => AddFriendDialog(currentUser: currentUser),
+                builder: (context) => AddFriendDialog(jwt: jwt),
               );
             },
           ),
@@ -105,11 +104,11 @@ class ChatListPage extends StatelessWidget {
 }
 
 class AddFriendDialog extends StatefulWidget {
-  final UserModel currentUser;
+  final String jwt;
 
   const AddFriendDialog({
     super.key,
-    required this.currentUser,
+    required this.jwt,
   });
 
   @override
@@ -117,7 +116,7 @@ class AddFriendDialog extends StatefulWidget {
 }
 
 class _AddFriendDialogState extends State<AddFriendDialog> {
-  final ApiServices _api = ApiServices();
+  final _userServices = ApiServices.getUserServices();
   final TextEditingController _controller = TextEditingController();
 
   bool _isSearching = false;
@@ -146,7 +145,8 @@ class _AddFriendDialogState extends State<AddFriendDialog> {
     });
 
     try {
-      final user = await _api.fetchBasicUserByName(username);
+      final response = await _userServices.fetchBasicUserByName(username);
+      final user = response.user;
 
       if (!mounted) return;
 
@@ -181,7 +181,7 @@ class _AddFriendDialogState extends State<AddFriendDialog> {
     });
 
     try {
-      await _api.sendFriendRequest(widget.currentUser.id, _foundUserId!);
+      await _userServices.sendFriendRequest(widget.jwt, _foundUserId!);
 
       if (!mounted) return;
 

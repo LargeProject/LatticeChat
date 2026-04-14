@@ -1,0 +1,7 @@
+{
+  "rootDir": "./tests",
+  "include": ["tests"],
+  "compilerOptions": {
+    "esModuleInterop": true,
+  }
+}

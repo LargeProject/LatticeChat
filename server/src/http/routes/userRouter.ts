@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { attachSession, validateUser } from '../middleware/authValidation';
 import {
+  handleAcceptFriendRequest,
   handleAddFriendRequest,
   handleGetFriendRequests,
   handleRemoveFriend,
@@ -33,6 +34,7 @@ userRouter.get('/conversations', handleGetConversationsBySearch);
 
 userRouter.get('/friend-requests', handleGetFriendRequests);
 userRouter.post('/friend-requests', handleAddFriendRequest);
+userRouter.patch('/friend-requests', handleAcceptFriendRequest)
 userRouter.delete('/friend-requests', handleRemoveFriendRequest);
 userRouter.delete('/friends', handleRemoveFriend);
 

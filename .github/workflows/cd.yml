@@ -40,7 +40,7 @@ jobs:
             cd /rep/LatticeChat/server && \
             yarn install --immutable && \
             yarn build && \
-            pm2 restart api
+            pm2 restart api --update-env
           "
 
       - name: Deploy Website Frontend
@@ -50,5 +50,5 @@ jobs:
             yarn install --immutable && \
             export NODE_OPTIONS='--max-old-space-size=3072'
             yarn build && \
-            pm2 restart web
+            pm2 restart web --update-env
           "

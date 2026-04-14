@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:latticechat/logic/api.dart';
 import 'dart:async';
 import 'package:latticechat/theme.dart';
 import 'package:latticechat/widgets/debounced_validation_field.dart';
 import 'package:latticechat/widgets/password_validation_field.dart';
 import 'package:latticechat/widgets/confirm_password_field.dart';
 import 'package:latticechat/utils/validators.dart';
-import 'package:latticechat/logic/models/error.dart';
+import 'package:latticechat/utils/severity.dart';
 import 'package:latticechat/pages/login.dart';
 import 'package:latticechat/pages/verify.dart';
+
+import '../logic/services/api.dart';
+import '../logic/util/error.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -42,15 +44,14 @@ class _RegisterPageState extends State<RegisterPage> {
     super.dispose();
   }
 
-  // Simulated API checks
   Future<bool> checkEmailAvailability(String email) async {
-    await Future.delayed(Duration(milliseconds: 500));
-    return !email.contains('test');
+    final authApi = ApiServices.getAuthServices();
+    return await authApi.isEmailAvailable(email);
   }
 
   Future<bool> checkUsernameAvailability(String username) async {
-    await Future.delayed(Duration(milliseconds: 500));
-    return !username.contains('admin');
+    final authApi = ApiServices.getAuthServices();
+    return await authApi.isEmailAvailable(username);
   }
   
   // A function meant to be called by the Sign Up button
@@ -64,15 +65,15 @@ class _RegisterPageState extends State<RegisterPage> {
 
     // All fields should be valid and available from in here down
     try {
-      final api = ApiServices();
+      final authApi = ApiServices.getAuthServices();
 
-      if (!await api.attemptSignUp(_username, _email, _password)) {
+      if (!await authApi.signUp(_username, _email, _password)) {
         debugPrint("Sign up unsuccessful, check information.");
         return;
       }
       debugPrint("Sign up successful!");
 
-      if (!await api.attemptSendEmailVerification(_email)) {
+      if (!await authApi.sendEmailVerification(_email)) {
         debugPrint("Failed to send email verification code, check information.");
         return;
       }
@@ -132,20 +133,28 @@ class _RegisterPageState extends State<RegisterPage> {
 
                   DebouncedValidationField(
                     label: 'Email',
-                    validator: isValidEmail,
+                    validator: emailValidator,
                     availabilityChecker: checkEmailAvailability,
                     onValueChanged: (value) => _email = value,
                     onValidationChanged: (isValid) => setState(() => _isEmailValid = isValid),
+                    emptyStatus: const StatusMessage(
+                      message: 'Email is required',
+                      severity: Severity.major
+                    )
                   ),
 
                   const SizedBox(height: 16),
 
                   DebouncedValidationField(
                     label: 'Username',
-                    validator: isValidUsername,
+                    validator: usernameValidator,
                     availabilityChecker: checkUsernameAvailability,
                     onValueChanged: (value) => _username = value,
                     onValidationChanged: (isValid) => setState(() => _isUsernameValid = isValid),
+                    emptyStatus: const StatusMessage(
+                      message: 'Username is required',
+                      severity: Severity.major
+                    )
                   ),
 
                   const SizedBox(height: 16),
@@ -167,7 +176,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   const SizedBox(height: 16),
 
                   ElevatedButton(
-                    onPressed: _handleSignUp,
+                    onPressed: _isFormValid ? _handleSignUp : null,
                     style: AppButtonStyles.primaryElevated,
                     child: const Text('Sign Up')
                   )
