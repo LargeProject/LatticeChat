@@ -1,5 +1,6 @@
 import type { Middleware, UserRequest } from '../types.js';
 import auth from '../../util/auth.js';
+import { InvalidTokenError } from '../../util/error';
 
 const attachSession: Middleware = async (req: UserRequest, res, next) => {
   const session = await auth.api.getSession({
@@ -25,21 +26,17 @@ const validateUser: Middleware = async (req: UserRequest, res, next) => {
   const userInfo = req.userInfo;
 
   if (!userInfo || !userInfo.id) {
-    res.status(401).send({
-      success: false,
-      message: 'Invalid Token',
-    });
+    const error = new InvalidTokenError();
+    error.handle(res);
     return;
   }
 
   const requestedUserId = req.params.user_id ?? '';
-  
+
   // For /me endpoint, any authenticated user is allowed
   if (requestedUserId && requestedUserId !== 'me' && requestedUserId !== userInfo.id) {
-    res.status(401).send({
-      success: false,
-      message: 'Invalid Token',
-    });
+    const error = new InvalidTokenError();
+    error.handle(res);
     return;
   }
 
