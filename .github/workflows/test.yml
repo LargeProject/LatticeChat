@@ -46,5 +46,5 @@ jobs:
           ALLOW_ORIGIN: ${{ secrets.ALLOW_ORIGIN }}
           MONGO_URI: ${{ secrets.MONGO_URI }}
           BETTER_AUTH_SECRET: '_'
-          SENDGRID_API_KEY: 'SG._'
+          SENDGRID_API_KEY: 'SG.'
 
