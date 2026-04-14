@@ -148,7 +148,9 @@ class _AddFriendDialogState extends State<AddFriendDialog> {
 
     try {
       final user = await _api.fetchBasicUserByName(username);
-
+      debugPrint('FOUND USER ID: ${user.id}');
+      debugPrint('FOUND USERNAME: ${user.username}');
+      debugPrint('CURRENT USER ID: ${widget.currentUser.id}');
       if (!mounted) return;
 
       if (user.id == widget.currentUser.id) {
