@@ -2,6 +2,11 @@ import supertest, { Response } from 'supertest';
 import { server } from '../../../src/server';
 import { User } from '../../../src/db/models';
 
+type AccountInfo = {
+  userId: string;
+  jwt: string;
+};
+
 export async function wait(time: number) {
   await new Promise((resolve) => setTimeout(resolve, time));
 }
@@ -28,8 +33,9 @@ class Request {
 
     const userId = response.body.user.id;
     const jwt = response.headers['set-auth-token'];
+    const account: AccountInfo = { jwt, userId };
 
-    return { userId, jwt };
+    return account;
   }
 
   async sendPasswordResetVerification(body: { email: string }) {
@@ -119,6 +125,11 @@ class Request {
       .post('/api/users/me/conversations/' + conversationId + '/messages')
       .set('Authorization', 'Bearer ' + jwt)
       .send();
+  }
+
+  async makeFriends(account1: AccountInfo, account2: AccountInfo) {
+    await request.sendFriendRequest(account1.jwt, account2.userId);
+    await request.acceptFriendRequest(account2.jwt, account1.userId);
   }
 }
 
