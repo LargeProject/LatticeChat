@@ -32,4 +32,30 @@ describe('POST /api/auth/sign-in/email', () => {
     });
     expect(response.headers['set-auth-token']).toBeDefined();
   });
+
+  it('should return 401 and INVALID_EMAIL_OR_PASSWORD', async () => {
+    const response = await request.signIn({
+      email: 'test@gmail.com',
+      password: 'Test@Test.Test',
+    });
+
+    expect(response.status).toBe(401);
+    expect(response.body.code).toBe('INVALID_EMAIL_OR_PASSWORD');
+  });
+
+  it('should return 403 and EMAIL_NOT_VERIFIED', async () => {
+    await request.signUp({
+      name: 'test',
+      email: 'test@gmail.com',
+      password: 'Test@Test.Test',
+    });
+
+    const response = await request.signIn({
+      email: 'test@gmail.com',
+      password: 'Test@Test.Test',
+    });
+
+    expect(response.status).toBe(403);
+    expect(response.body.code).toBe('EMAIL_NOT_VERIFIED');
+  });
 });
