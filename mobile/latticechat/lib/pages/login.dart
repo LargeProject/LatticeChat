@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:latticechat/theme.dart';
 import 'package:latticechat/pages/register.dart';
 import 'package:latticechat/pages/verify.dart';
-import 'package:latticechat/pages/chatList.dart';
+import 'package:latticechat/pages/chat_list.dart';
 
 import '../logic/services/api.dart';
 import '../logic/util/error.dart';
@@ -48,7 +48,7 @@ class _LoginPageState extends State<LoginPage> {
       // Send user to ChatListPage (with their information attached?)
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => ChatListPage()),
+        MaterialPageRoute(builder: (context) => ChatListPage(jwt: jsonWT)),
       );
 
     } on ApiError catch (error) {
