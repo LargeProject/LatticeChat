@@ -7,6 +7,13 @@ import 'package:latticechat/logic/models/user.dart';
 
 class ApiServices {
   static final String _baseUrl = dotenv.env['API_BASE_URL']!;
+  static String? _token;
+
+  static void setToken(String token) {
+    _token = token;
+  }
+
+  static String? get token => _token;
 
   Future<bool> attemptSignUp(String username, String email, String password) async {
     final response = await _post('$_baseUrl/auth/sign-up/email', {
@@ -34,9 +41,14 @@ class ApiServices {
 
     print('SIGN IN STATUS: ${response.statusCode}');
     print('SIGN IN BODY: $body');
+    print('SIGN IN TOKEN HEADER: ${response.headers['set-auth-token']}');
 
     if (response.statusCode == 200) {
-      return SignInResponse.fromJson(body)!;
+      final signInResponse = SignInResponse.fromJson(body)!;
+      if (signInResponse.jsonWT.isNotEmpty) {
+        ApiServices.setToken(signInResponse.jsonWT);
+      }
+      return signInResponse;
     } else {
       throw ApiError(type: body['code'], message: body['message']);
     }
@@ -78,10 +90,16 @@ class ApiServices {
 
     final body = jsonDecode(response.body);
 
+    print('FIND USER STATUS: ${response.statusCode}');
+    print('FIND USER BODY: $body');
+
     if (response.statusCode == 200) {
       return UserModel.fromJson(body['basicUserInfo']);
     } else {
-      throw ApiError(type: body['code'], message: body['message']);
+      throw ApiError(
+        type: body['code'] ?? 'unknown_error',
+        message: body['message'] ?? 'Failed to find user',
+      );
     }
   }
 
@@ -93,11 +111,18 @@ class ApiServices {
       },
     );
 
+    final body = response.body.isNotEmpty ? jsonDecode(response.body) : {};
+    print('SEND FRIEND REQUEST STATUS: ${response.statusCode}');
+    print('SEND FRIEND REQUEST BODY: $body');
+    print('TOKEN BEING SENT: ${ApiServices.token}');
+
     if (response.statusCode == 200) {
       return true;
     } else {
-      final body = jsonDecode(response.body);
-      throw ApiError(type: body['code'], message: body['message']);
+      throw ApiError(
+        type: body['code'] ?? 'unknown_error',
+        message: body['message'] ?? 'Failed to send friend request',
+      );
     }
   }
 
@@ -169,9 +194,15 @@ class ApiServices {
     final headers = {
       'Content-Type': 'application/json',
       'Origin': dotenv.env['ALLOW_ORIGIN']!,
+      if (_token != null) 'Authorization': 'Bearer $_token',
     };
 
     final jsonBody = jsonEncode(body);
+
+    print('REQUEST TYPE: $type');
+    print('REQUEST URL: $url');
+    print('REQUEST HEADERS: $headers');
+    print('REQUEST BODY: $jsonBody');
 
     if (type == "post") {
       return await http.post(Uri.parse(url), headers: headers, body: jsonBody);

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:latticechat/logic/api.dart';
+import 'package:latticechat/logic/models/error.dart';
 import 'package:latticechat/logic/models/user.dart';
 import 'open_chat.dart';
 
@@ -150,10 +151,27 @@ class _AddFriendDialogState extends State<AddFriendDialog> {
 
       if (!mounted) return;
 
+      if (user.id == widget.currentUser.id) {
+        setState(() {
+          _foundUserId = null;
+          _foundUsername = null;
+          _statusMessage = 'You cannot add yourself.';
+        });
+        return;
+      }
+
       setState(() {
         _foundUserId = user.id;
         _foundUsername = user.username;
         _statusMessage = 'User found: ${user.username}';
+      });
+    } on ApiError catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        _statusMessage = e.message;
+        _foundUserId = null;
+        _foundUsername = null;
       });
     } catch (e) {
       if (!mounted) return;
@@ -175,6 +193,13 @@ class _AddFriendDialogState extends State<AddFriendDialog> {
   Future<void> _sendFriendRequest() async {
     if (_foundUserId == null) return;
 
+    if (_foundUserId == widget.currentUser.id) {
+      setState(() {
+        _statusMessage = 'You cannot add yourself.';
+      });
+      return;
+    }
+
     setState(() {
       _isSending = true;
       _statusMessage = null;
@@ -187,6 +212,12 @@ class _AddFriendDialogState extends State<AddFriendDialog> {
 
       setState(() {
         _statusMessage = 'Friend request sent to $_foundUsername.';
+      });
+    } on ApiError catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        _statusMessage = e.message;
       });
     } catch (e) {
       if (!mounted) return;
