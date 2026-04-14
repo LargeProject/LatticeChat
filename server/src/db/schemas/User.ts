@@ -150,17 +150,9 @@ userSchema.pre('deleteOne', { document: true, query: false }, async function () 
   // remove this user from all users friends list
   await User.updateMany({ friendIds: this._id }, { $pull: { friendIds: this._id } });
 
-  // delete all friend requests associated connected to this user
+  // delete all friend requests associated with this user
   await FriendRequest.deleteMany({
     $or: [{ fromId: this._id }, { toId: this._id }],
-  });
-
-  // delete all private conversations that only have this user
-  await Conversation.deleteMany({
-    memberIds: {
-      $all: [this._id],
-    },
-    ownerId: null,
   });
 
   // Delete all direct messages
@@ -173,6 +165,7 @@ userSchema.pre('deleteOne', { document: true, query: false }, async function () 
 type UserAdditionalFields = {
   [x: string]: DBFieldAttribute;
 };
+
 export const authUserAdditionalFields: UserAdditionalFields = {
   phone: {
     type: 'string',
