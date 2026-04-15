@@ -5,6 +5,7 @@ import 'package:latticechat/pages/verify.dart';
 import 'package:latticechat/pages/chat_list.dart';
 import 'package:latticechat/logic/services/api.dart';
 import 'package:latticechat/logic/util/error.dart';
+import 'package:latticechat/pages/change_password.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -36,8 +37,8 @@ class _LoginPageState extends State<LoginPage> {
     final email = _emailController.text;
     final password = _passwordController.text;
 
-    if (email.isEmpty || password.isEmpty) { // you forgot something
-      debugPrint('Sign In button was pressed with a field missing');
+    if (email.isEmpty || password.isEmpty) {
+      debugPrint('Sign In button was somehow pressed with a field missing');
       return;
     }
 
@@ -52,7 +53,9 @@ class _LoginPageState extends State<LoginPage> {
       // Send user to ChatListPage (with their information attached?)
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => ChatListPage(jwt: jsonWT)),
+        MaterialPageRoute(
+          builder: (context) => ChatListPage(jwt: jsonWT)
+        ),
       );
 
     } on ApiError catch (error) {
@@ -61,15 +64,29 @@ class _LoginPageState extends State<LoginPage> {
         case 'EMAIL_NOT_VERIFIED':
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => VerifyPage(email: email)),
+            MaterialPageRoute(
+              builder: (context) => VerifyPage(email: email)
+            ),
           );
         case 'INVALID_EMAIL':
           ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Invalid email structure.'), backgroundColor: Colors.white),
+          const SnackBar(
+            content: Text('Invalid email structure.'),
+            backgroundColor: Colors.white),
+          );
+          break;
+        case 'EXPIRED_PASSWORD':
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ChangePasswordPage.enforced(email)
+            ),
           );
         default:
           ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Invalid email or password.'), backgroundColor: Colors.white),
+          const SnackBar(
+            content: Text('Invalid email or password.'),
+            backgroundColor: Colors.white),
           );
       }
     }
@@ -78,6 +95,11 @@ class _LoginPageState extends State<LoginPage> {
   // A function meant to be called by the Forgot Password button
   void _handleForgotPass() {
     debugPrint('Forgot Pass button was pressed');
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => ChangePasswordPage.forgot()),
+    );
   }
 
   // A function meant to be called by the No Account button

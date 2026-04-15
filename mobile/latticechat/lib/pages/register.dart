@@ -54,7 +54,6 @@ class _RegisterPageState extends State<RegisterPage> {
   }
   
   // A function meant to be called by the Sign Up button
-  // Consider making status messages flicker when submitted with an invalid field.
   void _handleSignUp() async {
     if (!_isFormValid) {
       debugPrint('Sign Up button was pressed with an invalid form. Do nothing');
@@ -78,7 +77,7 @@ class _RegisterPageState extends State<RegisterPage> {
       if (!await authApi.sendEmailVerification(_email)) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Verification code failed to send. Please wait and try again later.'),
+            content: Text('Verification code failed to send. Try again later.'),
             backgroundColor: Colors.white),
         );
         return;
@@ -89,7 +88,7 @@ class _RegisterPageState extends State<RegisterPage> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => VerifyPage(email: _email),
+          builder: (context) => VerifyPage(email: _email)
         ),
       );
 
@@ -106,7 +105,9 @@ class _RegisterPageState extends State<RegisterPage> {
     // Temporary page navigation
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => LoginPage()),
+      MaterialPageRoute(
+        builder: (context) => LoginPage()
+      ),
     );
   }
 
