@@ -4,6 +4,7 @@ import 'package:latticechat/theme.dart';
 import 'package:pinput/pinput.dart';
 import 'package:latticechat/logic/services/api.dart';
 import 'package:latticechat/logic/util/error.dart';
+import 'package:latticechat/pages/change_password.dart';
 
 
 class VerifyPage extends StatefulWidget {
