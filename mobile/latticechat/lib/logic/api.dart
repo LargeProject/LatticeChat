@@ -115,12 +115,16 @@ class ApiServices {
     }
   }
 
-  Future<List<dynamic>> fetchFriendRequests(String currentUserId) async {
+  Future<List<Map<String, dynamic>>> fetchFriendRequests(String currentUserId) async {
     final response = await _get('$_baseUrl/users/$currentUserId/friend-requests');
     final body = jsonDecode(response.body);
 
     if (response.statusCode == 200) {
-      return body['friendRequests'] ?? [];
+      final raw = body['friendRequests'] ?? [];
+      if (raw is List) {
+        return raw.whereType<Map>().map((e) => Map<String, dynamic>.from(e)).toList();
+      }
+      return [];
     } else {
       throw ApiError(
         type: body['code'] ?? 'unknown_error',

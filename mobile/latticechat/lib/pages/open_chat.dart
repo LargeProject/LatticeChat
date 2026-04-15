@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:latticechat/logic/models/user.dart';
 import 'package:latticechat/logic/api.dart';
 import 'package:latticechat/logic/models/error.dart';
-import 'package:latticechat/logic/models/user.dart';
 
 class OpenChatPage extends StatefulWidget {
   final String otherUserName;
@@ -89,35 +89,26 @@ class _OpenChatPageState extends State<OpenChatPage> {
   }
 
   bool _isMe(Map<String, dynamic> message) {
-    final senderId =
-    (message['senderId'] ??
+    final sender = message['sender'];
+    final senderId = (message['senderId'] ??
         message['authorId'] ??
         message['userId'] ??
         message['ownerId'] ??
+        (sender is Map ? sender['id'] : null) ??
         '')
         .toString();
 
-    if (senderId.isNotEmpty) {
-      return senderId == widget.currentUser.id;
-    }
-
-    final sender = message['sender'];
-    if (sender is Map<String, dynamic>) {
-      final nestedId = (sender['id'] ?? sender['_id'] ?? '').toString();
-      return nestedId == widget.currentUser.id;
-    }
-
-    return false;
+    return senderId == widget.currentUser.id;
   }
 
   DateTime? _messageTime(Map<String, dynamic> message) {
-    final raw =
-        message['createdAt'] ??
-            message['updatedAt'] ??
-            message['time'] ??
-            message['timestamp'];
+    final raw = message['createdAt'] ??
+        message['updatedAt'] ??
+        message['time'] ??
+        message['timestamp'];
 
     if (raw == null) return null;
+    if (raw is DateTime) return raw.toLocal();
     return DateTime.tryParse(raw.toString())?.toLocal();
   }
 
@@ -125,13 +116,13 @@ class _OpenChatPageState extends State<OpenChatPage> {
     if (time == null) return '';
 
     int hour = time.hour;
-    final int minute = time.minute;
-    final String period = hour >= 12 ? 'PM' : 'AM';
+    final minute = time.minute;
+    final period = hour >= 12 ? 'PM' : 'AM';
 
     hour = hour % 12;
     if (hour == 0) hour = 12;
 
-    final String minuteStr = minute.toString().padLeft(2, '0');
+    final minuteStr = minute.toString().padLeft(2, '0');
     return '$hour:$minuteStr $period';
   }
 
@@ -161,7 +152,7 @@ class _OpenChatPageState extends State<OpenChatPage> {
                 }
 
                 if (snapshot.hasError) {
-                  String message = 'Failed to load messages.';
+                  var message = 'Failed to load messages.';
                   final error = snapshot.error;
                   if (error is ApiError) {
                     message = error.message;
@@ -173,10 +164,7 @@ class _OpenChatPageState extends State<OpenChatPage> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(
-                            message,
-                            textAlign: TextAlign.center,
-                          ),
+                          Text(message, textAlign: TextAlign.center),
                           const SizedBox(height: 12),
                           ElevatedButton(
                             onPressed: _refreshMessages,
@@ -205,9 +193,7 @@ class _OpenChatPageState extends State<OpenChatPage> {
                       ),
                       children: const [
                         SizedBox(height: 220),
-                        Center(
-                          child: Text('No messages yet.'),
-                        ),
+                        Center(child: Text('No messages yet.')),
                       ],
                     ),
                   );
@@ -289,9 +275,8 @@ class _MessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bubbleColor = isMe
-        ? Theme.of(context).colorScheme.primary
-        : Colors.grey.shade800;
+    final bubbleColor =
+    isMe ? Theme.of(context).colorScheme.primary : Colors.grey.shade800;
 
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
@@ -326,7 +311,7 @@ class _MessageBubble extends StatelessWidget {
               Text(
                 time,
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.75),
+                  color: Colors.white.withValues(alpha: 0.75),
                   fontSize: 11,
                 ),
               ),

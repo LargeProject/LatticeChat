@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:latticechat/logic/api.dart';
 import 'package:latticechat/logic/models/error.dart';
 import 'package:latticechat/logic/models/user.dart';
+import 'package:latticechat/pages/friend_requests.dart';
 import 'open_chat.dart';
 
 class ChatListPage extends StatefulWidget {
@@ -48,8 +49,15 @@ class _ChatListPageState extends State<ChatListPage> {
       final otherNames = members
           .whereType<Map>()
           .map((member) => Map<String, dynamic>.from(member))
-          .where((member) => (member['id'] ?? member['_id'] ?? '').toString() != widget.currentUser.id)
-          .map((member) => (member['username'] ?? member['name'] ?? 'Unknown').toString())
+          .where(
+            (member) =>
+        (member['id'] ?? member['_id'] ?? '').toString() !=
+            widget.currentUser.id,
+      )
+          .map(
+            (member) =>
+            (member['username'] ?? member['name'] ?? 'Unknown').toString(),
+      )
           .where((name) => name.trim().isNotEmpty)
           .toList();
 
@@ -102,9 +110,10 @@ class _ChatListPageState extends State<ChatListPage> {
     final local = parsed.toLocal();
     final now = DateTime.now();
 
-    final sameDay = local.year == now.year &&
-        local.month == now.month &&
-        local.day == now.day;
+    final sameDay =
+        local.year == now.year &&
+            local.month == now.month &&
+            local.day == now.day;
 
     if (sameDay) {
       final hour = local.hour % 12 == 0 ? 12 : local.hour % 12;
@@ -131,6 +140,20 @@ class _ChatListPageState extends State<ChatListPage> {
     }
   }
 
+  Future<void> _openFriendRequestsPage() async {
+    final changed = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            FriendRequestsPage(currentUser: widget.currentUser),
+      ),
+    );
+
+    if (changed == true && mounted) {
+      await _refreshConversations();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -138,6 +161,10 @@ class _ChatListPageState extends State<ChatListPage> {
         title: const Text('Messages'),
         centerTitle: false,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.group_add),
+            onPressed: _openFriendRequestsPage,
+          ),
           IconButton(
             icon: const Icon(Icons.person_add_alt_1),
             onPressed: _openAddFriendDialog,
