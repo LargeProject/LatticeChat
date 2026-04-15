@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
 import 'package:latticechat/logic/response.dart';
 import 'package:latticechat/logic/util/http.dart';
 
@@ -18,7 +17,6 @@ class UserServices {
     if (response.statusCode == 200) {
       return FetchUserInfoResponse.fromJson(body);
     } else {
-      final body = jsonDecode(response.body);
       throw ApiError.fromBody(body);
     }
   }
@@ -97,8 +95,6 @@ class UserServices {
     final response = await HttpUtil.sendAuthDelete(senderJWT, '$_baseUrl/users/me/friend-requests', {
       'targetId': targetId
     });
-
-    debugPrint(response.body);
 
     if (response.statusCode == 200) {
       return true;
