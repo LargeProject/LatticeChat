@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:latticechat/pages/login.dart';
 import 'package:latticechat/theme.dart';
 import 'package:pinput/pinput.dart';
-
-import '../logic/services/api.dart';
-import '../logic/util/error.dart';
+import 'package:latticechat/logic/services/api.dart';
+import 'package:latticechat/logic/util/error.dart';
 
 
 class VerifyPage extends StatefulWidget {

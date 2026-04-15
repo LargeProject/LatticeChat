@@ -8,9 +8,8 @@ import 'package:latticechat/utils/validators.dart';
 import 'package:latticechat/utils/severity.dart';
 import 'package:latticechat/pages/login.dart';
 import 'package:latticechat/pages/verify.dart';
-
-import '../logic/services/api.dart';
-import '../logic/util/error.dart';
+import 'package:latticechat/logic/services/api.dart';
+import 'package:latticechat/logic/util/error.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
