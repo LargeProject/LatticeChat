@@ -48,6 +48,7 @@ class _LoginPageState extends State<LoginPage> {
       final jsonWT = response.jsonWT;
 
       debugPrint('Sign in successful!');
+      debugPrint('JWT: $jsonWT'); // TODO: DELETE ME WHEN YOU ARE DONE WITH ACCOUNT PAGE
 
       // Send user to ChatListPage (with their information attached?)
       Navigator.push(
