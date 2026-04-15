@@ -1,7 +1,12 @@
 import mongoose from 'mongoose';
 import { Conversation, Message, User, Verification } from '../../../src/db/models';
+import { ENV } from '../../../src/util/env';
 
 export async function resetDatabase() {
+  if (!ENV.MONGO_URI.includes('/test') || !ENV.MONGO_URI.includes('localhost')) {
+    console.error('Wrong database used for integration testing');
+    return;
+  }
   const connection = mongoose.connection;
   await connection.dropDatabase();
 
