@@ -73,9 +73,7 @@ describe('socket-io receive message (client bound)', () => {
     await client1.emitHandShake({ jwt: account1.jwt, id: account1.userId });
     await client2.emitHandShake({ jwt: account2.jwt, id: account2.userId });
 
-    client2.on('newMessage', (res) => {
-      done(res);
-    });
+    client2.on('newMessage', (res) => done(res));
 
     const createMessagePayLoad: CreateMessage = {
       conversationId: conversationId,
