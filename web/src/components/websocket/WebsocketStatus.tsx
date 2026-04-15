@@ -36,9 +36,7 @@ export function WebsocketStatus() {
     <div
       className={`fixed bottom-4 right-4 px-4 py-2 rounded-lg border ${statusColors[connectionState]} transition-all duration-300`}
     >
-      <span className="text-sm font-medium">
-        {statusMessages[connectionState]}
-      </span>
+      <span className="text-sm font-medium">{statusMessages[connectionState]}</span>
     </div>
   );
 }
@@ -50,12 +48,8 @@ export function WebsocketErrorBoundary({ children }: { children: ReactNode }) {
     return (
       <div className="flex items-center justify-center h-screen bg-red-50">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-900 mb-2">
-            Connection Error
-          </h1>
-          <p className="text-red-700 mb-4">
-            Failed to connect to the server. Please try refreshing the page.
-          </p>
+          <h1 className="text-2xl font-bold text-red-900 mb-2">Connection Error</h1>
+          <p className="text-red-700 mb-4">Failed to connect to the server. Please try refreshing the page.</p>
           <button
             onClick={() => window.location.reload()}
             className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"

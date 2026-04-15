@@ -8,97 +8,97 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from './routes/__root'
-import { Route as VerifyEmailRouteImport } from './routes/verify-email'
-import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
-import { Route as AppRouteImport } from './routes/app'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as rootRouteImport } from './routes/__root';
+import { Route as VerifyEmailRouteImport } from './routes/verify-email';
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password';
+import { Route as AppRouteImport } from './routes/app';
+import { Route as IndexRouteImport } from './routes/index';
 
 const VerifyEmailRoute = VerifyEmailRouteImport.update({
   id: '/verify-email',
   path: '/verify-email',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
   id: '/forgot-password',
   path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const AppRoute = AppRouteImport.update({
   id: '/app',
   path: '/app',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/app': typeof AppRoute
-  '/forgot-password': typeof ForgotPasswordRoute
-  '/verify-email': typeof VerifyEmailRoute
+  '/': typeof IndexRoute;
+  '/app': typeof AppRoute;
+  '/forgot-password': typeof ForgotPasswordRoute;
+  '/verify-email': typeof VerifyEmailRoute;
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/app': typeof AppRoute
-  '/forgot-password': typeof ForgotPasswordRoute
-  '/verify-email': typeof VerifyEmailRoute
+  '/': typeof IndexRoute;
+  '/app': typeof AppRoute;
+  '/forgot-password': typeof ForgotPasswordRoute;
+  '/verify-email': typeof VerifyEmailRoute;
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/app': typeof AppRoute
-  '/forgot-password': typeof ForgotPasswordRoute
-  '/verify-email': typeof VerifyEmailRoute
+  __root__: typeof rootRouteImport;
+  '/': typeof IndexRoute;
+  '/app': typeof AppRoute;
+  '/forgot-password': typeof ForgotPasswordRoute;
+  '/verify-email': typeof VerifyEmailRoute;
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/app' | '/forgot-password' | '/verify-email'
-  fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/app' | '/forgot-password' | '/verify-email'
-  id: '__root__' | '/' | '/app' | '/forgot-password' | '/verify-email'
-  fileRoutesById: FileRoutesById
+  fileRoutesByFullPath: FileRoutesByFullPath;
+  fullPaths: '/' | '/app' | '/forgot-password' | '/verify-email';
+  fileRoutesByTo: FileRoutesByTo;
+  to: '/' | '/app' | '/forgot-password' | '/verify-email';
+  id: '__root__' | '/' | '/app' | '/forgot-password' | '/verify-email';
+  fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  AppRoute: typeof AppRoute
-  ForgotPasswordRoute: typeof ForgotPasswordRoute
-  VerifyEmailRoute: typeof VerifyEmailRoute
+  IndexRoute: typeof IndexRoute;
+  AppRoute: typeof AppRoute;
+  ForgotPasswordRoute: typeof ForgotPasswordRoute;
+  VerifyEmailRoute: typeof VerifyEmailRoute;
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
     '/verify-email': {
-      id: '/verify-email'
-      path: '/verify-email'
-      fullPath: '/verify-email'
-      preLoaderRoute: typeof VerifyEmailRouteImport
-      parentRoute: typeof rootRouteImport
-    }
+      id: '/verify-email';
+      path: '/verify-email';
+      fullPath: '/verify-email';
+      preLoaderRoute: typeof VerifyEmailRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
     '/forgot-password': {
-      id: '/forgot-password'
-      path: '/forgot-password'
-      fullPath: '/forgot-password'
-      preLoaderRoute: typeof ForgotPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
+      id: '/forgot-password';
+      path: '/forgot-password';
+      fullPath: '/forgot-password';
+      preLoaderRoute: typeof ForgotPasswordRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
     '/app': {
-      id: '/app'
-      path: '/app'
-      fullPath: '/app'
-      preLoaderRoute: typeof AppRouteImport
-      parentRoute: typeof rootRouteImport
-    }
+      id: '/app';
+      path: '/app';
+      fullPath: '/app';
+      preLoaderRoute: typeof AppRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
     '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
+      id: '/';
+      path: '/';
+      fullPath: '/';
+      preLoaderRoute: typeof IndexRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
   }
 }
 
@@ -107,16 +107,14 @@ const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   VerifyEmailRoute: VerifyEmailRoute,
-}
-export const routeTree = rootRouteImport
-  ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>()
+};
+export const routeTree = rootRouteImport._addFileChildren(rootRouteChildren)._addFileTypes<FileRouteTypes>();
 
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
+import type { getRouter } from './router.tsx';
+import type { createStart } from '@tanstack/react-start';
 declare module '@tanstack/react-start' {
   interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
+    ssr: true;
+    router: Awaited<ReturnType<typeof getRouter>>;
   }
 }

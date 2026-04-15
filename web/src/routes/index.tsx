@@ -1,11 +1,11 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { lazy, Suspense } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { ShineBorder } from '@/components/ui/shine-border'
-import Label from '../components/landing/label'
-import { useAuthLogic } from '../components/landing/logic'
+import { createFileRoute } from '@tanstack/react-router';
+import { lazy, Suspense } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ShineBorder } from '@/components/ui/shine-border';
+import Label from '../components/landing/label';
+import { useAuthLogic } from '../components/landing/logic';
 
-const LatticeAnimation = lazy(() => import('@/components/ui/lattice'))
+const LatticeAnimation = lazy(() => import('@/components/ui/lattice'));
 
 export default function Auth() {
   // this is the brain of the auth page that has all of the functions api developer :) ily
@@ -32,7 +32,7 @@ export default function Auth() {
     isMobile,
     isPending,
     navigate,
-  } = useAuthLogic()
+  } = useAuthLogic();
 
   return (
     <main className="relative min-h-screen w-screen bg-black overflow-y-auto overflow-x-hidden md:overflow-hidden flex items-stretch justify-center">
@@ -70,9 +70,7 @@ export default function Auth() {
                     <h1 className="text-4xl font-extrabold bg-linear-to-r from-cyan-400 via-purple-500 to-blue-500 bg-size-[200%_200%] animate-gradient bg-clip-text text-transparent tracking-tight">
                       Create Account
                     </h1>
-                    <p className="text-zinc-500 text-sm">
-                      Join to speak freely.
-                    </p>
+                    <p className="text-zinc-500 text-sm">Join to speak freely.</p>
                   </div>
 
                   <AnimatePresence>
@@ -120,15 +118,12 @@ export default function Auth() {
                         <p className="font-mono">
                           {isCheckingEmail
                             ? 'Checking email availability...'
-                            : (emailAvailability ??
-                              'Enter email to check availability.')}
+                            : (emailAvailability ?? 'Enter email to check availability.')}
                         </p>
                       </div>
 
                       <div className="space-y-2">
-                        <label className="text-zinc-500 text-sm">
-                          Username
-                        </label>
+                        <label className="text-zinc-500 text-sm">Username</label>
                         <input
                           type="text"
                           value={username}
@@ -152,15 +147,12 @@ export default function Auth() {
                         <p className="font-mono">
                           {isCheckingUsername
                             ? 'Checking username availability...'
-                            : (usernameAvailability ??
-                              'Enter username to check availability.')}
+                            : (usernameAvailability ?? 'Enter username to check availability.')}
                         </p>
                       </div>
 
                       <div className="space-y-2">
-                        <label className="text-zinc-500 text-sm">
-                          Password
-                        </label>
+                        <label className="text-zinc-500 text-sm">Password</label>
                         <input
                           type="password"
                           value={password}
@@ -177,27 +169,21 @@ export default function Auth() {
                             : 'border-rose-500/40 bg-rose-500/5 text-rose-200'
                         }`}
                       >
-                        <p className="font-mono">
-                          Password strength: {passwordStrength.label}
-                        </p>
+                        <p className="font-mono">Password strength: {passwordStrength.label}</p>
                         {!isPasswordStrong && (
                           <p className="text-[11px] text-rose-300/90">
-                            Use 8+ chars with upper, lower, numbers, and
-                            symbols.<br></br>
+                            Use 8+ chars with upper, lower, numbers, and symbols.<br></br>
                           </p>
                         )}
                         <p>
                           <br></br>
-                          Encryption strength relies on password complexity, so
-                          a stronger password is recommended for better
-                          security.
+                          Encryption strength relies on password complexity, so a stronger password is recommended for
+                          better security.
                         </p>
                       </div>
 
                       <div className="space-y-2">
-                        <label className="text-zinc-500 text-sm">
-                          Confirm Password
-                        </label>
+                        <label className="text-zinc-500 text-sm">Confirm Password</label>
                         <input
                           type="password"
                           value={confirmPassword}
@@ -216,9 +202,7 @@ export default function Auth() {
                           }`}
                         >
                           <p className="font-mono">
-                            {passwordsMatch
-                              ? 'Passwords match.'
-                              : 'Passwords do not match yet.'}
+                            {passwordsMatch ? 'Passwords match.' : 'Passwords do not match yet.'}
                           </p>
                         </div>
                       )}
@@ -270,9 +254,7 @@ export default function Auth() {
                     <h1 className="text-4xl font-extrabold bg-linear-to-r from-cyan-400 via-purple-500 to-blue-500 bg-size-[200%_200%] animate-gradient bg-clip-text text-transparent tracking-tight">
                       Welcome Back
                     </h1>
-                    <p className="text-zinc-500 text-sm">
-                      Sign in to continue your encrypted chats{' '}
-                    </p>
+                    <p className="text-zinc-500 text-sm">Sign in to continue your encrypted chats </p>
                   </div>
 
                   <AnimatePresence>
@@ -307,9 +289,7 @@ export default function Auth() {
                       </div>
 
                       <div className="space-y-2">
-                        <label className="text-zinc-500 text-sm">
-                          Password
-                        </label>
+                        <label className="text-zinc-500 text-sm">Password</label>
                         <input
                           type="password"
                           value={password}
@@ -363,9 +343,9 @@ export default function Auth() {
         </div>
       </div>
     </main>
-  )
+  );
 }
 
 export const Route = createFileRoute('/')({
   component: Auth,
-})
+});

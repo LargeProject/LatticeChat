@@ -1,7 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { Check, X, User, UserPlus, Inbox, Send, UserMinus, Users } from 'lucide-react';
 import { useUser } from '#/lib/context/UserContext.tsx';
-import { type FriendRequest, removeFriendRequest, sendFriendRequest, removeFriend, acceptFriendRequest  } from '#/lib/api/friend.ts';
+import {
+  type FriendRequest,
+  removeFriendRequest,
+  sendFriendRequest,
+  removeFriend,
+  acceptFriendRequest,
+} from '#/lib/api/friend.ts';
 import { fetchBasicUserInfo } from '#/lib/api/user.ts';
 import { useAsyncEffect } from '#/components/hooks/useAsyncEffect.ts';
 

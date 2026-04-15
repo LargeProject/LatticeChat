@@ -44,10 +44,7 @@ function VerifyEmail() {
   const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
     e.preventDefault();
 
-    const pasted = e.clipboardData
-      .getData('text')
-      .replace(/\D/g, '')
-      .slice(0, code.length);
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, code.length);
     if (!pasted) return;
 
     const newCode = [...code];
@@ -87,10 +84,7 @@ function VerifyEmail() {
     }
   };
 
-  const handleKeyDown = (
-    index: number,
-    e: React.KeyboardEvent<HTMLInputElement>,
-  ) => {
+  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Backspace' && !code[index] && index > 0) {
       inputRefs.current[index - 1]?.focus();
     }
@@ -116,8 +110,7 @@ function VerifyEmail() {
         </h2>
 
         <p className="text-sm text-zinc-400 text-center">
-          Enter the 6-digit code we emailed you to confirm your address and
-          complete your sign up.
+          Enter the 6-digit code we emailed you to confirm your address and complete your sign up.
         </p>
 
         <form onSubmit={handleSubmit} noValidate className="space-y-6">

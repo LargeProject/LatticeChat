@@ -21,7 +21,7 @@ export function useConversation(conversation: Conversation) {
   useEffect(() => {
     let ignore = false;
     setMessages([]);
-    
+
     fetchConversationMessages(conversation.id).then((data) => {
       if (!ignore) {
         setMessages(data);
