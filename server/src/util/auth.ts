@@ -60,8 +60,13 @@ const auth = betterAuth({
   hooks: {
     before: createAuthMiddleware(async (ctx) => {
       // password validation middleware
-      if (ctx.path == '/sign-up/email' || ctx.path == '/email-otp/reset-password') {
-        const password = ctx.body.password;
+      if (ctx.path == '/sign-up/email' || ctx.path == '/email-otp/reset-password' || ctx.path == '/change-password') {
+        let password = '';
+        if (ctx.path == '/change-password') {
+          password = ctx.body.newPassword;
+        } else {
+          password = ctx.body.password;
+        }
 
         const { score, feedback } = zxcvbn(password);
         if (score < 3) {

@@ -8,7 +8,7 @@ beforeEach(async () => {
 
 describe('GET /api/users/me', () => {
   it('should return 200 and user info', async () => {
-    const { jwt } = await request.createAndSignIn({
+    const { jwt, userId } = await request.createAndSignIn({
       name: 'test',
       email: 'test@gmail.com',
       password: 'Test@Test.Test',
@@ -19,6 +19,7 @@ describe('GET /api/users/me', () => {
     expect(response.status).toBe(200);
     expect(response.body.userInfo).toMatchObject({
       user: {
+        id: userId,
         name: 'test',
         email: 'test@gmail.com',
       },

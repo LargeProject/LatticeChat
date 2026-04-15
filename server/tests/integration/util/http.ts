@@ -40,6 +40,13 @@ class Request {
     return account;
   }
 
+  async sendChangePassword(jwt: string, body: { newPassword: string; currentPassword: string }) {
+    return await supertest(server)
+      .post('/api/auth/change-password')
+      .set('Authorization', 'Bearer ' + jwt)
+      .send(body);
+  }
+
   async sendPasswordResetVerification(body: { email: string }) {
     return await supertest(server)
       .post('/api/auth/email-otp/send-verification-otp')
