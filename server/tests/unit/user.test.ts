@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { connectDatabase, database, disconnectDatabase, resetDatabase } from '../integration/util/database';
 import { ConversationService, UserService } from '../../src/db';
+import { bufferToString } from './util';
 
 beforeEach(async () => {
   await connectDatabase();
@@ -44,12 +45,15 @@ describe('UserServices - acceptFriendRequest', () => {
     user1 = await UserService.findUser(user1.id);
     user2 = await UserService.findUser(user2.id);
 
-    const user1ConversationId = user1.conversationIds[0].id;
-    const user2ConversationId = user2.conversationIds[0].id;
-    const conversation = await ConversationService.findConversation(Buffer.from(user1ConversationId).toString('hex'));
+    const user1ConversationId = bufferToString(user1.conversationIds[0].id);
+    const user2ConversationId = bufferToString(user2.conversationIds[0].id);
+    const conversation = await ConversationService.findConversation(user1ConversationId);
 
-    expect(user1.friendIds[0].id).toEqual(user2.id);
-    expect(user2.friendIds[0].id).toEqual(user1.id);
+    const user1Friend = bufferToString(user1.friendIds[0].id);
+    const user2Friend = bufferToString(user2.friendIds[0].id);
+
+    expect(user1Friend).toEqual(user2.id);
+    expect(user2Friend).toEqual(user1.id);
     expect(user1ConversationId).toEqual(user2ConversationId);
     expect(conversation).toBeDefined();
   });
