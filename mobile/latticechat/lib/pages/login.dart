@@ -20,6 +20,10 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
+  String _email = '';
+  String _password = '';
+  bool get _isReady => _email.isNotEmpty && _password.isNotEmpty;
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -54,13 +58,19 @@ class _LoginPageState extends State<LoginPage> {
     } on ApiError catch (error) {
       debugPrint(error.toString());
       switch (error.type) {
-        case "EMAIL_NOT_VERIFIED":
+        case 'EMAIL_NOT_VERIFIED':
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => VerifyPage(email: email)),
           );
-        case "INVALID_EMAIL_OR_PASSWORD":
-          // Display message somehow. Maybe a toast for simplicity.
+        case 'INVALID_EMAIL':
+          ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Invalid email structure.'), backgroundColor: Colors.white),
+          );
+        default:
+          ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Invalid email or password.'), backgroundColor: Colors.white),
+          );
       }
     }
   }
@@ -113,6 +123,7 @@ class _LoginPageState extends State<LoginPage> {
                     decoration: InputDecoration(
                       labelText: 'Email',
                     ),
+                    onChanged: (value) => setState(() => _email = value),
                   ),
                   
                   const SizedBox(height: 16),
@@ -123,12 +134,13 @@ class _LoginPageState extends State<LoginPage> {
                     decoration: InputDecoration(
                       labelText: 'Password',
                     ),
+                    onChanged: (value) => setState(() => _password = value),
                   ),
 
                   const SizedBox(height: 16),
 
                   ElevatedButton(
-                    onPressed: _handleLogin,
+                    onPressed: _isReady? _handleLogin : null,
                     style: AppButtonStyles.primaryElevated,
                     child: const Text('Sign In'),
                   ),
