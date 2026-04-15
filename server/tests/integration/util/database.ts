@@ -3,7 +3,7 @@ import { Conversation, Message, User, Verification } from '../../../src/db/model
 import { ENV } from '../../../src/util/env';
 
 export async function resetDatabase() {
-  if (!ENV.MONGO_URI.includes('/test') || !ENV.MONGO_URI.includes('localhost')) {
+  if (!ENV.MONGO_URI.includes('localhost')) {
     console.error('Wrong database used for integration testing');
     return;
   }
