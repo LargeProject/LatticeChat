@@ -55,8 +55,7 @@ class _RegisterPageState extends State<RegisterPage> {
   }
   
   // A function meant to be called by the Sign Up button
-  // TODO: Make status messages flicker when submitted with an invalid field?
-  // TODO: Display some kind of error when the API call fails.
+  // Consider making status messages flicker when submitted with an invalid field.
   void _handleSignUp() async {
     if (!_isFormValid) {
       debugPrint('Sign Up button was pressed with an invalid form. Do nothing');
@@ -68,13 +67,21 @@ class _RegisterPageState extends State<RegisterPage> {
       final authApi = ApiServices.getAuthServices();
 
       if (!await authApi.signUp(_username, _email, _password)) {
-        debugPrint("Sign up unsuccessful, check information.");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Sign up unsuccessful, check information.'),
+            backgroundColor: Colors.white),
+        );
         return;
       }
       debugPrint("Sign up successful!");
 
       if (!await authApi.sendEmailVerification(_email)) {
-        debugPrint("Failed to send email verification code, check information.");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Verification code failed to send. Please wait and try again later.'),
+            backgroundColor: Colors.white),
+        );
         return;
       }
       debugPrint("Sent email verification code. Proceeding to Verify page...");
