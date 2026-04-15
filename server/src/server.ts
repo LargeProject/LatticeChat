@@ -21,7 +21,7 @@ const app = express();
 
 app.use(cors(corsOptions));
 app.use(express.json());
-if (ENV.HTTP_LOG_LEVEL == 'info') app.use(logger);
+if (ENV.LOG_LEVEL == 'info') app.use(logger);
 
 // Serve OpenAPI spec and Swagger UI
 app.get('/openapi.yaml', (req, res) => {
