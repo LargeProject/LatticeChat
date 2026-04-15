@@ -8,6 +8,7 @@ import { connectMongoDB, UserService } from '../db';
 import { sendDuplicateEmailNotification, sendEmailVerificationOTP, sendForgetPasswordOTP } from './mailer';
 import { createAuthMiddleware } from '@better-auth/core/api';
 import { authUserAdditionalFields } from '../db/schemas/User';
+import { LogLevels } from './log';
 
 await connectMongoDB();
 const client = mongoose.connection.getClient();
@@ -113,6 +114,10 @@ const auth = betterAuth({
         }
       }
     }),
+  },
+
+  logger: {
+    disabled: ENV.LOG_LEVEL != LogLevels.INFO,
   },
 });
 

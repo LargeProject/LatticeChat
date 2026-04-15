@@ -6,6 +6,7 @@ import { ENV } from './util/env';
 import cors from 'cors';
 import { logger } from './http/middleware/loggerMiddleware';
 import apiRouter from './http';
+import { LogLevels } from './util/log';
 
 const corsOptions = {
   origin: ENV.ALLOW_ORIGIN,
@@ -17,8 +18,8 @@ const corsOptions = {
 const app = express();
 app.use(cors(corsOptions));
 app.use(express.json());
-if(ENV.HTTP_LOG_LEVEL == 'info') app.use(logger);
 app.use('/api', apiRouter);
+if (ENV.LOG_LEVEL == LogLevels.INFO) app.use(logger);
 
 export const server = http.createServer(app);
 export const io = new WebsocketServer(server).registerEvents(events);

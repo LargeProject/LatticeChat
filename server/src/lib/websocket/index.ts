@@ -4,6 +4,7 @@ import { ENV } from '../../util/env';
 import * as types from './types';
 import { UserConnectionManager } from './UserConnectionManager';
 import type { AckResponse } from '@latticechat/shared';
+import { Logger } from '../../util/log';
 
 export type AckCallback = (response: AckResponse) => void;
 export const ACK_SUCCESS = { success: true };
@@ -56,8 +57,8 @@ export class WebsocketServer {
   private dispatch(socket: types.SocketWithAuth, event: types.RegisteredEvent) {
     socket.on(event.name, async (payload: any, ack?: AckCallback) => {
       if (!socket.data.userId && !event.isPublic) {
-        console.log(socket.data);
-        console.warn(
+        Logger.error(socket.data);
+        Logger.warn(
           `Event ${event.name} (${event.isPublic ? 'public' : 'protected'}) received from unauthenticated socket`,
         );
         ack?.(ACK_FAIL);
@@ -77,9 +78,9 @@ export class WebsocketServer {
         ack?.(result);
       } catch (error) {
         if (error instanceof types.WebsocketError) {
-          console.error(`[${event.name}] ${error.code}: ${error.message}`);
+          Logger.error(`[${event.name}] ${error.code}: ${error.message}`);
         } else {
-          console.error(`[${event.name}] Unexpected error:`, error);
+          Logger.error(`[${event.name}] Unexpected error:`, error);
         }
         ack?.(ACK_FAIL);
       }
@@ -90,12 +91,12 @@ export class WebsocketServer {
     const parsed = schema.safeParse(payload);
     if (parsed.error) {
       try {
-        console.error(
+        Logger.error(
           `[${eventName}] payload validation failed:`,
           parsed.error.format ? parsed.error.format() : parsed.error,
         );
       } catch (logErr) {
-        console.error(`[${eventName}] payload validation failed (unable to format error)`, parsed.error);
+        Logger.error(`[${eventName}] payload validation failed (unable to format error)`, parsed.error);
       }
       throw new types.WebsocketError(
         `Invalid payload for ${eventName}: ${JSON.stringify(parsed.error.format ? parsed.error.format() : parsed.error)}`,
