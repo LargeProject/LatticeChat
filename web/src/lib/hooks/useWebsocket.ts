@@ -62,6 +62,24 @@ export function useWebsocket() {
     [context.emitWithAck, context.socket, context.isAuthenticated],
   );
 
+  const leaveConversation = useCallback(
+    async (conversationId: string) => {
+      if (!context.socket || !context.isAuthenticated) {
+        console.warn('Socket not connected or not authenticated');
+        return { success: false };
+      }
+
+      try {
+        const ack = await context.emitWithAck('leaveConversation', { conversationId });
+        return ack;
+      } catch (error) {
+        console.error('Error leaving conversation:', error);
+        return { success: false };
+      }
+    },
+    [context.emitWithAck, context.socket, context.isAuthenticated],
+  );
+
   const getMessageQueue = useCallback(() => {
     return messageQueueRef.current;
   }, []);
@@ -80,6 +98,7 @@ export function useWebsocket() {
     createMessage,
     createConversation,
     addMember,
+    leaveConversation,
     getMessageQueue,
     clearMessageQueue,
   };

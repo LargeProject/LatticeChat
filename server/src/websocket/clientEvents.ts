@@ -27,4 +27,10 @@ export const events: RegisteredEvent[] = [
     handler: WebsocketHandlers.handleAddMember,
     isPublic: false,
   },
+  {
+    name: 'leaveConversation',
+    payloadSchema: payload.leaveConversation,
+    handler: WebsocketHandlers.handleLeaveConversation,
+    isPublic: false,
+  },
 ];

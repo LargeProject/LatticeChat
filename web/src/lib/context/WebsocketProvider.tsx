@@ -31,6 +31,7 @@ export type ClientEventMap = {
 export type ServerEventMap = {
   newMessage: contracts.EmitMessage;
   newMember: contracts.EmitMemberAdded;
+  memberLeft: contracts.EmitMemberLeft;
 };
 
 export function WebsocketProvider({ children, wsUrl, onError }: WebsocketProviderProps) {

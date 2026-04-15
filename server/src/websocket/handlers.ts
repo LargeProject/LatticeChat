@@ -161,4 +161,65 @@ export class WebsocketHandlers {
       throw new WebsocketError('Failed to add member', 'ADD_MEMBER_ERROR', 500);
     }
   }
+
+  static async handleLeaveConversation(
+    data: actions.LeaveConversation,
+    context: WebsocketContext,
+  ): Promise<actions.AckResponse> {
+    try {
+      const userId = context.userId;
+      const result = await ConversationService.removeMemberFromConversation({
+        conversationId: data.conversationId,
+        userId,
+      });
+
+      const payload: any = {
+        conversationId: result.conversationId,
+        userId: result.userId,
+        leftAt: result.leftAt,
+        ...(result.newOwnerId ? { newOwnerId: result.newOwnerId } : {}),
+      };
+
+      if (result.remainingMemberIds && result.remainingMemberIds.length > 0) {
+        broadcastToConversationMembers(context, result.remainingMemberIds, 'memberLeft', payload);
+      }
+
+      if (!result.deleted && result.remainingMemberIds && result.remainingMemberIds.length > 0) {
+        try {
+          const leftUser = await UserService.findUser(userId, 'user');
+          const conversation = await ConversationService.findConversation(data.conversationId);
+          const message = await MessageService.createMessage({
+            conversationId: conversation._id.toString(),
+            senderId: 'system',
+            content: `${leftUser.name} left the conversation`,
+          });
+
+          const emitMessage = {
+            id: message._id.toString(),
+            conversationId: message.conversationId,
+            senderId: message.senderId,
+            content: message.content,
+            createdAt: message.createdAt,
+          };
+
+          broadcastToConversationMembers(
+            context,
+            conversation.memberIds.map((m: any) => m.toString()),
+            'newMessage',
+            emitMessage,
+          );
+        } catch (e) {
+          Logger.error(e);
+        }
+      }
+
+      return ACK_SUCCESS;
+    } catch (error) {
+      if (error instanceof WebsocketError) {
+        throw error;
+      }
+      Logger.error('[LeaveConversation] Error:', error);
+      throw new WebsocketError('Failed to leave conversation', 'LEAVE_CONVERSATION_ERROR', 500);
+    }
+  }
 }

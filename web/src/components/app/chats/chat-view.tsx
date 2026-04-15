@@ -4,6 +4,7 @@ import { MessageList } from './messages';
 import { ChatInput } from './chat-input';
 import { AddMembersModal } from './add-members-modal';
 import { useWebsocket } from '#/lib/hooks/useWebsocket';
+import { useWebsocketListener } from '#/lib/hooks/useWebsocketListener';
 import type { Message } from '#/lib/api/conversation.ts';
 import { useUser } from '#/lib/context/UserContext.tsx';
 import { useConversation } from '#/components/hooks/useConversation';
@@ -18,12 +19,26 @@ export function ChatView({ conversation }: ChatViewProps) {
   const { createMessage } = useWebsocket();
   const { userInfo } = useUser();
   const { setConvoId } = useAppState();
+  const { createMessage, isAuthenticated, leaveConversation } = useWebsocket();
+  const { userInfo, refreshUser } = useUser();
   const [pendingMessages, setPendingMessages] = useState<Array<Message & { optimistic: true }>>([]);
   const [isAddMembersOpen, setIsAddMembersOpen] = useState(false);
 
   useEffect(() => {
     setPendingMessages([]);
   }, [conversation.id]);
+
+  const [membersState, setMembersState] = useState(conversation.members);
+  useEffect(() => {
+    setMembersState(conversation.members);
+  }, [conversation.members]);
+
+  const onMemberLeftUI = (data: contracts.EmitMemberLeft) => {
+    if (data.conversationId === conversation.id) {
+      setMembersState((m) => m.filter((x) => x.id !== data.userId));
+    }
+  };
+  useWebsocketListener('memberLeft', onMemberLeftUI, isAuthenticated, [conversation.id]);
 
   const handleSend = useCallback(
     async (text: string) => {
@@ -59,6 +74,23 @@ export function ChatView({ conversation }: ChatViewProps) {
     setIsAddMembersOpen(false);
   }, []);
 
+  const handleLeave = useCallback(async () => {
+    if (!userInfo.data) return;
+    if (!confirm('Leave conversation?')) return;
+
+    try {
+      const result = await leaveConversation(conversation.id);
+      if ((result as any)?.success) {
+        await refreshUser();
+      } else {
+        alert('Failed to leave conversation');
+      }
+    } catch (e) {
+      console.error(e);
+      alert('Error leaving conversation');
+    }
+  }, [conversation.id, refreshUser, userInfo, leaveConversation]);
+
   const { name, messages } = useConversation(conversation);
 
   const allMessages = [...messages, ...pendingMessages];
@@ -93,11 +125,21 @@ export function ChatView({ conversation }: ChatViewProps) {
             >
               <UserPlus size={16} />
             </button>
+
+            <button
+              type="button"
+              onClick={handleLeave}
+              className="inline-flex h-9 items-center justify-center rounded-lg px-3 text-(--text-danger) transition-colors hover:bg-(--link-bg-hover) hover:text-(--text-primary) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--line)"
+              aria-label="Leave conversation"
+              title="Leave conversation"
+            >
+              Leave
+            </button>
           </div>
         </div>
       </header>
 
-      <MessageList messages={allMessages} currentUserId={userInfo.data?.id || ''} members={conversation.members} />
+      <MessageList messages={allMessages} currentUserId={userInfo.data?.id || ''} members={membersState} />
 
       <div className="border-t border-(--line) bg-(--surface)">
         <ChatInput onSend={handleSend} />
