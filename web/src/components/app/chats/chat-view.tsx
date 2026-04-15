@@ -16,8 +16,6 @@ type ChatViewProps = {
 };
 
 export function ChatView({ conversation }: ChatViewProps) {
-  const { createMessage } = useWebsocket();
-  const { userInfo } = useUser();
   const { setConvoId } = useAppState();
   const { createMessage, isAuthenticated, leaveConversation } = useWebsocket();
   const { userInfo, refreshUser } = useUser();
