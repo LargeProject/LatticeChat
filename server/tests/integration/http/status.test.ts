@@ -1,6 +1,6 @@
 import request from 'supertest';
 import { describe, it, expect } from 'vitest';
-import { server } from '../../src/server';
+import { server } from '../../../src/server';
 
 describe('GET /api/status', () => {
   it('should return 200 and ok', async () => {

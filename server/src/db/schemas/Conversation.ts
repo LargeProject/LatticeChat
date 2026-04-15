@@ -1,13 +1,12 @@
-import { HydratedDocument, InferSchemaType, Types } from 'mongoose';
+import type { BasicUserInfo } from '@latticechat/shared';
+import type { HydratedDocument, InferSchemaType, Types } from 'mongoose';
 import mongoose, { Schema } from 'mongoose';
-import { User } from '../models';
+import * as models from '../models';
 import { UserService } from '../services/UserService';
-import { BasicUserInfo } from '@latticechat/shared';
 
 export const messageSchema = new Schema({
   senderId: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
+    type: String,
     required: true,
   },
   conversationId: {
@@ -25,17 +24,6 @@ export const messageSchema = new Schema({
     required: true,
     default: Date.now,
   },
-  keys: [
-    {
-      id: {
-        type: Schema.Types.ObjectId,
-        ref: 'User',
-      },
-      encryptedKey: {
-        type: String,
-      },
-    },
-  ],
 });
 
 export const conversationSchema = new Schema(
@@ -48,7 +36,7 @@ export const conversationSchema = new Schema(
     isDirectMessage: {
       type: Boolean,
       required: true,
-      default: true
+      default: true,
     },
     name: {
       type: String,
@@ -64,7 +52,7 @@ export const conversationSchema = new Schema(
       validate: {
         // Ensure conversations always have atleast two members
         validator: (v: Types.ObjectId[]) => {
-          return v && v.length >= 2;
+          return v.length >= 2;
         },
         message: 'A conversation must have at least two members',
       },
@@ -76,7 +64,7 @@ export const conversationSchema = new Schema(
         const memberObjectId = new mongoose.Types.ObjectId(memberId);
         return this.memberIds.includes(memberObjectId);
       },
-      getMembers: async function(): Promise<BasicUserInfo[]> {
+      getMembers: async function (): Promise<BasicUserInfo[]> {
         const stringMemberIds = this.memberIds.map((memberId) => memberId.toString());
         const members = await UserService.getBasicUserInfosById(stringMemberIds);
         return members.map((member) => {
@@ -84,10 +72,10 @@ export const conversationSchema = new Schema(
             id: member._id.toString(),
             name: member.name,
             biography: member.biography,
-            createdAt: member.createdAt
-          }
+            createdAt: member.createdAt,
+          };
         });
-      }
+      },
     },
   },
 );
@@ -98,9 +86,9 @@ export type ConversationDocument = HydratedDocument<Conversation> & { getMembers
 conversationSchema.pre('save', { document: true, query: true }, async function () {
   if (!this.isNew) return;
 
-  await User.updateMany({ _id: { $in: this.memberIds } }, { $addToSet: { conversationIds: this._id } });
+  await models.User.updateMany({ _id: { $in: this.memberIds } }, { $addToSet: { conversationIds: this._id } });
 });
 
 conversationSchema.pre('deleteOne', { document: true, query: false }, async function () {
-  await User.updateMany({ conversationIds: this._id }, { $pull: { conversationIds: this._id } });
+  await models.User.updateMany({ conversationIds: this._id }, { $pull: { conversationIds: this._id } });
 });

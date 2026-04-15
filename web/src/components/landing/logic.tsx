@@ -71,7 +71,7 @@ export function useAuthLogic() {
           navigate({ to: '/verify-email' });
         },
         onError: (ctx) => {
-          alert(ctx.error.message);
+          setError(ctx.error.message);
           setIsPending(false);
         },
       },
@@ -79,10 +79,17 @@ export function useAuthLogic() {
   }
 
   async function sendVerificationCode() {
-    await authClient.emailOtp.sendVerificationOtp({
-      email: email,
-      type: 'email-verification',
-    });
+    await authClient.emailOtp.sendVerificationOtp(
+      {
+        email: email,
+        type: 'email-verification',
+      },
+      {
+        onError: (ctx) => {
+          setError(ctx.error.message);
+        },
+      },
+    );
   }
 
   async function signin() {
@@ -113,7 +120,7 @@ export function useAuthLogic() {
             sendVerificationCode();
             navigate({ to: '/verify-email' });
           } else {
-            alert(ctx.error.message);
+            setError(ctx.error.message);
             setIsPending(false);
           }
         },
@@ -132,6 +139,7 @@ export function useAuthLogic() {
       if (username.trim().length > 20)
         return 'Username must be at most 20 characters';
     } else if (mode === 'login') {
+      if (!password) return 'Password is required';
       return null;
     }
 
@@ -183,7 +191,7 @@ export function useAuthLogic() {
     if (!password) {
       setPasswordStrength({
         score: 0,
-        label: '',
+        label: 'Literally the weakest',
         feedback: null,
       });
       return;

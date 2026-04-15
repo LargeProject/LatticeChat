@@ -79,7 +79,7 @@ export async function fetchConversations(conversationIds: string[]): Promise<Con
   return conversations;
 }
 
-export async function fetchConversationsBySearch(search: string) {
+export async function fetchConversationsBySearch(search: string): Promise<Conversation[]> {
   const userId = getLocalUserId();
   const jwt = getLocalJWT();
 

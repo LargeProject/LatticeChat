@@ -1,4 +1,5 @@
-import { type BasicUserInfo, fetchBasicUserInfo } from '#/lib/api/user.ts';
+import {  fetchBasicUserInfo } from '#/lib/api/user.ts';
+import type {BasicUserInfo} from '#/lib/api/user.ts';
 import { HttpError } from '#/lib/util/error.ts';
 import { getLocalJWT, getLocalUserId } from '#/lib/util/storage.ts';
 
@@ -36,12 +37,32 @@ export async function fetchFriendRequests(): Promise<FriendRequest[]> {
 
     const friendRequest: FriendRequest = {
       type: requestType ?? 'incoming',
-      associatedUser: associatedUser!,
+      associatedUser: associatedUser,
     };
     friendRequests.push(friendRequest);
   }
 
   return friendRequests;
+}
+
+export async function acceptFriendRequest(targetId: string) {
+  const senderId = getLocalUserId();
+  const jwt = getLocalJWT();
+
+  const requestBody = { targetId: targetId };
+  const response = await fetch(import.meta.env.VITE_API_BASE_URL + '/users/' + senderId + '/friend-requests', {
+    method: 'PATCH',
+    headers: {
+      Authorization: 'Bearer ' + jwt,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(requestBody),
+  });
+
+  const body = await response.json();
+  if (!response.ok) {
+    throw new HttpError(response.status, body.code, body.message);
+  }
 }
 
 export async function sendFriendRequest(targetId: string) {
@@ -64,13 +85,13 @@ export async function sendFriendRequest(targetId: string) {
   }
 }
 
-export async function removeFriendRequest(targetId: string, type: 'incoming' | 'outgoing') {
+export async function removeFriendRequest(targetId: string) {
   const senderId = getLocalUserId();
   const jwt = getLocalJWT();
 
   const requestBody = { targetId: targetId };
   const response = await fetch(
-    import.meta.env.VITE_API_BASE_URL + '/users/' + senderId + '/friend-requests' + '?type=' + type,
+    import.meta.env.VITE_API_BASE_URL + '/users/' + senderId + '/friend-requests',
     {
       method: 'DELETE',
       headers: {
@@ -108,7 +129,7 @@ export async function removeFriend(targetId: string) {
 }
 
 export async function fetchFriends(friendIds: string[]): Promise<BasicUserInfo[]> {
-  let friends: BasicUserInfo[] = [];
+  const friends: BasicUserInfo[] = [];
   for (const friendId of friendIds) {
     const friend = await fetchBasicUserInfo(friendId);
 
@@ -119,5 +140,3 @@ export async function fetchFriends(friendIds: string[]): Promise<BasicUserInfo[]
 
   return friends;
 }
-
-export { BasicUserInfo };

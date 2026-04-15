@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:latticechat/pages/login.dart';
 import 'package:latticechat/theme.dart';
-import 'package:latticechat/logic/api.dart';
-import 'package:latticechat/logic/models/error.dart';
 import 'package:pinput/pinput.dart';
+
+import '../logic/services/api.dart';
+import '../logic/util/error.dart';
 
 
 class VerifyPage extends StatefulWidget {
@@ -33,10 +34,10 @@ class _VerifyPageState extends State<VerifyPage> {
     debugPrint('Attempting to verify with code: $pin and email: ${widget.email}');
 
     try {
-      final api = ApiServices();
+      final authApi = ApiServices.getAuthServices();
 
       // This API call needs to be modified, because I want the session ID--not just a boolean
-      final response = await api.attemptVerifyEmail(widget.email, pin);
+      final response = await authApi.verifyEmail(widget.email, pin);
       
       // Switches to the Login page
       if (response) {   

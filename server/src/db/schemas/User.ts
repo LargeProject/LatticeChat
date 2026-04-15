@@ -3,7 +3,7 @@ import * as z from 'zod';
 import validator from 'validator';
 import { DBFieldAttribute } from '@better-auth/core/db';
 import { ObjectId } from 'mongodb';
-import { Account, Conversation, FriendRequest, User } from '../models';
+import { Account, Conversation, FriendRequest, Message, User } from '../models';
 import { AccountNotFoundError } from '../../util/error';
 import { ConversationService } from '../services/ConversationService';
 import { UserService } from '../services/UserService';
@@ -150,17 +150,9 @@ userSchema.pre('deleteOne', { document: true, query: false }, async function () 
   // remove this user from all users friends list
   await User.updateMany({ friendIds: this._id }, { $pull: { friendIds: this._id } });
 
-  // delete all friend requests associated connected to this user
+  // delete all friend requests associated with this user
   await FriendRequest.deleteMany({
     $or: [{ fromId: this._id }, { toId: this._id }],
-  });
-
-  // delete all private conversations that only have this user
-  await Conversation.deleteMany({
-    memberIds: {
-      $all: [this._id],
-    },
-    ownerId: null,
   });
 
   // Delete all direct messages
@@ -168,11 +160,15 @@ userSchema.pre('deleteOne', { document: true, query: false }, async function () 
 
   // remove this user from all conversations that include them
   await Conversation.updateMany({ memberIds: this._id }, { $pull: { memberIds: this._id } });
+
+  // remove all of this user's messages
+  await Message.deleteMany({ senderId: this.id });
 });
 
 type UserAdditionalFields = {
   [x: string]: DBFieldAttribute;
 };
+
 export const authUserAdditionalFields: UserAdditionalFields = {
   phone: {
     type: 'string',

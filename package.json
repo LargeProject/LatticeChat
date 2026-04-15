@@ -8,10 +8,13 @@
     "server"
   ],
   "scripts": {
+    "generate:diagrams": "bash scripts/generate-diagrams.sh",
+    "fetch-commits": "git log --reverse --pretty=format:\"%H %an %ad %s\" --date=iso > commit_history.txt",
     "dev": "concurrently \"yarn workspace server dev\" \"yarn workspace web dev\"",
     "build": "yarn workspaces foreach --all -pt run build"
   },
   "devDependencies": {
+    "@types/swagger-ui-express": "^4.1.8",
     "concurrently": "^9.1.2"
   }
 }

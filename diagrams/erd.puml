@@ -1,0 +1,62 @@
+@startuml
+' Entity Relationship Diagram for LatticeChat
+!theme spacelab
+
+entity User {
+  _id: ObjectId
+  name: string
+  email: string
+  emailVerified: boolean
+  phone: string
+  biography: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+entity Conversation {
+  _id: ObjectId
+  ownerId: ObjectId (User)
+  isDirectMessage: boolean
+  name: string
+  memberIds: [ObjectId] (User)
+}
+
+entity Message {
+  _id: ObjectId
+  senderId: ObjectId (User)
+  conversationId: ObjectId (Conversation)
+  content: string
+  createdAt: Date
+  keys: [ { id: ObjectId (User), encryptedKey: string } ]
+}
+
+entity FriendRequest {
+  _id: ObjectId
+  fromId: ObjectId (User)
+  toId: ObjectId (User)
+}
+
+entity Account {
+  _id: ObjectId
+  userId: ObjectId (User)
+  publicKey: string
+}
+
+entity KeyExchangeRequest {
+  _id: ObjectId
+  fromId: ObjectId (User)
+  toId: ObjectId (User)
+  cipher: string
+}
+
+' Relationships
+User ||--o{ Conversation : memberIds
+User ||--o{ FriendRequest : fromId
+User ||--o{ FriendRequest : toId
+User ||--o{ Account : userId
+User ||--o{ KeyExchangeRequest : fromId
+User ||--o{ KeyExchangeRequest : toId
+Conversation ||--o{ Message : conversationId
+User ||--o{ Message : senderId
+
+@enduml

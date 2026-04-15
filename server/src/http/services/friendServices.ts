@@ -19,53 +19,44 @@ const handleGetFriendRequests: Service = async (req: UserRequest, res) => {
   }
 };
 
+const handleAcceptFriendRequest: Service = async(req: UserRequest, res) => {
+  const senderId = req.userInfo?.id ?? '';
+  const targetId = req.body.targetId ?? '';
+
+  try {
+    await db.UserService.acceptFriendRequest(targetId, senderId);
+
+    res.status(200).send({
+      success: true,
+      message: 'Friend request successfully accepted',
+    });
+  } catch (error) {
+    handleHttpError(error, res);
+  }
+}
+
 const handleAddFriendRequest: Service = async (req: UserRequest, res) => {
   const senderId = req.userInfo?.id ?? '';
   const targetId = req.body.targetId ?? '';
 
   try {
-    const friendRequest = await db.UserService.createFriendRequest(senderId, targetId);
+    await db.UserService.createFriendRequest(senderId, targetId);
 
-    if (!friendRequest) {
-      res.status(200).send({
-        success: true,
-        message: 'Friend successfully added',
-      });
-    } else {
-      res.status(200).send({
-        success: true,
-        message: 'Friend request successfully sent',
-      });
-    }
+    res.status(200).send({
+      success: true,
+      message: 'Friend request successfully sent',
+    });
   } catch (error) {
     handleHttpError(error, res);
   }
 };
 
 const handleRemoveFriendRequest: Service = async (req: UserRequest, res) => {
-  const type = req.query.type;
-
   const senderId = req.userInfo?.id ?? '';
   const targetId = req.body.targetId ?? '';
 
-  let fromId = '';
-  let toId = '';
-  if (type === 'outgoing') {
-    fromId = senderId;
-    toId = targetId;
-  } else if (type === 'incoming') {
-    fromId = targetId;
-    toId = senderId;
-  } else {
-    res.status(409).send({
-      success: false,
-      message: 'Unknown friend request type: ' + type,
-    });
-    return;
-  }
-
   try {
-    await db.UserService.removeFriendRequest(fromId, toId);
+    await db.UserService.removeFriendRequest(senderId, targetId);
     res.status(200).send({
       success: true,
       message: 'Friend request successfully deleted',
@@ -96,4 +87,4 @@ const handleRemoveFriend: Service = async (req: UserRequest, res) => {
   }
 };
 
-export { handleGetFriendRequests, handleAddFriendRequest, handleRemoveFriendRequest, handleRemoveFriend };
+export { handleGetFriendRequests, handleAddFriendRequest, handleRemoveFriendRequest, handleRemoveFriend, handleAcceptFriendRequest };

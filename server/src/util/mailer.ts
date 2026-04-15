@@ -1,7 +1,11 @@
 import sendgridMailer from '@sendgrid/mail';
 import { ENV } from './env';
 
-sendgridMailer.setApiKey(ENV.SENDGRID_API_KEY);
+const PLACEHOLDER_KEY = 'SG.';
+
+if (ENV.SENDGRID_API_KEY != PLACEHOLDER_KEY) {
+  sendgridMailer.setApiKey(ENV.SENDGRID_API_KEY);
+}
 
 const sendEmailVerificationOTP = async (receiverEmail: string, otp: string) => {
   sendEmailOTP(receiverEmail, 'Email Verification Code', otp, (otp) => `<p>Verification Code: ${otp}</p>`);
@@ -17,6 +21,7 @@ const sendEmailOTP = async (
   otp: string,
   htmlCallback: (otp: string) => string,
 ) => {
+  if (ENV.SENDGRID_API_KEY == PLACEHOLDER_KEY) return;
   sendgridMailer.send({
     from: `"No Reply" <lattice@cop4331site.com>`,
     to: receiverEmail,
@@ -26,6 +31,7 @@ const sendEmailOTP = async (
 };
 
 const sendDuplicateEmailNotification = async (receiverEmail: string) => {
+  if (ENV.SENDGRID_API_KEY == PLACEHOLDER_KEY) return;
   sendgridMailer.send({
     from: `"No Reply" <lattice@cop4331site.com>`,
     to: receiverEmail,

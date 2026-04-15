@@ -19,9 +19,18 @@ export function useConversation(conversation: Conversation) {
 
   // Initial message fetch
   useEffect(() => {
+    let ignore = false;
+    setMessages([]);
+    
     fetchConversationMessages(conversation.id).then((data) => {
-      setMessages(data);
+      if (!ignore) {
+        setMessages(data);
+      }
     });
+
+    return () => {
+      ignore = true;
+    };
   }, [conversation.id]);
 
   // Handle incoming messages via websocket
@@ -34,10 +43,18 @@ export function useConversation(conversation: Conversation) {
     }
   };
 
-  useWebsocketListener('newMessage', onMessageReceive, isAuthenticated);
+  useWebsocketListener('newMessage', onMessageReceive, isAuthenticated, [conversation.id]);
+
+  const addMessage = (message: Message) => {
+    setMessages((m) => {
+      if (m.some((msg) => msg.id === message.id)) return m;
+      return [...m, message];
+    });
+  };
 
   return {
     name,
     messages,
+    addMessage,
   };
 }

@@ -1,9 +1,10 @@
 import type * as actions from '@latticechat/shared';
-import { ConversationService, MessageService } from '../db';
+import { ConversationService, MessageService, UserService } from '../db';
+import { ACK_SUCCESS } from '../lib/websocket';
 import type { WebsocketContext } from '../lib/websocket/types';
 import { WebsocketError } from '../lib/websocket/types';
 import auth from '../util/auth';
-import { ACK_SUCCESS } from '../lib/websocket';
+import { Logger } from '../util/log';
 
 function broadcastToConversationMembers(context: WebsocketContext, members: any[], eventName: string, data: any) {
   const { server } = context;
@@ -42,10 +43,10 @@ export class WebsocketHandlers {
       try {
         context.socket.join(session.user.id);
       } catch (e) {
-        console.error('Failed to join user room', e);
+        Logger.error('Failed to join user room', e);
       }
 
-      console.log(
+      Logger.log(
         `User ${session.user.id} authenticated (socket: ${context.socket.id}) and joined room ${session.user.id}`,
       );
 
@@ -57,7 +58,7 @@ export class WebsocketHandlers {
       if (error instanceof WebsocketError) {
         throw error;
       }
-      console.error('Auth error:', error);
+      Logger.error('Auth error:', error);
       throw new WebsocketError('Authentication failed', 'AUTH_FAILED', 500);
     }
   }
@@ -68,7 +69,6 @@ export class WebsocketHandlers {
   ): Promise<actions.AckResponse> {
     try {
       const message = await MessageService.createMessage(data);
-
       const conversation = await ConversationService.findConversation(data.conversationId);
 
       const emitMessage = {
@@ -83,10 +83,10 @@ export class WebsocketHandlers {
       return ACK_SUCCESS;
     } catch (error) {
       if (error instanceof WebsocketError) {
-        console.error('[MessageService] websocket error', error.code, error.message);
+        Logger.error('[MessageService] websocket error', error.code, error.message);
         throw error;
       }
-      console.error('[MessageService] Error creating message:', error);
+      Logger.error('[MessageService] Error creating message:', error);
       throw new WebsocketError('Failed to create message', 'MESSAGE_CREATE_ERROR', 500);
     }
   }
@@ -111,7 +111,7 @@ export class WebsocketHandlers {
       if (error instanceof WebsocketError) {
         throw error;
       }
-      console.error('Error creating conversation:', error);
+      Logger.error('Error creating conversation:', error);
       throw new WebsocketError('Failed to create conversation', 'CONVERSATION_CREATE_ERROR', 500);
     }
   }
@@ -128,12 +128,36 @@ export class WebsocketHandlers {
 
       broadcastToConversationMembers(context, memberIds, 'newMember', result);
 
+      // Emit a system message to all members
+      try {
+        const adderUser = await UserService.findUser(result.addedBy, 'user');
+        const addedUser = await UserService.findUser(result.userId, 'target');
+
+        const message = await MessageService.createMessage({
+          conversationId: conversation._id.toString(),
+          senderId: 'system',
+          content: `${addedUser.name} was added by ${adderUser.name}`,
+        });
+
+        const emitMessage = {
+          id: message._id.toString(),
+          conversationId: message.conversationId,
+          senderId: message.senderId,
+          content: message.content,
+          createdAt: message.createdAt,
+        };
+
+        broadcastToConversationMembers(context, conversation.memberIds, 'newMessage', emitMessage);
+      } catch (e) {
+        Logger.error(e);
+      }
+
       return ACK_SUCCESS;
     } catch (error) {
       if (error instanceof WebsocketError) {
         throw error;
       }
-      console.error('[MessageService] Error adding member:', error);
+      Logger.error('[MessageService] Error adding member:', error);
       throw new WebsocketError('Failed to add member', 'ADD_MEMBER_ERROR', 500);
     }
   }

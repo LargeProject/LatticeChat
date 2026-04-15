@@ -5,20 +5,28 @@ import { useUser } from '#/lib/context/UserContext.tsx';
 import { useAsyncEffect } from '#/components/hooks/useAsyncEffect.ts';
 import type { Conversation } from '#/lib/api/conversation';
 import { useAppState } from '#/lib/context/AppStateContext';
-import { useConversation } from '#/components/hooks/useConversation';
+import { getConversationName } from '#/lib/util/conversation';
 
 type ChatRowProps = {
   conversation: Conversation;
   isSelected: boolean;
 };
 
-const ChatIcon = memo(function ChatIcon({ conversation }: { conversation: Conversation }) {
+const ChatIcon = memo(function ChatIcon({ conversation, name }: { conversation: Conversation; name: string }) {
   return (
     <>
       {conversation.isDirectMessage ? (
-        <>
-          <div className="absolute inline-flex h-9 w-9 items-center justify-center rounded-full bg-(--line) text-xs font-semibold text-(--text-primary) ring-1"></div>
-        </>
+        <div
+          className="absolute inline-flex h-9 w-9 items-center justify-center rounded-full bg-(--line) text-xs font-semibold text-(--text-primary) ring-1"
+          title={name}
+        >
+          {name
+            .split(' ')
+            .map((p) => p[0])
+            .slice(0, 2)
+            .join('')
+            .toUpperCase()}
+        </div>
       ) : (
         conversation.members.slice(0, 3).map((m, idx) => (
           <div
@@ -42,7 +50,11 @@ const ChatIcon = memo(function ChatIcon({ conversation }: { conversation: Conver
 
 const ChatRow = function ChatRow({ conversation, isSelected }: ChatRowProps) {
   const { setConvoId } = useAppState();
-  const { name } = useConversation(conversation);
+  const { userInfo } = useUser();
+  const name = useMemo(() => {
+    if (!userInfo.data) return '';
+    return getConversationName(userInfo.data, conversation);
+  }, [conversation, userInfo.data]);
 
   function onClick() {
     setConvoId(conversation.id);
@@ -59,8 +71,11 @@ const ChatRow = function ChatRow({ conversation, isSelected }: ChatRowProps) {
       ].join(' ')}
       aria-current={isSelected ? 'page' : undefined}
     >
-      <div className="relative flex shrink-0" style={{ width: 40 }}>
-        <ChatIcon conversation={conversation} />
+      <div 
+        className="relative flex h-9 shrink-0" 
+        style={{ width: conversation.isDirectMessage ? 36 : 36 + (Math.min(conversation.members.length, 3) - 1) * 16 }}
+      >
+        <ChatIcon conversation={conversation} name={name} />
       </div>
 
       <div className="min-w-0 flex-1">
@@ -68,7 +83,7 @@ const ChatRow = function ChatRow({ conversation, isSelected }: ChatRowProps) {
         {conversation.isDirectMessage ? (
           <></>
         ) : (
-          <p className="truncate text-xs text-(--text-secondary)">`{conversation.members.length} members`</p>
+          <p className="truncate text-xs text-(--text-secondary)">{conversation.members.length} members</p>
         )}
       </div>
     </button>
@@ -81,6 +96,7 @@ function normalize(value: string) {
 
 export function ChatList() {
   const { conversations, refreshConversations, refreshUser } = useUser();
+  const { convoId } = useAppState();
   const [isLoaded, setIsLoaded] = useState(false);
 
   useAsyncEffect(async () => {
@@ -129,7 +145,7 @@ export function ChatList() {
           <ul className="space-y-1">
             {conversations.map((conversation) => (
               <li key={conversation.id}>
-                <ChatRow conversation={conversation} isSelected={false} />
+                <ChatRow conversation={conversation} isSelected={convoId === conversation.id} />
               </li>
             ))}
           </ul>

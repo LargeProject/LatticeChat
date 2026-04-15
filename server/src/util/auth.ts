@@ -8,6 +8,7 @@ import { connectMongoDB, UserService } from '../db';
 import { sendDuplicateEmailNotification, sendEmailVerificationOTP, sendForgetPasswordOTP } from './mailer';
 import { createAuthMiddleware } from '@better-auth/core/api';
 import { authUserAdditionalFields } from '../db/schemas/User';
+import { LogLevels } from './log';
 
 await connectMongoDB();
 const client = mongoose.connection.getClient();
@@ -33,7 +34,7 @@ const auth = betterAuth({
   database: mongodbAdapter(db, { client }),
   emailAndPassword: {
     enabled: true,
-    minPasswordLength: 3,
+    minPasswordLength: 8,
     maxPasswordLength: 100,
     requireEmailVerification: true,
     onExistingUserSignUp: async ({ user }, request) => {
@@ -60,8 +61,13 @@ const auth = betterAuth({
   hooks: {
     before: createAuthMiddleware(async (ctx) => {
       // password validation middleware
-      if (ctx.path == '/sign-up/email' || ctx.path == '/email-otp/reset-password') {
-        const password = ctx.body.password;
+      if (ctx.path == '/sign-up/email' || ctx.path == '/email-otp/reset-password' || ctx.path == '/change-password') {
+        let password = '';
+        if (ctx.path == '/change-password') {
+          password = ctx.body.newPassword;
+        } else {
+          password = ctx.body.password;
+        }
 
         const { score, feedback } = zxcvbn(password);
         if (score < 3) {
@@ -108,6 +114,10 @@ const auth = betterAuth({
         }
       }
     }),
+  },
+
+  logger: {
+    disabled: ENV.LOG_LEVEL != LogLevels.INFO,
   },
 });
 

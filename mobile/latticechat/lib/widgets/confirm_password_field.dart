@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:latticechat/theme.dart';
+import 'package:latticechat/utils/severity.dart';
 
 class ConfirmPasswordField extends StatefulWidget {
   final String label;
@@ -20,7 +22,7 @@ class ConfirmPasswordField extends StatefulWidget {
 
 class _ConfirmPasswordFieldState extends State<ConfirmPasswordField> {
   final TextEditingController _controller = TextEditingController();
-  String _statusMessage = '';
+  StatusMessage _status = const StatusMessage(message: 'Confirm your password', severity: Severity.unknown);
 
   void _notifyParent(String value, bool isValid) {
     widget.onValueChanged?.call(value);
@@ -30,13 +32,24 @@ class _ConfirmPasswordFieldState extends State<ConfirmPasswordField> {
   void _validateAndNotify(String value) {
     setState(() {
       if (value.isEmpty) {
-        _statusMessage = '';
+        _status = const StatusMessage(
+          message: 'Confirm your password',
+          severity: Severity.unknown
+        );
         _notifyParent(value, false);
         return;
       }
       
       final bool matches = (value == widget.password);
-      _statusMessage = matches ? '✓ Passwords match' : '✗ Passwords do not match';
+      _status = matches ?
+        const StatusMessage(
+          message: 'Passwords match',
+          severity: Severity.none
+        )
+        : const StatusMessage(
+          message: 'Passwords do not match, yet',
+          severity: Severity.minor
+        );
 
       // Called after changing, allowing for response before server sees it
       _notifyParent(value, matches);
@@ -80,14 +93,10 @@ class _ConfirmPasswordFieldState extends State<ConfirmPasswordField> {
           ),
           onChanged: _onTextChanged,
         ),
-        const SizedBox(height: 4),
-        Text(
-          _statusMessage,
-          style: TextStyle(
-            fontSize: 12,
-            color: _statusMessage.contains('✓') ? Colors.green : Colors.red,
-          ),
-        ),
+
+        const SizedBox(height: 8),
+        
+        _status,
       ],
     );
   }

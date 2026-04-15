@@ -13,18 +13,30 @@ export class TypeError extends Error {
   public toString() {
     return `${this.code} Error: ${this.message}\n`;
   }
+
+  public toResponseObject() {
+    return {
+      success: false,
+      code: this.code,
+      message: this.message,
+    };
+  }
+
+  public handle(res: Response) {
+    res.status(this.statusCode).send(this.toResponseObject());
+  }
 }
 
 export class AccountNotFoundError extends TypeError {
-  constructor() { 
-    super(404, 'ACCOUNT_NOT_FOUND', 'Account not found'); 
+  constructor() {
+    super(404, 'ACCOUNT_NOT_FOUND', 'Account not found');
   }
 }
 
 export class UserNotFoundError extends TypeError {
- constructor() { 
-   super(404, `USER_NOT_FOUND`, `User not found`); 
- }
+  constructor() {
+    super(404, `USER_NOT_FOUND`, `User not found`);
+  }
 }
 
 export class TargetNotFoundError extends TypeError {
@@ -75,18 +87,6 @@ export class SelfFriendRequestError extends TypeError {
   }
 }
 
-export class KeyExchangeExistsError extends TypeError {
-  constructor() {
-    super(409, 'KEY_EXCHANGE_REQUEST_EXISTS', 'Key exchange request exists');
-  }
-}
-
-export class KeyExchangeNotFoundError extends TypeError {
-  constructor() {
-    super(404, 'KEY_EXCHANGE_REQUEST_NOT_FOUND', 'Key exchange not found');
-  }
-}
-
 export class DirectMessageInviteError extends TypeError {
   constructor() {
     super(403, 'DIRECT_MESSAGE_INVITE', 'Members cannot be added to a direct message');
@@ -108,6 +108,12 @@ export class NotFriendsError extends TypeError {
 export class MemberExistsError extends TypeError {
   constructor() {
     super(403, 'MEMBER_EXISTS', 'Member already exists in this conversation');
+  }
+}
+
+export class InvalidTokenError extends TypeError {
+  constructor() {
+    super(401, 'INVALID_TOKEN', 'Invalid Token');
   }
 }
 

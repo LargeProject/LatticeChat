@@ -1,6 +1,5 @@
 import type { Service, UserRequest } from '../types';
 import { handleHttpError } from '../../util/error';
-import mongoose from 'mongoose';
 import { ConversationService, UserService } from '../../db';
 
 const handleGetConversation: Service = async (req: UserRequest, res) => {
@@ -49,10 +48,8 @@ const handleGetConversationMessages: Service = async (req: UserRequest, res) => 
   const conversationId = req.params.conversation_id?.toString() ?? '';
 
   try {
-    // use hasMember here
     const conversation = await ConversationService.findConversation(conversationId);
-    const userObjectId = new mongoose.Types.ObjectId(userId);
-    if (!conversation.memberIds.includes(userObjectId)) {
+    if (!conversation.hasMember(userId)) {
       res.status(401).send({
         success: false,
         message: 'Not a member of the conversation',
