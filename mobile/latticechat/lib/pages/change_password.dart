@@ -165,9 +165,10 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               backgroundColor: Colors.white,
             ),
           );
-          setState(() => _isLoading = false);
-          return;
         }
+        setState(() => _isLoading = false);
+        return;
+        
       }
       
       if (mounted) {
@@ -176,6 +177,14 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       }
     } on ApiError catch (error) {
       debugPrint(error.toString());
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Change failed, old password may be incorrect.'),
+            backgroundColor: Colors.white,
+          ),
+        );
+      }
       setState(() => _isLoading = false);
     }
   }
@@ -290,7 +299,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                     ),
                     const SizedBox(height: 16),
                     PasswordField(
-                      label: "Password",
+                      label: "New Password",
                       onValueChanged: (value) => _newPassword = value,
                       onValidationChanged: (isValid) => setState(() => _isNewPasswordValid = isValid),
                     ),
