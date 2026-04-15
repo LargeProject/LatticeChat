@@ -2,11 +2,22 @@ import mongoose from 'mongoose';
 import { Conversation, Message, User, Verification } from '../../../src/db/models';
 import { ENV } from '../../../src/util/env';
 
+export async function connectDatabase() {
+  if (mongoose.connection.readyState === 0 || mongoose.connection.readyState === 99) {
+    await mongoose.connect(ENV.MONGO_URI);
+  }
+}
+
+export async function disconnectDatabase() {
+  await mongoose.disconnect();
+}
+
 export async function resetDatabase() {
   if (!ENV.MONGO_URI.includes('localhost')) {
     console.error('Wrong database used for integration testing');
     return;
   }
+
   const connection = mongoose.connection;
   await connection.dropDatabase();
 
@@ -29,9 +40,9 @@ export class Database {
     return verification?.value.replace(':0', '') ?? null;
   }
 
-  async createFakePrivateConversation(memberIds: string[]) {
+  async createConversation(memberIds: string[], isDirect: boolean) {
     const conversation = await Conversation.create({
-      isDirectMessage: true,
+      isDirectMessage: isDirect,
       memberIds: memberIds.map((memberId) => new mongoose.Types.ObjectId(memberId)),
     });
 
@@ -46,6 +57,18 @@ export class Database {
       senderId: senderId,
       conversationId: new mongoose.Types.ObjectId(conversationId),
       content: content,
+    });
+  }
+
+  async createFakeUser(user: { name: string; email: string; isEmailVerified?: boolean }) {
+    return await User.create({
+      name: user.name,
+      email: user.email,
+      emailVerified: user.isEmailVerified ?? true,
+      friendIds: [],
+      conversationIds: [],
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
     });
   }
 }
