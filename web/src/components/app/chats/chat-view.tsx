@@ -1,10 +1,9 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Info, UserPlus } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { UserPlus } from 'lucide-react';
 import { MessageList } from './messages';
 import { ChatInput } from './chat-input';
 import { AddMembersModal } from './add-members-modal';
 import { useWebsocket } from '#/lib/hooks/useWebsocket';
-import { useWebsocketListener } from '#/lib/hooks/useWebsocketListener';
 import type { Message } from '#/lib/api/conversation.ts';
 import { useUser } from '#/lib/context/UserContext.tsx';
 import { useConversation } from '#/components/hooks/useConversation';
@@ -12,31 +11,17 @@ import type * as contracts from '@latticechat/shared';
 
 type ChatViewProps = {
   conversation: contracts.Conversation;
-  onTogglePanel: () => void;
 };
 
-export function ChatView({ conversation, onTogglePanel }: ChatViewProps) {
+export function ChatView({ conversation }: ChatViewProps) {
   const { createMessage, isAuthenticated } = useWebsocket();
   const { userInfo } = useUser();
   const [pendingMessages, setPendingMessages] = useState<Array<Message & { optimistic: true }>>([]);
   const [isAddMembersOpen, setIsAddMembersOpen] = useState(false);
-  const [memberCount, setMemberCount] = useState(0);
 
   useEffect(() => {
     setPendingMessages([]);
   }, [conversation.id]);
-
-  // Listen for new members being added
-  const handleNewMember = useCallback(
-    (data: contracts.EmitMemberAdded) => {
-      if (data.conversationId === conversation.id) {
-        setMemberCount((prev) => prev + 1);
-      }
-    },
-    [conversation.id],
-  );
-
-  useWebsocketListener('newMember', handleNewMember, isAuthenticated);
 
   const handleSend = useCallback(
     async (text: string) => {
@@ -94,18 +79,6 @@ export function ChatView({ conversation, onTogglePanel }: ChatViewProps) {
               title="Add members"
             >
               <UserPlus size={16} />
-            </button>
-
-            <button
-              type="button"
-              onClick={onTogglePanel}
-              className="inline-flex h-9 items-center gap-1 rounded-lg px-2 text-(--text-secondary) transition-colors hover:bg-(--link-bg-hover) hover:text-(--text-primary) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--line)"
-              aria-label="Toggle user info panel"
-              aria-pressed={false}
-              title="Toggle info"
-            >
-              <Info size={16} />
-              <span className="text-xs font-medium">Info</span>
             </button>
           </div>
         </div>

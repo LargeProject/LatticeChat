@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { LogOut, Radiation, User } from 'lucide-react';
+import { LogOut, Radiation } from 'lucide-react';
 import { useUser } from '#/lib/context/UserContext.tsx';
 import { setLocalJWT } from '#/lib/util/storage.ts';
 import { useNavigate } from '@tanstack/react-router';
@@ -121,9 +121,6 @@ export default function SettingsLayout() {
           {/* Profile card */}
           <section className="rounded-2xl border border-(--line) bg-(--surface-strong) p-5 shadow-sm">
             <div className="flex items-start gap-4">
-              <div className="grid size-48 place-items-center rounded-full bg-(--link-bg-hover) text-sm font-semibold text-(--text-primary)">
-                <User size={48} />
-              </div>
               <div className="flex-1 min-w-0">
                 <h2 className="text-sm font-semibold text-(--text-primary)">Account</h2>
 
