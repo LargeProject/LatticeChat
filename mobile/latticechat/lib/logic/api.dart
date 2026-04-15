@@ -260,4 +260,28 @@ class ApiServices {
       return http.Response("{}", 500);
     }
   }
+
+  Future<bool> sendMessage(
+      String currentUserId,
+      String conversationId,
+      String content,
+      ) async {
+    final response = await _post(
+      '$_baseUrl/users/$currentUserId/conversations/$conversationId/messages',
+      {
+        'content': content,
+      },
+    );
+
+    final body = response.body.isNotEmpty ? jsonDecode(response.body) : {};
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return true;
+    } else {
+      throw ApiError(
+        type: body['code'] ?? 'unknown_error',
+        message: body['message'] ?? 'Failed to send message',
+      );
+    }
+  }
 }

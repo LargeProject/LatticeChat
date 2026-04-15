@@ -48,20 +48,33 @@ class _OpenChatPageState extends State<OpenChatPage> {
     _scrollToBottom(jump: false);
   }
 
-  void _sendMessage() {
+  Future<void> _sendMessage() async {
     final text = _messageController.text.trim();
     if (text.isEmpty) return;
 
     _messageController.clear();
 
-    if (!_sendingNotAvailableNoticeShown) {
-      _sendingNotAvailableNoticeShown = true;
+    try {
+      await _api.sendMessage(
+        widget.currentUser.id,
+        widget.conversationId,
+        text,
+      );
+
+      if (!mounted) return;
+
+      await _refreshMessages();
+    } on ApiError catch (e) {
+      if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Message sending is not wired yet. This screen is currently loading real messages only.',
-          ),
-        ),
+        SnackBar(content: Text(e.message)),
+      );
+    } catch (_) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to send message.')),
       );
     }
   }
