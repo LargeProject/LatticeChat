@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:latticechat/logic/models/user.dart';
-import 'package:latticechat/logic/api.dart';
-import 'package:latticechat/logic/models/error.dart';
+import 'package:latticechat/logic/services/api.dart';
+import 'package:latticechat/logic/util/error.dart';
 
 class OpenChatPage extends StatefulWidget {
   final String otherUserName;
