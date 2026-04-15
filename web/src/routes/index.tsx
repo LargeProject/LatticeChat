@@ -35,9 +35,9 @@ export default function Auth() {
   } = useAuthLogic()
 
   return (
-    <main className="relative min-h-screen w-screen bg-black overflow-hidden flex items-stretch justify-center">
+    <main className="relative min-h-screen w-screen bg-black overflow-y-auto overflow-x-hidden md:overflow-hidden flex items-stretch justify-center">
 
-      <div className="relative w-full h-screen md:h-screen overflow-hidden bg-zinc-950">
+      <div className="relative w-full min-h-screen md:h-screen overflow-y-auto overflow-x-hidden md:overflow-hidden bg-zinc-950 pb-32 md:pb-0">
         <div className="pointer-events-none absolute inset-0 " />
 
         {!isMobile && (
@@ -54,7 +54,7 @@ export default function Auth() {
           </motion.div>
         )}
 
-        <div className="relative z-10 grid h-full grid-cols-1 md:grid-cols-3">
+        <div className="relative z-10 grid min-h-full grid-cols-1 md:grid-cols-3">
           <div className="flex items-center p-8 md:col-span-1">
             <AnimatePresence mode="wait">
               {mode === 'signup' ? (
