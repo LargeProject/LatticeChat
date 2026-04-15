@@ -191,7 +191,7 @@ export function useAuthLogic() {
     if (!password) {
       setPasswordStrength({
         score: 0,
-        label: '',
+        label: 'Literally the weakest',
         feedback: null,
       });
       return;
