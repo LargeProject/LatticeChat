@@ -10,7 +10,7 @@ const Label = () => {
           End-to-end encrypted messaging powered by
           <span className="text-zinc-200 font-semibold"> post-quantum cryptography</span>.{' '}
           <span className="text-yellow-200 font-semibold">
-            In progress demo project-use at your own risk. We cannot guarantee protection against nation state actors.
+            In progress demo project-use at your own risk. We cannot guarantee protection against sophisticated attacks.
           </span>
         </p>
 
