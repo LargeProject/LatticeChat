@@ -96,6 +96,20 @@ class AuthServices {
     }
   }
 
+  Future<bool> changePassword(String jwt, String currentPassword, String newPassword) async {
+    final response = await HttpUtil.sendAuthPost(jwt, '$_baseUrl/auth/change-password', {
+      'currentPassword': currentPassword,
+      'newPassword': newPassword
+    });
+
+    if (response.statusCode == 200) {
+      return true;
+    } else {
+      final body = jsonDecode(response.body);
+      throw ApiError.fromBody(body);
+    }
+  }
+
   Future<bool> isUsernameAvailable(String username) async {
     final response = await HttpUtil.sendGet('$_baseUrl/auth/username-taken?username=$username');
     final body = jsonDecode(response.body);
