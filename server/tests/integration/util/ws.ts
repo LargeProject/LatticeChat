@@ -4,12 +4,15 @@ import { events } from '../../../src/websocket/clientEvents';
 import { io, Socket } from 'socket.io-client';
 import { ENV } from '../../../src/util/env';
 
+let socketServer: WebsocketServer | null;
+export let client: TestClient;
+
 const socketPort = (parseInt(ENV.PORT) + 1).toString();
 const clientUrl = 'http://localhost:' + socketPort;
 
 export async function startSocketServer() {
   const io = new WebsocketServer(server).registerEvents(events).start();
-  return new Promise((resolve, reject) => {
+  socketServer = await new Promise((resolve, reject) => {
     server.listen(socketPort, () => {
       resolve(io);
     });
@@ -20,10 +23,42 @@ export async function startSocketServer() {
   });
 }
 
-export function createClientConnection(onConnection: () => void = () => {}) {
-  const client = io(clientUrl);
-  client.on('connect', onConnection);
-  return io(clientUrl);
+export async function initSocketEnvironment() {
+  await startSocketServer();
+  client.reset();
+}
+
+export async function destroySocketEnvironment() {
+  await socketServer.stop();
+  client.close();
+}
+
+class TestClient {
+  private baseClient: Socket;
+
+  constructor() {
+    this.reset();
+  }
+
+  public reset() {
+    this.baseClient = io(clientUrl);
+  }
+
+  public close() {
+    this.baseClient.close();
+  }
+
+  public on(eventName: string, callback: (data: any) => {}) {
+    this.baseClient.on(eventName, callback);
+  }
+
+  public async emit(eventName: string, data: any) {
+    return new Promise<any>((resolve, reject) => {
+      this.baseClient.emit(eventName, data, (res: any) => {
+        resolve(res);
+      });
+    });
+  }
 }
 
 export function createWaitHook() {
