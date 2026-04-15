@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:latticechat/logic/models/user.dart';
 import 'package:latticechat/logic/services/api.dart';
 import 'package:latticechat/logic/util/error.dart';
-import 'package:latticechat/logic/models/user.dart';
 
 class FriendRequestsPage extends StatefulWidget {
   final UserModel currentUser;
+  final String jwt;
 
   const FriendRequestsPage({
     super.key,
     required this.currentUser,
+    required this.jwt,
   });
 
   @override
@@ -16,7 +18,7 @@ class FriendRequestsPage extends StatefulWidget {
 }
 
 class _FriendRequestsPageState extends State<FriendRequestsPage> {
-  final ApiServices _api = ApiServices();
+  final _userApi = ApiServices.getUserServices();
   late Future<List<Map<String, dynamic>>> _requestsFuture;
 
   @override
@@ -26,7 +28,21 @@ class _FriendRequestsPageState extends State<FriendRequestsPage> {
   }
 
   void _loadRequests() {
-    _requestsFuture = _api.fetchFriendRequests(widget.currentUser.id);
+    _requestsFuture = _fetchRequests();
+  }
+
+  Future<List<Map<String, dynamic>>> _fetchRequests() async {
+    final response = await _userApi.fetchFriendRequests(widget.jwt);
+    final raw = response.friendRequests;
+
+    if (raw is List) {
+      return raw
+          .whereType<Map>()
+          .map((e) => Map<String, dynamic>.from(e))
+          .toList();
+    }
+
+    return [];
   }
 
   Future<void> _refreshRequests() async {
@@ -49,7 +65,7 @@ class _FriendRequestsPageState extends State<FriendRequestsPage> {
     final username = _requestUsername(request);
 
     try {
-      await _api.sendFriendRequest(widget.currentUser.id, targetId);
+      await _userApi.acceptFriendRequest(widget.jwt, targetId);
 
       if (!mounted) return;
 
@@ -79,11 +95,7 @@ class _FriendRequestsPageState extends State<FriendRequestsPage> {
     final username = _requestUsername(request);
 
     try {
-      await _api.removeFriendRequest(
-        widget.currentUser.id,
-        targetId,
-        'incoming',
-      );
+      await _userApi.removeFriendRequest(widget.jwt, targetId);
 
       if (!mounted) return;
 
@@ -117,9 +129,7 @@ class _FriendRequestsPageState extends State<FriendRequestsPage> {
         future: _requestsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
+            return const Center(child: CircularProgressIndicator());
           }
 
           if (snapshot.hasError) {
@@ -135,10 +145,7 @@ class _FriendRequestsPageState extends State<FriendRequestsPage> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      message,
-                      textAlign: TextAlign.center,
-                    ),
+                    Text(message, textAlign: TextAlign.center),
                     const SizedBox(height: 12),
                     ElevatedButton(
                       onPressed: _refreshRequests,
@@ -158,9 +165,7 @@ class _FriendRequestsPageState extends State<FriendRequestsPage> {
               child: ListView(
                 children: const [
                   SizedBox(height: 220),
-                  Center(
-                    child: Text('No friend requests right now.'),
-                  ),
+                  Center(child: Text('No friend requests right now.')),
                 ],
               ),
             );

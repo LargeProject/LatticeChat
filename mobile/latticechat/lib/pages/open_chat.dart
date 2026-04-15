@@ -7,12 +7,14 @@ class OpenChatPage extends StatefulWidget {
   final String otherUserName;
   final String conversationId;
   final UserModel currentUser;
+  final String jwt;
 
   const OpenChatPage({
     super.key,
     required this.otherUserName,
     required this.conversationId,
     required this.currentUser,
+    required this.jwt,
   });
 
   @override
@@ -20,12 +22,11 @@ class OpenChatPage extends StatefulWidget {
 }
 
 class _OpenChatPageState extends State<OpenChatPage> {
-  final ApiServices _api = ApiServices();
+  final _conversationApi = ApiServices.getConversationServices();
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
   late Future<List<Map<String, dynamic>>> _messagesFuture;
-  bool _sendingNotAvailableNoticeShown = false;
 
   @override
   void initState() {
@@ -34,10 +35,25 @@ class _OpenChatPageState extends State<OpenChatPage> {
   }
 
   void _loadMessages() {
-    _messagesFuture = _api.fetchConversationMessages(
-      widget.currentUser.id,
+    _messagesFuture = _fetchMessages();
+  }
+
+  Future<List<Map<String, dynamic>>> _fetchMessages() async {
+    final response = await _conversationApi.fetchConversationMessages(
+      widget.jwt,
       widget.conversationId,
     );
+
+    final raw = response.messages;
+
+    if (raw is List) {
+      return raw
+          .whereType<Map>()
+          .map((e) => Map<String, dynamic>.from(e))
+          .toList();
+    }
+
+    return [];
   }
 
   Future<void> _refreshMessages() async {
@@ -48,35 +64,17 @@ class _OpenChatPageState extends State<OpenChatPage> {
     _scrollToBottom(jump: false);
   }
 
-  Future<void> _sendMessage() async {
+  void _sendMessage() {
     final text = _messageController.text.trim();
     if (text.isEmpty) return;
 
     _messageController.clear();
 
-    try {
-      await _api.sendMessage(
-        widget.currentUser.id,
-        widget.conversationId,
-        text,
-      );
-
-      if (!mounted) return;
-
-      await _refreshMessages();
-    } on ApiError catch (e) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message)),
-      );
-    } catch (_) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to send message.')),
-      );
-    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Message sending is not wired yet.'),
+      ),
+    );
   }
 
   void _scrollToBottom({bool jump = false}) {

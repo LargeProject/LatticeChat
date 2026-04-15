@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:latticechat/logic/models/user.dart';
 import 'package:latticechat/logic/services/api.dart';
 import 'package:latticechat/logic/util/error.dart';
-import 'package:latticechat/logic/models/user.dart';
 import 'package:latticechat/pages/friend_requests.dart';
 import 'open_chat.dart';
 
 class ChatListPage extends StatefulWidget {
-  final UserModel currentUser;
+  final String jwt;
 
   const ChatListPage({
     super.key,
-    required this.currentUser,
+    required this.jwt,
   });
 
   @override
@@ -18,41 +18,110 @@ class ChatListPage extends StatefulWidget {
 }
 
 class _ChatListPageState extends State<ChatListPage> {
-  final ApiServices _api = ApiServices();
+  final _conversationApi = ApiServices.getConversationServices();
+  final _userApi = ApiServices.getUserServices();
+
+  UserModel? _currentUser;
   late Future<List<Map<String, dynamic>>> _conversationsFuture;
 
   @override
   void initState() {
     super.initState();
-    _loadConversations();
+    _conversationsFuture = _initializeData();
   }
 
-  void _loadConversations() {
-    _conversationsFuture = _api.fetchConversations(widget.currentUser.id);
+  Future<List<Map<String, dynamic>>> _initializeData() async {
+    final userResponse = await _userApi.fetchUser(widget.jwt);
+    final user = _extractCurrentUser(userResponse);
+
+    if (user == null) {
+      throw ApiError(
+        type: 'missing_user',
+        message: 'Failed to load current user.',
+      );
+    }
+
+    _currentUser = user;
+
+    final response = await _conversationApi.fetchConversations(widget.jwt);
+    return _normalizeMapList(response.conversations);
+  }
+
+  List<Map<String, dynamic>> _normalizeMapList(dynamic raw) {
+    if (raw is Iterable) {
+      return raw
+          .whereType<Map>()
+          .map((e) => Map<String, dynamic>.from(e))
+          .toList();
+    }
+    return [];
+  }
+
+  UserModel? _extractCurrentUser(dynamic response) {
+    try {
+      final dynamic candidate =
+          response.user ??
+              response.currentUser ??
+              response.userInfo ??
+              response.basicUserInfo;
+
+      if (candidate is UserModel) {
+        return candidate;
+      }
+
+      if (candidate is Map) {
+        return UserModel.fromJson(Map<String, dynamic>.from(candidate));
+      }
+    } catch (_) {}
+
+    try {
+      final dynamic rawJson = response.toJson();
+      if (rawJson is Map<String, dynamic>) {
+        if (rawJson['user'] is Map) {
+          return UserModel.fromJson(rawJson);
+        }
+        if (rawJson['currentUser'] is Map) {
+          return UserModel.fromJson({
+            'user': rawJson['currentUser'],
+          });
+        }
+        if (rawJson['userInfo'] is Map) {
+          return UserModel.fromJson({
+            'user': rawJson['userInfo'],
+          });
+        }
+        if (rawJson['basicUserInfo'] is Map) {
+          return UserModel.fromJson(rawJson['basicUserInfo']);
+        }
+      }
+    } catch (_) {}
+
+    return null;
   }
 
   Future<void> _refreshConversations() async {
     setState(() {
-      _loadConversations();
+      _conversationsFuture = _initializeData();
     });
     await _conversationsFuture;
   }
 
   String _conversationTitle(Map<String, dynamic> conversation) {
+    final currentUser = _currentUser;
     final name = conversation['name'];
     if (name is String && name.trim().isNotEmpty) {
       return name;
     }
 
     final members = conversation['members'];
-    if (members is List) {
+    if (members is List && currentUser != null) {
       final otherNames = members
           .whereType<Map>()
           .map((member) => Map<String, dynamic>.from(member))
           .where(
             (member) =>
         (member['id'] ?? member['_id'] ?? '').toString() !=
-            widget.currentUser.id,
+            currentUser.id,
       )
           .map(
             (member) =>
@@ -130,9 +199,15 @@ class _ChatListPageState extends State<ChatListPage> {
   }
 
   Future<void> _openAddFriendDialog() async {
+    final currentUser = _currentUser;
+    if (currentUser == null) return;
+
     final sent = await showDialog<bool>(
       context: context,
-      builder: (context) => AddFriendDialog(currentUser: widget.currentUser),
+      builder: (context) => AddFriendDialog(
+        currentUser: currentUser,
+        jwt: widget.jwt,
+      ),
     );
 
     if (sent == true && mounted) {
@@ -141,11 +216,16 @@ class _ChatListPageState extends State<ChatListPage> {
   }
 
   Future<void> _openFriendRequestsPage() async {
+    final currentUser = _currentUser;
+    if (currentUser == null) return;
+
     final changed = await Navigator.push<bool>(
       context,
       MaterialPageRoute(
-        builder: (context) =>
-            FriendRequestsPage(currentUser: widget.currentUser),
+        builder: (context) => FriendRequestsPage(
+          currentUser: currentUser,
+          jwt: widget.jwt,
+        ),
       ),
     );
 
@@ -223,6 +303,11 @@ class _ChatListPageState extends State<ChatListPage> {
               itemCount: conversations.length,
               separatorBuilder: (_, __) => const Divider(height: 1),
               itemBuilder: (context, index) {
+                final currentUser = _currentUser;
+                if (currentUser == null) {
+                  return const SizedBox.shrink();
+                }
+
                 final conversation = conversations[index];
                 final title = _conversationTitle(conversation);
                 final lastMessage = _lastMessageText(conversation);
@@ -264,7 +349,8 @@ class _ChatListPageState extends State<ChatListPage> {
                         builder: (context) => OpenChatPage(
                           otherUserName: title,
                           conversationId: conversationId,
-                          currentUser: widget.currentUser,
+                          currentUser: currentUser,
+                          jwt: widget.jwt,
                         ),
                       ),
                     );
@@ -281,10 +367,12 @@ class _ChatListPageState extends State<ChatListPage> {
 
 class AddFriendDialog extends StatefulWidget {
   final UserModel currentUser;
+  final String jwt;
 
   const AddFriendDialog({
     super.key,
     required this.currentUser,
+    required this.jwt,
   });
 
   @override
@@ -292,7 +380,7 @@ class AddFriendDialog extends StatefulWidget {
 }
 
 class _AddFriendDialogState extends State<AddFriendDialog> {
-  final ApiServices _api = ApiServices();
+  final _userApi = ApiServices.getUserServices();
   final TextEditingController _controller = TextEditingController();
 
   bool _isSearching = false;
@@ -324,9 +412,19 @@ class _AddFriendDialogState extends State<AddFriendDialog> {
     });
 
     try {
-      final user = await _api.fetchBasicUserByName(username);
+      final dynamic response = await _userApi.fetchBasicUserByName(username);
+      final user = _extractBasicUser(response);
 
       if (!mounted) return;
+
+      if (user == null) {
+        setState(() {
+          _statusMessage = 'Could not read user info.';
+          _foundUserId = null;
+          _foundUsername = null;
+        });
+        return;
+      }
 
       if (user.id == widget.currentUser.id) {
         setState(() {
@@ -383,7 +481,7 @@ class _AddFriendDialogState extends State<AddFriendDialog> {
     });
 
     try {
-      await _api.sendFriendRequest(widget.currentUser.id, _foundUserId!);
+      await _userApi.sendFriendRequest(widget.jwt, _foundUserId!);
 
       if (!mounted) return;
 
@@ -412,6 +510,44 @@ class _AddFriendDialogState extends State<AddFriendDialog> {
         });
       }
     }
+  }
+
+  BasicUserModel? _extractBasicUser(dynamic response) {
+    try {
+      final dynamic candidate =
+          response.basicUserInfo ?? response.user ?? response.userInfo;
+
+      if (candidate is BasicUserModel) {
+        return candidate;
+      }
+
+      if (candidate is Map) {
+        return BasicUserModel.fromJson(Map<String, dynamic>.from(candidate));
+      }
+    } catch (_) {}
+
+    try {
+      final dynamic rawJson = response.toJson();
+      if (rawJson is Map<String, dynamic>) {
+        if (rawJson['basicUserInfo'] is Map) {
+          return BasicUserModel.fromJson(
+            Map<String, dynamic>.from(rawJson['basicUserInfo']),
+          );
+        }
+        if (rawJson['user'] is Map) {
+          return BasicUserModel.fromJson(
+            Map<String, dynamic>.from(rawJson['user']),
+          );
+        }
+        if (rawJson['userInfo'] is Map) {
+          return BasicUserModel.fromJson(
+            Map<String, dynamic>.from(rawJson['userInfo']),
+          );
+        }
+      }
+    } catch (_) {}
+
+    return null;
   }
 
   @override

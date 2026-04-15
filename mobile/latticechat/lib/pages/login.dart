@@ -60,7 +60,7 @@ class _LoginPageState extends State<LoginPage> {
             MaterialPageRoute(builder: (context) => VerifyPage(email: email)),
           );
         case "INVALID_EMAIL_OR_PASSWORD":
-          // Display message somehow. Maybe a toast for simplicity.
+        // Display message somehow. Maybe a toast for simplicity.
       }
     }
   }
@@ -97,7 +97,7 @@ class _LoginPageState extends State<LoginPage> {
               'Sign in to continue your encrypted chats',
               style: Theme.of(context).textTheme.bodyMedium,
             ),
-            
+
             const SizedBox(height: 16),
 
             Container(  // Login label
@@ -114,7 +114,7 @@ class _LoginPageState extends State<LoginPage> {
                       labelText: 'Email',
                     ),
                   ),
-                  
+
                   const SizedBox(height: 16),
 
                   TextField(
@@ -136,16 +136,16 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(height: 8),
 
                   TextButton(
-                    onPressed: _handleForgotPass,
-                    child: const Text('Forgot Password?')
+                      onPressed: _handleForgotPass,
+                      child: const Text('Forgot Password?')
                   ),
                 ],
               ),
             ),
 
             TextButton(
-              onPressed: _handleNoAccount,
-              child: const Text('Don\'t have an account? Sign up')
+                onPressed: _handleNoAccount,
+                child: const Text('Don\'t have an account? Sign up')
             ),
           ],
         ),
