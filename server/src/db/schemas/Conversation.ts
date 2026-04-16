@@ -91,4 +91,5 @@ conversationSchema.pre('save', { document: true, query: true }, async function (
 
 conversationSchema.pre('deleteOne', { document: true, query: false }, async function () {
   await models.User.updateMany({ conversationIds: this._id }, { $pull: { conversationIds: this._id } });
+  await models.Message.deleteMany({ conversationId: this._id });
 });
