@@ -115,9 +115,9 @@ export const userSchema = new Schema(
         const filteredConversations = conversations.filter((conversation) => {
           if (conversation.isDirectMessage) {
             const otherMember = conversation.members.filter((member) => member.id != this.id);
-            return otherMember[0]?.name.includes(search) ?? false;
+            return otherMember[0]?.name?.toLowerCase().includes(search.toLowerCase()) ?? false;
           } else {
-            return conversation?.name?.includes(search) ?? false;
+            return conversation?.name?.toLowerCase().includes(search.toLowerCase()) ?? false;
           }
         });
         return filteredConversations;

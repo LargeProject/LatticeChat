@@ -67,7 +67,9 @@ const ChatRow = function ChatRow({ conversation, isSelected }: ChatRowProps) {
       className={[
         'group relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all duration-200 ease-out',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300 dark:focus-visible:ring-zinc-700 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-zinc-950',
-        isSelected ? 'bg-zinc-100 dark:bg-zinc-800/50 shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-700/50' : 'hover:bg-zinc-50 dark:hover:bg-zinc-900/60 active:scale-[0.98]',
+        isSelected
+          ? 'bg-zinc-100 dark:bg-zinc-800/50 shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-700/50'
+          : 'hover:bg-zinc-50 dark:hover:bg-zinc-900/60 active:scale-[0.98]',
       ].join(' ')}
       aria-current={isSelected ? 'page' : undefined}
     >
