@@ -123,7 +123,7 @@ export async function fetchConversationMessages(conversationId: string): Promise
   const messages: Message[] = [];
   for (const rawMessage of rawMessages) {
     const message: Message = {
-      id: rawMessage._id,
+      id: rawMessage.id,
       senderId: rawMessage.senderId,
       conversationId: rawMessage.conversationId,
       content: rawMessage.content,

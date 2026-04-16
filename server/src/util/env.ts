@@ -1,5 +1,6 @@
-import * as z from "zod";
-import "dotenv/config";
+import * as z from 'zod';
+import 'dotenv/config';
+import { LogLevels } from './log';
 
 const envSchema = z.object({
   HOST: z.string().nonempty(),
@@ -8,7 +9,7 @@ const envSchema = z.object({
   MONGO_URI: z.string().nonempty(),
   BETTER_AUTH_SECRET: z.string().nonempty(),
   SENDGRID_API_KEY: z.string().nonempty(),
-  HTTP_LOG_LEVEL: z.string().default('none'),
+  LOG_LEVEL: z.string().default(LogLevels.NONE),
 });
 
 export const ENV = envSchema.parse({
@@ -18,5 +19,5 @@ export const ENV = envSchema.parse({
   MONGO_URI: process.env.MONGO_URI,
   BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
   SENDGRID_API_KEY: process.env.SENDGRID_API_KEY,
-  HTTP_LOG_LEVEL: process.env.HTTP_LOG_LEVEL
+  LOG_LEVEL: process.env.LOG_LEVEL,
 });

@@ -1,0 +1,748 @@
+openapi: 3.0.3
+info:
+  title: LatticeChat API
+  version: 1.0.0
+  description: >
+    Initial OpenAPI spec for LatticeChat (generated draft). Contains key REST
+    endpoints and component schemas derived from shared contracts.
+tags:
+  - name: auth
+    description: Authentication and account routes
+  - name: users
+    description: User resources
+servers:
+  - url: http://localhost:{port}
+    variables:
+      port:
+        default: '3001'
+paths:
+  /api/auth/email-taken:
+    post:
+      tags:
+        - auth
+      summary: Check if email is taken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailCheckRequest'
+      responses:
+        '200':
+          description: response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isTaken:
+                    type: boolean
+  /api/auth/email-verified:
+    post:
+      tags:
+        - auth
+      summary: Check if email is verified
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailVerifiedRequest'
+      responses:
+        '200':
+          description: response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isVerified:
+                    type: boolean
+  /api/auth/username-taken:
+    get:
+      tags:
+        - auth
+      summary: Check if username is taken
+      parameters:
+        - in: query
+          name: username
+          schema:
+            type: string
+      responses:
+        '200':
+          description: response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isTaken:
+                    type: boolean
+  /api/auth/signup:
+    post:
+      tags:
+        - auth
+      summary: Create user (sign up via email)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignUpRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrentUserResponse'
+  /api/auth/signin:
+    post:
+      tags:
+        - auth
+      summary: Sign in via email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignInRequest'
+      responses:
+        '200':
+          description: Authenticated
+          headers:
+            set-auth-token:
+              description: JWT authentication token
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrentUserResponse'
+  /api/auth/email-otp/send-verification:
+    post:
+      tags:
+        - auth
+      summary: Send email verification OTP
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailOtpSendRequest'
+      responses:
+        '200':
+          description: OTP sent
+  /api/auth/email-otp/verify:
+    post:
+      tags:
+        - auth
+      summary: Verify email OTP
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailOtpVerifyRequest'
+      responses:
+        '200':
+          description: Verification successful
+  /api/auth/email-otp/request-password-reset:
+    post:
+      tags:
+        - auth
+      summary: Request password reset OTP
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetRequest'
+      responses:
+        '200':
+          description: Reset OTP sent
+  /api/auth/email-otp/reset-password:
+    post:
+      tags:
+        - auth
+      summary: Reset password using OTP
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetRequest'
+      responses:
+        '200':
+          description: Password reset successful
+  /api/users/me:
+    get:
+      summary: Get current user
+      responses:
+        '200':
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrentUserResponse'
+  /api/users/{user_id}:
+    get:
+      tags:
+        - users
+      summary: Get basic user information
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: byName
+          schema:
+            type: string
+      responses:
+        '200':
+          description: response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  basicUserInfo:
+                    $ref: '#/components/schemas/BasicUserInfo'
+    delete:
+      tags:
+        - users
+      summary: Delete user account (authenticated)
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: user deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+  /api/users/{user_id}/public-key:
+    get:
+      tags:
+        - users
+      summary: Get user's public key
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  publicKey:
+                    type: string
+    post:
+      tags:
+        - users
+      summary: Set user's public key (authenticated)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublicKeyRequest'
+      responses:
+        '200':
+          description: public key set
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+  /api/users/{user_id}/conversations:
+    get:
+      tags:
+        - users
+      summary: Search user's conversations
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: search
+          schema:
+            type: string
+      responses:
+        '200':
+          description: list of conversations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  conversations:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Conversation'
+  /api/users/{user_id}/conversations/{conversation_id}:
+    get:
+      tags:
+        - users
+      summary: Get conversation details
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: conversation_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: conversation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  conversation:
+                    $ref: '#/components/schemas/Conversation'
+  /api/users/{user_id}/conversations/{conversation_id}/messages:
+    get:
+      tags:
+        - users
+      summary: Get messages for a conversation
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: conversation_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: messages
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  messages:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Message'
+  /api/users/{user_id}/friend-requests:
+    get:
+      tags:
+        - users
+      summary: List friend requests
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: friend requests
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  friendRequests:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FriendRequest'
+    post:
+      tags:
+        - users
+      summary: Send a friend request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TargetIdRequest'
+      responses:
+        '200':
+          description: friend request sent
+    patch:
+      tags:
+        - users
+      summary: Accept a friend request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TargetIdRequest'
+      responses:
+        '200':
+          description: friend request accepted
+    delete:
+      tags:
+        - users
+      summary: Remove a friend request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TargetIdRequest'
+      responses:
+        '200':
+          description: friend request removed
+  /api/users/{user_id}/friends:
+    delete:
+      tags:
+        - users
+      summary: Remove a friend
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TargetIdRequest'
+      responses:
+        '200':
+          description: friend removed
+  /api/users/{user_id}/key-exchange-requests:
+    post:
+      tags:
+        - users
+      summary: Create key exchange request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateKeyExchangeRequest'
+      responses:
+        '200':
+          description: key exchange request created
+    get:
+      tags:
+        - users
+      summary: Get key exchange requests
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: key exchange requests
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  keyExchangeRequests:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/KeyExchangeRequest'
+    delete:
+      tags:
+        - users
+      summary: Delete key exchange requests
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: key exchange requests deleted
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    BasicUserInfo:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        biography:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - createdAt
+    Conversation:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        isDirectMessage:
+          type: boolean
+        ownerId:
+          type: string
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/BasicUserInfo'
+      required:
+        - id
+        - name
+        - isDirectMessage
+    UserInfo:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        biography:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - email
+        - createdAt
+    CurrentUserResponse:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/UserInfo'
+        conversations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Conversation'
+        friends:
+          type: array
+          items:
+            $ref: '#/components/schemas/BasicUserInfo'
+    SignUpRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+      required:
+        - name
+        - email
+        - password
+    SignInRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+        callbackURL:
+          type: string
+      required:
+        - email
+        - password
+    EmailCheckRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+      required:
+        - email
+    EmailVerifiedRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+      required:
+        - email
+    EmailOtpSendRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        type:
+          type: string
+          default: email-verification
+      required:
+        - email
+    EmailOtpVerifyRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        otp:
+          type: string
+      required:
+        - email
+        - otp
+    PasswordResetRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        otp:
+          type: string
+        password:
+          type: string
+      required:
+        - email
+        - otp
+        - password
+    PublicKeyRequest:
+      type: object
+      properties:
+        publicKey:
+          type: string
+      required:
+        - publicKey
+    TargetIdRequest:
+      type: object
+      properties:
+        targetId:
+          type: string
+      required:
+        - targetId
+    CreateKeyExchangeRequest:
+      type: object
+      properties:
+        targetId:
+          type: string
+        cipher:
+          type: string
+      required:
+        - targetId
+        - cipher
+    KeyExchangeRequest:
+      type: object
+      properties:
+        id:
+          type: string
+        fromId:
+          type: string
+        toId:
+          type: string
+        cipher:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - fromId
+        - toId
+        - cipher
+        - createdAt
+    FriendRequest:
+      type: object
+      properties:
+        id:
+          type: string
+        senderId:
+          type: string
+        targetId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - senderId
+        - targetId
+        - createdAt
+    Message:
+      type: object
+      properties:
+        id:
+          type: string
+        conversationId:
+          type: string
+        senderId:
+          type: string
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - conversationId
+        - senderId
+        - content
+        - createdAt

@@ -1,12 +1,11 @@
 import { useState } from 'react'
 import {
   HiOutlineChatBubbleOvalLeft,
-  HiOutlinePhone,
   HiOutlineCog6Tooth, HiUserPlus
 } from 'react-icons/hi2'
 import { AnimatedThemeToggler } from '../../registry/magicui/animated-theme-toggler'
 
-type Section = 'chats' | 'friends' | 'calls' | 'settings'
+type Section = 'chats' | 'friends' | 'settings'
 
 type NavItem = {
   key: Section
@@ -23,7 +22,6 @@ type SidebarProps = {
 const navItems: NavItem[] = [
   { key: 'chats', label: 'Chats', icon: HiOutlineChatBubbleOvalLeft },
   { key: 'friends', label: 'Add Friend', icon: HiUserPlus },
-  { key: 'calls', label: 'Calls', icon: HiOutlinePhone },
   { key: 'settings', label: 'Settings', icon: HiOutlineCog6Tooth },
 ]
 

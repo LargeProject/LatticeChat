@@ -15,13 +15,17 @@ export default function ChatLayout() {
 
   return (
     <div className="flex h-full min-h-0 flex-1 overflow-hidden">
-      <aside className="hidden h-full min-h-0 w-72 shrink-0 border-r border-(--line) bg-(--surface) md:flex lg:w-80">
+      <aside
+        className={`${
+          conversation ? 'hidden md:flex' : 'flex'
+        } h-full min-h-0 w-full shrink-0 border-r border-(--line) bg-(--surface) md:w-72 lg:w-80`}
+      >
         <div className="flex h-full min-h-0 w-full flex-col overflow-hidden">
           <ChatList />
         </div>
       </aside>
 
-      <main className="flex min-w-0 flex-1 overflow-hidden">
+      <main className={`${conversation ? 'flex' : 'hidden md:flex'} min-w-0 flex-1 overflow-hidden`}>
         {!conversation ? (
           <EmptyState />
         ) : (

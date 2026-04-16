@@ -23,8 +23,8 @@ describe('GET /api/users/me/conversations?search=', () => {
     const account1 = await request.createAndSignIn(account1Credentials);
     const account2 = await request.createAndSignIn(account2Credentials);
 
-    const conversation = await database.createFakePrivateConversation([account1.userId, account2.userId]);
-    const message = await database.createFakeDirectMessage(conversation.id, account1.userId, 'Hello!');
+    const conversation = await database.createConversation([account1.userId, account2.userId], true);
+    await database.createFakeDirectMessage(conversation.id, account1.userId, 'Hello!');
 
     const response = await request.searchConversation(account1.jwt, 't');
 
@@ -44,7 +44,7 @@ describe('GET /api/users/me/conversations/:conversation_id/messages', async () =
     const account1 = await request.createAndSignIn(account1Credentials);
     const account2 = await request.createAndSignIn(account2Credentials);
 
-    const conversation = await database.createFakePrivateConversation([account1.userId, account2.userId]);
+    const conversation = await database.createConversation([account1.userId, account2.userId], true);
     const message1 = await database.createFakeDirectMessage(conversation.id, account1.userId, 'Hello!');
     const message2 = await database.createFakeDirectMessage(conversation.id, account2.userId, 'Hey!');
 
