@@ -413,6 +413,14 @@ class _AddFriendDialogState extends State<AddFriendDialog> {
 
     try {
       final dynamic response = await _userApi.fetchBasicUserByName(username);
+
+      // DEBUG: see exactly what came back from the API response object
+      try {
+        print('fetchBasicUserByName response.toJson(): ${response.toJson()}');
+      } catch (_) {
+        print('fetchBasicUserByName response: $response');
+      }
+
       final user = _extractBasicUser(response);
 
       if (!mounted) return;
@@ -528,21 +536,29 @@ class _AddFriendDialogState extends State<AddFriendDialog> {
 
     try {
       final dynamic rawJson = response.toJson();
+
       if (rawJson is Map<String, dynamic>) {
         if (rawJson['basicUserInfo'] is Map) {
           return BasicUserModel.fromJson(
             Map<String, dynamic>.from(rawJson['basicUserInfo']),
           );
         }
+
         if (rawJson['user'] is Map) {
           return BasicUserModel.fromJson(
             Map<String, dynamic>.from(rawJson['user']),
           );
         }
+
         if (rawJson['userInfo'] is Map) {
           return BasicUserModel.fromJson(
             Map<String, dynamic>.from(rawJson['userInfo']),
           );
+        }
+
+        if ((rawJson['id'] != null || rawJson['_id'] != null) &&
+            (rawJson['username'] != null || rawJson['name'] != null)) {
+          return BasicUserModel.fromJson(rawJson);
         }
       }
     } catch (_) {}

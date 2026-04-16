@@ -25,6 +25,10 @@ class UserServices {
     final response = await HttpUtil.sendGet('$_baseUrl/users/$name?byName=true');
     final body = jsonDecode(response.body);
 
+    print('fetchBasicUserByName status: ${response.statusCode}');
+    print('fetchBasicUserByName raw body: ${response.body}');
+    print('fetchBasicUserByName decoded body: $body');
+
     if (response.statusCode == 200) {
       return FetchBasicUserInfoResponse.fromJson(body);
     } else {

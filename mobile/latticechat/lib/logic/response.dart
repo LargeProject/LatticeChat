@@ -37,10 +37,27 @@ class FetchBasicUserInfoResponse {
   FetchBasicUserInfoResponse._({required this.user, required this.message});
 
   static FetchBasicUserInfoResponse fromJson(Map<String, dynamic> json) {
+    final dynamic rawUser =
+        json['basicUserInfo'] ??
+            json['user'] ??
+            json['userInfo'] ??
+            json;
+
     return FetchBasicUserInfoResponse._(
-        user: BasicUserModel.fromJson(json['basicUserInfo']),
-        message: json['message']
+      user: BasicUserModel.fromJson(Map<String, dynamic>.from(rawUser)),
+      message: (json['message'] ?? '').toString(),
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'user': {
+        'id': user.id,
+        'username': user.username,
+        'createdAt': user.createdAt.toIso8601String(),
+      },
+      'message': message,
+    };
   }
 }
 
