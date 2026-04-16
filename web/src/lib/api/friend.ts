@@ -1,5 +1,5 @@
-import {  fetchBasicUserInfo } from '#/lib/api/user.ts';
-import type {BasicUserInfo} from '#/lib/api/user.ts';
+import { fetchBasicUserInfo } from '#/lib/api/user.ts';
+import type { BasicUserInfo } from '#/lib/api/user.ts';
 import { HttpError } from '#/lib/util/error.ts';
 import { getLocalJWT, getLocalUserId } from '#/lib/util/storage.ts';
 
@@ -45,11 +45,11 @@ export async function fetchFriendRequests(): Promise<FriendRequest[]> {
   return friendRequests;
 }
 
-export async function acceptFriendRequest(targetId: string) {
+export async function acceptFriendRequest(targetUsername: string) {
   const senderId = getLocalUserId();
   const jwt = getLocalJWT();
 
-  const requestBody = { targetId: targetId };
+  const requestBody = { targetUsername: targetUsername };
   const response = await fetch(import.meta.env.VITE_API_BASE_URL + '/users/' + senderId + '/friend-requests', {
     method: 'PATCH',
     headers: {
@@ -90,17 +90,14 @@ export async function removeFriendRequest(targetId: string) {
   const jwt = getLocalJWT();
 
   const requestBody = { targetId: targetId };
-  const response = await fetch(
-    import.meta.env.VITE_API_BASE_URL + '/users/' + senderId + '/friend-requests',
-    {
-      method: 'DELETE',
-      headers: {
-        Authorization: 'Bearer ' + jwt,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(requestBody),
+  const response = await fetch(import.meta.env.VITE_API_BASE_URL + '/users/' + senderId + '/friend-requests', {
+    method: 'DELETE',
+    headers: {
+      Authorization: 'Bearer ' + jwt,
+      'Content-Type': 'application/json',
     },
-  );
+    body: JSON.stringify(requestBody),
+  });
 
   const body = await response.json();
   if (!response.ok) {

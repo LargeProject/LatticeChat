@@ -67,9 +67,9 @@ class UserServices {
     }
   }
 
-  Future<bool> sendFriendRequest(String senderJWT, String targetId) async {
+  Future<bool> sendFriendRequest(String senderJWT, String targetUsername) async {
     final response = await HttpUtil.sendAuthPost(senderJWT, '$_baseUrl/users/me/friend-requests', {
-      'targetId': targetId
+      'targetUsername': targetUsername
     });
 
     if (response.statusCode == 200) {
