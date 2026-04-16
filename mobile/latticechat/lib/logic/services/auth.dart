@@ -123,7 +123,7 @@ class AuthServices {
 
   Future<bool> isEmailAvailable(String email) async {
     final response = await HttpUtil.sendPost('$_baseUrl/auth/email-taken', {
-      email: email
+      'email': email
     });
     final body = jsonDecode(response.body);
 
