@@ -112,7 +112,7 @@ export default function FriendsLayout() {
     let targetUser = null;
     try {
       targetUser = await fetchBasicUserInfo(normalizedInput, true);
-      await sendFriendRequest(targetUser!.username);
+      await sendFriendRequest(targetUser!.name);
     } catch (error: any) {
       // TODO: add specific http errors
       pushMessage(`Error Occurred: ${error.message}`, 'error');
@@ -122,8 +122,8 @@ export default function FriendsLayout() {
 
     const newRequest: LayoutFriendRequest = {
       id: targetUser.id,
-      username: targetUser.username,
-      displayName: targetUser.username,
+      username: targetUser.name,
+      displayName: targetUser.name,
       mutualFriends: 0,
       avatarColor: 'bg-blue-500',
     };
