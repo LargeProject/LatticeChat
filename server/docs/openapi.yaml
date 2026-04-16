@@ -78,7 +78,7 @@ paths:
                 properties:
                   isTaken:
                     type: boolean
-  /api/auth/signup:
+  /api/auth/sign-up/email:
     post:
       tags:
         - auth
@@ -90,13 +90,13 @@ paths:
             schema:
               $ref: '#/components/schemas/SignUpRequest'
       responses:
-        '201':
-          description: Created
+        '200':
+          description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CurrentUserResponse'
-  /api/auth/signin:
+  /api/auth/sign-in/email:
     post:
       tags:
         - auth
@@ -227,53 +227,6 @@ paths:
       responses:
         '200':
           description: user deleted
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                  message:
-                    type: string
-  /api/users/{user_id}/public-key:
-    get:
-      tags:
-        - users
-      summary: Get user's public key
-      parameters:
-        - in: path
-          name: user_id
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: response
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                  message:
-                    type: string
-                  publicKey:
-                    type: string
-    post:
-      tags:
-        - users
-      summary: Set user's public key (authenticated)
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PublicKeyRequest'
-      responses:
-        '200':
-          description: public key set
           content:
             application/json:
               schema:
@@ -456,59 +409,6 @@ paths:
       responses:
         '200':
           description: friend removed
-  /api/users/{user_id}/key-exchange-requests:
-    post:
-      tags:
-        - users
-      summary: Create key exchange request
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateKeyExchangeRequest'
-      responses:
-        '200':
-          description: key exchange request created
-    get:
-      tags:
-        - users
-      summary: Get key exchange requests
-      parameters:
-        - in: path
-          name: user_id
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: key exchange requests
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                  message:
-                    type: string
-                  keyExchangeRequests:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/KeyExchangeRequest'
-    delete:
-      tags:
-        - users
-      summary: Delete key exchange requests
-      parameters:
-        - in: path
-          name: user_id
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: key exchange requests deleted
 components:
   securitySchemes:
     bearerAuth:
@@ -679,36 +579,6 @@ components:
           type: string
       required:
         - targetId
-    CreateKeyExchangeRequest:
-      type: object
-      properties:
-        targetId:
-          type: string
-        cipher:
-          type: string
-      required:
-        - targetId
-        - cipher
-    KeyExchangeRequest:
-      type: object
-      properties:
-        id:
-          type: string
-        fromId:
-          type: string
-        toId:
-          type: string
-        cipher:
-          type: string
-        createdAt:
-          type: string
-          format: date-time
-      required:
-        - id
-        - fromId
-        - toId
-        - cipher
-        - createdAt
     FriendRequest:
       type: object
       properties:

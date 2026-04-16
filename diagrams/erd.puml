@@ -42,20 +42,12 @@ entity Account {
   publicKey: string
 }
 
-entity KeyExchangeRequest {
-  _id: ObjectId
-  fromId: ObjectId (User)
-  toId: ObjectId (User)
-  cipher: string
-}
 
 ' Relationships
 User ||--o{ Conversation : memberIds
 User ||--o{ FriendRequest : fromId
 User ||--o{ FriendRequest : toId
 User ||--o{ Account : userId
-User ||--o{ KeyExchangeRequest : fromId
-User ||--o{ KeyExchangeRequest : toId
 Conversation ||--o{ Message : conversationId
 User ||--o{ Message : senderId
 
