@@ -23,6 +23,7 @@ export type ClientEventMap = {
   createConversation: contracts.CreateConversation;
   removePrivateConversation: contracts.RemovePrivateConversation;
   addMember: contracts.AddMember;
+  renameConversation: contracts.RenameConversation;
 };
 
 /**
@@ -32,6 +33,7 @@ export type ServerEventMap = {
   newMessage: contracts.EmitMessage;
   newMember: contracts.EmitMemberAdded;
   memberLeft: contracts.EmitMemberLeft;
+  conversationUpdated: contracts.EmitConversationUpdated;
 };
 
 export function WebsocketProvider({ children, wsUrl, onError }: WebsocketProviderProps) {

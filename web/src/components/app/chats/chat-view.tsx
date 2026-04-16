@@ -17,7 +17,7 @@ type ChatViewProps = {
 
 export function ChatView({ conversation }: ChatViewProps) {
   const { setConvoId } = useAppState();
-  const { createMessage, isAuthenticated, leaveConversation } = useWebsocket();
+  const { createMessage, isAuthenticated, leaveConversation, renameConversation } = useWebsocket();
   const { userInfo, refreshUser } = useUser();
   const [pendingMessages, setPendingMessages] = useState<Array<Message & { optimistic: true }>>([]);
   const [isAddMembersOpen, setIsAddMembersOpen] = useState(false);
@@ -91,6 +91,26 @@ export function ChatView({ conversation }: ChatViewProps) {
 
   const { name, messages } = useConversation(conversation);
 
+  const handleRename = useCallback(async () => {
+    if (!userInfo.data) return;
+    if (conversation.isDirectMessage) return;
+
+    const newName = prompt('Enter new conversation name:', name || '');
+    if (!newName) return;
+    const trimmed = newName.trim();
+    if (!trimmed || trimmed === name) return;
+
+    try {
+      const result = await renameConversation({ conversationId: conversation.id, newName: trimmed });
+      if (!(result as any)?.success) {
+        alert('Failed to rename conversation');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Failed to rename conversation');
+    }
+  }, [conversation.id, name, renameConversation, userInfo]);
+
   const allMessages = [...messages, ...pendingMessages];
 
   return (
@@ -114,6 +134,18 @@ export function ChatView({ conversation }: ChatViewProps) {
           </div>
 
           <div className="flex items-center gap-1">
+            {!conversation.isDirectMessage && (
+              <button
+                type="button"
+                onClick={handleRename}
+                className="inline-flex h-9 items-center justify-center rounded-lg px-3 text-(--text-secondary) transition-colors hover:bg-(--link-bg-hover) hover:text-(--text-primary) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--line)"
+                aria-label="Rename conversation"
+                title="Rename conversation"
+              >
+                Rename
+              </button>
+            )}
+
             <button
               type="button"
               onClick={() => setIsAddMembersOpen(true)}
