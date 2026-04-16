@@ -24,3 +24,9 @@ export const emitMemberLeft = z.object({
   newOwnerId: z.string().optional(),
 });
 export type EmitMemberLeft = z.infer<typeof emitMemberLeft>;
+
+export const emitConversationUpdated = z.object({
+  conversationId: z.string().nonempty(),
+  name: z.string().nonempty(),
+});
+export type EmitConversationUpdated = z.infer<typeof emitConversationUpdated>;
