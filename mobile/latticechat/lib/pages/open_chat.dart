@@ -1,4 +1,11 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Page;
+import 'package:latticechat/logic/models/message.dart';
+import 'package:latticechat/logic/models/ws/create_message.dart';
+import 'package:latticechat/logic/services/socket.dart';
+import 'package:latticechat/pages/chat_list.dart';
+import 'package:provider/provider.dart';
+
+import '../logic/services/api.dart';
 
 class ChatMessage {
   final String text;
@@ -13,11 +20,15 @@ class ChatMessage {
 }
 
 class OpenChatPage extends StatefulWidget {
+  final String jwt;
   final String otherUserName;
+  final String conversationId;
 
   const OpenChatPage({
     super.key,
+    required this.jwt,
     required this.otherUserName,
+    required this.conversationId
   });
 
   @override
@@ -28,42 +39,51 @@ class _OpenChatPageState extends State<OpenChatPage> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
-  final List<ChatMessage> _messages = [
-    ChatMessage(
-      text: "Hey, how are you?",
-      isMe: false,
-      time: DateTime.now().subtract(const Duration(minutes: 12)),
-    ),
-    ChatMessage(
-      text: "I'm good, how about you?",
-      isMe: true,
-      time: DateTime.now().subtract(const Duration(minutes: 10)),
-    ),
-    ChatMessage(
-      text: "Doing well. Are we still on for later?",
-      isMe: false,
-      time: DateTime.now().subtract(const Duration(minutes: 8)),
-    ),
-  ];
+  SocketService? _socket;
+  List<ChatMessage> _messages = [];
 
-  void _sendMessage() {
+  @override
+  void initState() {
+    super.initState();
+    _refresh();
+  }
+
+  void _refresh() async {
+    final userApi = ApiServices.getConversationServices();
+    final response = await userApi.fetchConversationMessages(widget.jwt, widget.conversationId);
+    final messages = response.messages;
+
+    setState(() {
+      _messages = messages.map((message) =>
+          ChatMessage(
+              text: message.content,
+              isMe: message.senderId == userId,
+              time: message.createdAt
+          )
+      ).toList();
+    });
+  }
+
+  void _sendMessage() async {
     final text = _messageController.text.trim();
     if (text.isEmpty) return;
 
-    setState(() {
-      _messages.add(
+    _socket!.emitMessage(CreateMessageModel(conversationId: widget.conversationId, senderId: userId, content: text));
+
+    /*setState(() {
+      /*_messages.add(
         ChatMessage(
           text: text,
           isMe: true,
           time: DateTime.now(),
         ),
-      );
-    });
+      );*/
+    });*/
 
     _messageController.clear();
     _scrollToBottom();
 
-    Future.delayed(const Duration(milliseconds: 700), () {
+    /*Future.delayed(const Duration(milliseconds: 700), () {
       if (!mounted) return;
 
       setState(() {
@@ -77,7 +97,7 @@ class _OpenChatPageState extends State<OpenChatPage> {
       });
 
       _scrollToBottom();
-    });
+    });*/
   }
 
   void _scrollToBottom() {
@@ -111,8 +131,25 @@ class _OpenChatPageState extends State<OpenChatPage> {
     super.dispose();
   }
 
+  void _init() {
+    _socket!.onMessage((message) {
+      setState(() {
+        final newMessage = ChatMessage(
+            text: message.content,
+            isMe: message.senderId == userId,
+            time: message.createdAt
+        );
+        _messages.add(newMessage);
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+
+    _socket = Provider.of<SocketService>(context, listen: false);
+    _init();
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.otherUserName),

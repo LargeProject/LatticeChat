@@ -1,39 +1,67 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Page;
+import 'package:latticechat/logic/models/conversation.dart';
 import 'package:latticechat/logic/services/api.dart';
+import 'package:latticechat/logic/services/socket.dart';
+import 'package:provider/provider.dart';
+import '../logic/models/ws/hand_shake.dart';
 import 'open_chat.dart';
 
-class ChatListPage extends StatelessWidget {
+// UNDO LATER
+String userId = '';
+
+class ChatListPage extends StatefulWidget {
   final String jwt;
 
   const ChatListPage({
     super.key,
-    required this.jwt,
+    required this.jwt
   });
 
   @override
+  State<StatefulWidget> createState() => ChatListState();
+}
+
+class ChatListState extends State<ChatListPage> {
+
+  SocketService? _socket;
+  List<ConversationModel> _conversations = List<ConversationModel>.empty(growable: true);
+
+  Future<void> _init() async {
+
+    _socket!.connect();
+    if(_socket!.status != Status.connected) return;
+
+    final userApi = ApiServices.getUserServices();
+    final infoResponse = await userApi.fetchUser(widget.jwt);
+    final user = infoResponse.user;
+    userId = user.id;
+
+    final ack = await _socket!.emitHandShake(InitHandShake(jwt: widget.jwt, userId: user.id));
+  }
+
+  Future<void> _refresh() async {
+    final response = await ApiServices.getConversationServices().fetchConversations(widget.jwt);
+    final conversations = response.conversations;
+
+    setState(() {
+      _conversations = conversations;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _refresh();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final chats = [
-      {
-        "name": "Darren",
-        "lastMessage": "See you later",
-        "time": "2:14 PM",
-      },
-      {
-        "name": "Alex",
-        "lastMessage": "Did you finish it?",
-        "time": "1:48 PM",
-      },
-      {
-        "name": "Maria",
-        "lastMessage": "Call me when you're free",
-        "time": "11:32 AM",
-      },
-      {
-        "name": "Jordan",
-        "lastMessage": "I just sent the file",
-        "time": "Yesterday",
-      },
-    ];
+
+    _socket = context.watch<SocketService>();
+
+    _init();
+
+    final chats = _conversations;
 
     return Scaffold(
       appBar: AppBar(
@@ -45,7 +73,7 @@ class ChatListPage extends StatelessWidget {
             onPressed: () {
               showDialog(
                 context: context,
-                builder: (context) => AddFriendDialog(jwt: jwt),
+                builder: (context) => AddFriendDialog(jwt: widget.jwt),
               );
             },
           ),
@@ -56,9 +84,13 @@ class ChatListPage extends StatelessWidget {
         separatorBuilder: (_, __) => const Divider(height: 1),
         itemBuilder: (context, index) {
           final chat = chats[index];
-          final name = chat["name"]!;
-          final lastMessage = chat["lastMessage"]!;
-          final time = chat["time"]!;
+          var name = '';
+          if(chat.isDirectMessage) {
+            // fix later
+            name = chat.members[1].username;
+          } else {
+            name = chat.name;
+          }
 
           return ListTile(
             contentPadding: const EdgeInsets.symmetric(
@@ -76,25 +108,17 @@ class ChatListPage extends StatelessWidget {
               name,
               style: const TextStyle(fontWeight: FontWeight.w600),
             ),
-            subtitle: Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Text(
-                lastMessage,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            trailing: Text(
-              time,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            onTap: () {
-              Navigator.push(
+            onTap: () async {
+              await Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => OpenChatPage(otherUserName: name),
+                  builder: (context) => ChangeNotifierProvider.value(
+                    value: _socket,
+                    child: OpenChatPage(jwt: widget.jwt, otherUserName: name, conversationId: chat.id),
+                  ),
                 ),
               );
+              _refresh();
             },
           );
         },

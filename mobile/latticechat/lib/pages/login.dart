@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:latticechat/logic/services/socket.dart';
 import 'package:latticechat/theme.dart';
 import 'package:latticechat/pages/register.dart';
 import 'package:latticechat/pages/verify.dart';
 import 'package:latticechat/pages/chat_list.dart';
+import 'package:provider/provider.dart';
 
 import '../logic/services/api.dart';
 import '../logic/util/error.dart';
@@ -43,13 +45,17 @@ class _LoginPageState extends State<LoginPage> {
       final response = await authApi.signIn(email, password);
       final jsonWT = response.jsonWT;
 
-      debugPrint('Sign in successful!');
+      debugPrint('Sign in successful! $jsonWT');
 
-      // Send user to ChatListPage (with their information attached?)
+      // Send user to ChatListPage (with their information attached?
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => ChatListPage(jwt: jsonWT)),
-      );
+        MaterialPageRoute(
+          builder: (context) => ChangeNotifierProvider(
+            create: (context) => SocketService(),
+            child: ChatListPage(jwt: jsonWT),
+          ),
+      ));
 
     } on ApiError catch (error) {
       debugPrint(error.toString());
