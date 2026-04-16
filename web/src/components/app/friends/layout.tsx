@@ -200,7 +200,7 @@ export default function FriendsLayout() {
                   disabled={!canSend}
                   className="group inline-flex items-center gap-2 rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-150 hover:bg-emerald-700 hover:shadow-md active:scale-95 disabled:cursor-not-allowed disabled:bg-emerald-600/40 disabled:text-white/50 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2"
                 >
-                  <span>Send Friend Request</span>
+                  <span>Send</span>
                   <UserPlus className="h-4 w-4 transition-transform duration-150 group-hover:translate-x-0.5" />
                 </button>
               </div>
