@@ -22,23 +22,9 @@ export function EmptyState() {
         </h1>
 
         <p className="text-zinc-400 text-base leading-relaxed">
-          End-to-end encrypted messaging powered by
-          <span className="text-zinc-200 font-semibold">
-            {' '}
-            post-quantum cryptography
-          </span>
-          .
+          Messages encrypted in transit
         </p>
 
-        <div className="flex gap-4 justify-center pt-2 text-[12px] font-mono text-black-500">
-          <span className="border border-zinc-800 px-2 py-1 rounded">E2EE</span>
-          <span className="border border-zinc-800 px-2 py-1 rounded">
-            Post-Quantum
-          </span>
-          <span className="border border-zinc-800 px-2 py-1 rounded">
-            Kyber KEM
-          </span>
-        </div>
       </div>
     </div>
   )
