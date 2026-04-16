@@ -19,21 +19,33 @@ class UserModel {
   });
 
   static UserModel fromJson(Map<String, dynamic> json) {
-    final user = json['user'];
+    final user = (json['user'] as Map<String, dynamic>? ?? json);
 
-    List<Map<String, dynamic>> jsonConversations = json['conversations'].cast<Map<String, dynamic>>();
-    List<Map<String, dynamic>> jsonFriends = json['friends'].cast<Map<String, dynamic>>();
+    final jsonConversations = ((json['conversations'] ?? []) as List)
+        .whereType<Map>()
+        .map((e) => Map<String, dynamic>.from(e))
+        .toList();
 
-    final conversations = jsonConversations.map((jsonConversation) => ConversationModel.fromJson(jsonConversation)).toList();
-    final friends = jsonFriends.map((jsonFriend) => BasicUserModel.fromJson(jsonFriend)).toList();
+    final jsonFriends = ((json['friends'] ?? []) as List)
+        .whereType<Map>()
+        .map((e) => Map<String, dynamic>.from(e))
+        .toList();
+
+    final conversations = jsonConversations
+        .map((jsonConversation) => ConversationModel.fromJson(jsonConversation))
+        .toList();
+
+    final friends = jsonFriends
+        .map((jsonFriend) => BasicUserModel.fromJson(jsonFriend))
+        .toList();
 
     return UserModel._(
-      id: user['id'],
-      username: user['name'],
-      email: user['email'],
+      id: (user['id'] ?? user['_id'] ?? '').toString(),
+      username: (user['username'] ?? user['name'] ?? '').toString(),
+      email: (user['email'] ?? '').toString(),
       friends: friends,
       conversations: conversations,
-      createdAt: DateTime.parse(user['createdAt'])
+      createdAt: DateTime.parse(user['createdAt']),
     );
   }
 }
@@ -50,10 +62,14 @@ class BasicUserModel {
   });
 
   static BasicUserModel fromJson(Map<String, dynamic> json) {
+    final data = json['user'] is Map<String, dynamic>
+        ? json['user'] as Map<String, dynamic>
+        : json;
+
     return BasicUserModel._(
-      id: json['id'],
-      username: json['name'],
-      createdAt: DateTime.parse(json['createdAt'])
+      id: (data['id'] ?? data['_id'] ?? '').toString(),
+      username: (data['username'] ?? data['name'] ?? '').toString(),
+      createdAt: DateTime.parse(data['createdAt']),
     );
   }
 }

@@ -37,48 +37,8 @@ paths:
                 properties:
                   isTaken:
                     type: boolean
-  /api/auth/email-verified:
-    post:
-      tags:
-        - auth
-      summary: Check if email is verified
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/EmailVerifiedRequest'
-      responses:
-        '200':
-          description: response
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  isVerified:
-                    type: boolean
-  /api/auth/username-taken:
-    get:
-      tags:
-        - auth
-      summary: Check if username is taken
-      parameters:
-        - in: query
-          name: username
-          schema:
-            type: string
-      responses:
-        '200':
-          description: response
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  isTaken:
-                    type: boolean
-  /api/auth/signup:
+
+  /api/auth/sign-up/email:
     post:
       tags:
         - auth
@@ -90,13 +50,14 @@ paths:
             schema:
               $ref: '#/components/schemas/SignUpRequest'
       responses:
-        '201':
-          description: Created
+        '200':
+          description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CurrentUserResponse'
-  /api/auth/signin:
+
+  /api/auth/sign-in/email:
     post:
       tags:
         - auth
@@ -119,7 +80,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CurrentUserResponse'
-  /api/auth/email-otp/send-verification:
+
+  /api/auth/email-otp/send-verification-otp:
     post:
       tags:
         - auth
@@ -133,7 +95,8 @@ paths:
       responses:
         '200':
           description: OTP sent
-  /api/auth/email-otp/verify:
+
+  /api/auth/email-otp/verify-email:
     post:
       tags:
         - auth
@@ -147,6 +110,49 @@ paths:
       responses:
         '200':
           description: Verification successful
+
+  /api/auth/change-password:
+    post:
+      tags:
+        - auth
+      summary: Change password (authenticated)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                currentPassword:
+                  type: string
+                newPassword:
+                  type: string
+              required:
+                - currentPassword
+                - newPassword
+      responses:
+        '200':
+          description: Password changed successfully
+  /api/auth/username-taken:
+    get:
+      tags:
+        - auth
+      summary: Check if username is taken
+      parameters:
+        - in: query
+          name: username
+          schema:
+            type: string
+      responses:
+        '200':
+          description: response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isTaken:
+                    type: boolean
   /api/auth/email-otp/request-password-reset:
     post:
       tags:
@@ -185,6 +191,156 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CurrentUserResponse'
+    delete:
+      summary: Delete current user
+      responses:
+        '200':
+          description: user deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+
+  /api/users/me/friend-requests:
+    get:
+      tags:
+        - users
+      summary: List friend requests for current user
+      responses:
+        '200':
+          description: friend requests
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  friendRequests:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FriendRequest'
+    post:
+      tags:
+        - users
+      summary: Send friend request (by username)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                targetUsername:
+                  type: string
+              required:
+                - targetUsername
+      responses:
+        '200':
+          description: friend request sent
+    patch:
+      tags:
+        - users
+      summary: Accept a friend request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TargetIdRequest'
+      responses:
+        '200':
+          description: friend request accepted
+    delete:
+      tags:
+        - users
+      summary: Remove a friend request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TargetIdRequest'
+      responses:
+        '200':
+          description: friend request removed
+
+  /api/users/me/friends:
+    delete:
+      tags:
+        - users
+      summary: Remove a friend
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TargetIdRequest'
+      responses:
+        '200':
+          description: friend removed
+
+  /api/users/me/conversations:
+    get:
+      tags:
+        - users
+      summary: Search user's conversations (current user)
+      parameters:
+        - in: query
+          name: search
+          schema:
+            type: string
+      responses:
+        '200':
+          description: list of conversations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  conversations:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Conversation'
+
+  /api/users/me/conversations/{conversation_id}/messages:
+    get:
+      tags:
+        - users
+      summary: Get messages for a conversation (current user)
+      parameters:
+        - in: path
+          name: conversation_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: messages
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  messages:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Message'
   /api/users/{user_id}:
     get:
       tags:
@@ -227,53 +383,6 @@ paths:
       responses:
         '200':
           description: user deleted
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                  message:
-                    type: string
-  /api/users/{user_id}/public-key:
-    get:
-      tags:
-        - users
-      summary: Get user's public key
-      parameters:
-        - in: path
-          name: user_id
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: response
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                  message:
-                    type: string
-                  publicKey:
-                    type: string
-    post:
-      tags:
-        - users
-      summary: Set user's public key (authenticated)
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PublicKeyRequest'
-      responses:
-        '200':
-          description: public key set
           content:
             application/json:
               schema:
@@ -456,59 +565,6 @@ paths:
       responses:
         '200':
           description: friend removed
-  /api/users/{user_id}/key-exchange-requests:
-    post:
-      tags:
-        - users
-      summary: Create key exchange request
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateKeyExchangeRequest'
-      responses:
-        '200':
-          description: key exchange request created
-    get:
-      tags:
-        - users
-      summary: Get key exchange requests
-      parameters:
-        - in: path
-          name: user_id
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: key exchange requests
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                  message:
-                    type: string
-                  keyExchangeRequests:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/KeyExchangeRequest'
-    delete:
-      tags:
-        - users
-      summary: Delete key exchange requests
-      parameters:
-        - in: path
-          name: user_id
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: key exchange requests deleted
 components:
   securitySchemes:
     bearerAuth:

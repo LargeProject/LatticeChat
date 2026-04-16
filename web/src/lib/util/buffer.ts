@@ -6,9 +6,7 @@ export function bufferToHexString(buffer: { [key: string]: number }) {
   return hexString;
 }
 
-export function bufferArrayToHexStringArray(
-  array: { buffer: { [key: string]: number } }[],
-) {
+export function bufferArrayToHexStringArray(array: { buffer: { [key: string]: number } }[]) {
   const hexArray: string[] = new Array(array.length);
   for (let i = 0; i < array.length; i++) {
     hexArray[i] = bufferToHexString(array[i].buffer);

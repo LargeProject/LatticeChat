@@ -1,56 +1,49 @@
-import { useLayoutEffect, useRef, useState } from 'react'
-import { Send } from 'lucide-react'
+import { useLayoutEffect, useRef, useState } from 'react';
+import { Send } from 'lucide-react';
 
-const MIN_TEXTAREA_HEIGHT = 20
-const MAX_TEXTAREA_HEIGHT = 200
+const MIN_TEXTAREA_HEIGHT = 20;
+const MAX_TEXTAREA_HEIGHT = 200;
 
-export function ChatInput({
-  onSend,
-}: {
-  onSend: (text: string) => void
-}) {
-  const [text, setText] = useState('')
-  const [isComposing, setIsComposing] = useState(false)
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
+export function ChatInput({ onSend }: { onSend: (text: string) => void }) {
+  const [text, setText] = useState('');
+  const [isComposing, setIsComposing] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const hasText = text.trim().length > 0
+  const hasText = text.trim().length > 0;
 
   const resizeTextarea = () => {
-    const el = textareaRef.current
-    if (!el) return
+    const el = textareaRef.current;
+    if (!el) return;
 
-    el.style.height = 'auto'
-    const nextHeight = Math.min(
-      Math.max(el.scrollHeight, MIN_TEXTAREA_HEIGHT),
-      MAX_TEXTAREA_HEIGHT,
-    )
-    el.style.height = `${nextHeight}px`
-    el.style.overflowY = el.scrollHeight > MAX_TEXTAREA_HEIGHT ? 'auto' : 'hidden'
-  }
+    el.style.height = 'auto';
+    const nextHeight = Math.min(Math.max(el.scrollHeight, MIN_TEXTAREA_HEIGHT), MAX_TEXTAREA_HEIGHT);
+    el.style.height = `${nextHeight}px`;
+    el.style.overflowY = el.scrollHeight > MAX_TEXTAREA_HEIGHT ? 'auto' : 'hidden';
+  };
 
   useLayoutEffect(() => {
-    resizeTextarea()
-  }, [text])
+    resizeTextarea();
+  }, [text]);
 
   const handleSend = () => {
-    const trimmed = text.trim()
-    if (!trimmed) return
+    const trimmed = text.trim();
+    if (!trimmed) return;
 
-    onSend(trimmed)
-    setText('')
+    onSend(trimmed);
+    setText('');
 
     requestAnimationFrame(() => {
-      textareaRef.current?.focus()
-      resizeTextarea()
-    })
-  }
+      textareaRef.current?.focus();
+      resizeTextarea();
+    });
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey && !isComposing) {
-      e.preventDefault()
-      handleSend()
+      e.preventDefault();
+      handleSend();
     }
-  }
+  };
 
   return (
     <div
@@ -62,7 +55,6 @@ export function ChatInput({
         focus-within:border-zinc-400/70 focus-within:ring-2 focus-within:ring-zinc-400/25
       "
     >
-      
       <textarea
         ref={textareaRef}
         value={text}
@@ -99,5 +91,5 @@ export function ChatInput({
         <Send size={16} />
       </button>
     </div>
-  )
+  );
 }

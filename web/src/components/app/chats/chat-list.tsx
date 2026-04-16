@@ -71,8 +71,8 @@ const ChatRow = function ChatRow({ conversation, isSelected }: ChatRowProps) {
       ].join(' ')}
       aria-current={isSelected ? 'page' : undefined}
     >
-      <div 
-        className="relative flex h-9 shrink-0" 
+      <div
+        className="relative flex h-9 shrink-0"
         style={{ width: conversation.isDirectMessage ? 36 : 36 + (Math.min(conversation.members.length, 3) - 1) * 16 }}
       >
         <ChatIcon conversation={conversation} name={name} />

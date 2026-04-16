@@ -1,45 +1,38 @@
-import { useState } from 'react'
-import {
-  HiOutlineChatBubbleOvalLeft,
-  HiOutlineCog6Tooth, HiUserPlus
-} from 'react-icons/hi2'
-import { AnimatedThemeToggler } from '../../registry/magicui/animated-theme-toggler'
+import { useState } from 'react';
+import { HiOutlineChatBubbleOvalLeft, HiOutlinePhone, HiOutlineCog6Tooth, HiUserPlus } from 'react-icons/hi2';
+import { AnimatedThemeToggler } from '../../registry/magicui/animated-theme-toggler';
 
-type Section = 'chats' | 'friends' | 'settings'
+type Section = 'chats' | 'friends' | 'calls' | 'settings';
 
 type NavItem = {
-  key: Section
-  label: string
-  icon: React.ComponentType<{ size?: number; className?: string }>
-}
+  key: Section;
+  label: string;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+};
 
 type SidebarProps = {
-  defaultSection?: Section
-  activeSection?: Section
-  onSelectSection?: (section: Section) => void
-}
+  defaultSection?: Section;
+  activeSection?: Section;
+  onSelectSection?: (section: Section) => void;
+};
 
 const navItems: NavItem[] = [
   { key: 'chats', label: 'Chats', icon: HiOutlineChatBubbleOvalLeft },
   { key: 'friends', label: 'Add Friend', icon: HiUserPlus },
   { key: 'settings', label: 'Settings', icon: HiOutlineCog6Tooth },
-]
+];
 
-const ICON_SIZE = 22
+const ICON_SIZE = 22;
 
-export default function Sidebar({
-  defaultSection = 'chats',
-  activeSection,
-  onSelectSection,
-}: SidebarProps) {
-  const [active, setActive] = useState<Section>(defaultSection)
+export default function Sidebar({ defaultSection = 'chats', activeSection, onSelectSection }: SidebarProps) {
+  const [active, setActive] = useState<Section>(defaultSection);
 
   const handleSelect = (key: Section) => {
     if (activeSection === undefined) {
-      setActive(key)
+      setActive(key);
     }
-    onSelectSection?.(key)
-  }
+    onSelectSection?.(key);
+  };
 
   return (
     <aside
@@ -48,8 +41,8 @@ export default function Sidebar({
     >
       <nav className="mt-1 flex w-full flex-1 flex-col items-center gap-1.5" aria-label="Main sections">
         {navItems.map((item) => {
-          const isActive = (activeSection ?? active) === item.key
-          const Icon = item.icon
+          const isActive = (activeSection ?? active) === item.key;
+          const Icon = item.icon;
 
           return (
             <button
@@ -72,7 +65,9 @@ export default function Sidebar({
                 aria-hidden
                 className={[
                   'pointer-events-none absolute -left-2.5 h-7 w-1 rounded-full transition-all duration-200',
-                  isActive ? 'bg-zinc-600 opacity-100 dark:bg-zinc-300' : 'bg-zinc-500/50 opacity-0 group-hover:opacity-100',
+                  isActive
+                    ? 'bg-zinc-600 opacity-100 dark:bg-zinc-300'
+                    : 'bg-zinc-500/50 opacity-0 group-hover:opacity-100',
                 ].join(' ')}
               />
               <Icon
@@ -84,7 +79,7 @@ export default function Sidebar({
               />
               <span className="sr-only">{item.label}</span>
             </button>
-          )
+          );
         })}
       </nav>
 
@@ -99,5 +94,5 @@ export default function Sidebar({
         </div>
       </div>
     </aside>
-  )
+  );
 }

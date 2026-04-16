@@ -1,5 +1,5 @@
-import { BsIncognito } from 'react-icons/bs'
-import { EncryptedText } from '../../ui/encrypted-text'
+import { BsIncognito } from 'react-icons/bs';
+import { EncryptedText } from '../../ui/encrypted-text';
 
 export function EmptyState() {
   return (
@@ -27,5 +27,5 @@ export function EmptyState() {
 
       </div>
     </div>
-  )
+  );
 }

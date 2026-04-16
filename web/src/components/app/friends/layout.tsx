@@ -1,14 +1,19 @@
 import { useEffect, useRef, useState } from 'react';
 import { Check, X, User, UserPlus, Inbox, Send, UserMinus, Users } from 'lucide-react';
 import { useUser } from '#/lib/context/UserContext.tsx';
-import { type FriendRequest, removeFriendRequest, sendFriendRequest, removeFriend, acceptFriendRequest  } from '#/lib/api/friend.ts';
+import {
+  type FriendRequest,
+  removeFriendRequest,
+  sendFriendRequest,
+  removeFriend,
+  acceptFriendRequest,
+} from '#/lib/api/friend.ts';
 import { fetchBasicUserInfo } from '#/lib/api/user.ts';
 import { useAsyncEffect } from '#/components/hooks/useAsyncEffect.ts';
 
 type LayoutFriendRequest = {
   id: string;
-  username: string;
-  displayName: string;
+  name: string;
   mutualFriends: number;
   avatarColor: string;
 };
@@ -28,8 +33,7 @@ function toLayoutFriendRequests(friendRequests: FriendRequest[]) {
   for (const friendRequest of friendRequests) {
     const layoutFriendRequest: LayoutFriendRequest = {
       id: friendRequest.associatedUser.id,
-      username: friendRequest.associatedUser.name,
-      displayName: friendRequest.associatedUser.name,
+      name: friendRequest.associatedUser.name,
       mutualFriends: 0,
       avatarColor: 'bg-blue-500',
     };
@@ -91,8 +95,8 @@ export default function FriendsLayout() {
     e.preventDefault();
     if (!canSend) return;
 
-    const alreadySent = sentRequests.some((r) => r.username.toLowerCase() === normalizedInput);
-    const alreadyIncoming = incomingRequests.some((r) => r.username.toLowerCase() === normalizedInput);
+    const alreadySent = sentRequests.some((r) => r.name.toLowerCase() === normalizedInput);
+    const alreadyIncoming = incomingRequests.some((r) => r.name.toLowerCase() === normalizedInput);
 
     if (alreadySent) {
       pushMessage(`You already sent a request to @${normalizedInput}`, 'error');
@@ -106,18 +110,18 @@ export default function FriendsLayout() {
     let targetUser = null;
     try {
       targetUser = await fetchBasicUserInfo(normalizedInput, true);
-      await sendFriendRequest(targetUser!.id);
+
+      if (!targetUser) return;
+      await sendFriendRequest(targetUser.name);
     } catch (error: any) {
       // TODO: add specific http errors
       pushMessage(`Error Occurred: ${error.message}`, 'error');
       return;
     }
-    if (targetUser == null) return;
 
     const newRequest: LayoutFriendRequest = {
       id: targetUser.id,
-      username: targetUser.name,
-      displayName: targetUser.name,
+      name: targetUser.name,
       mutualFriends: 0,
       avatarColor: 'bg-blue-500',
     };
@@ -279,8 +283,7 @@ export default function FriendsLayout() {
                         <Avatar color={request.avatarColor} />
                         <div className="flex flex-col">
                           <div className="flex items-baseline gap-1">
-                            <span className="text-base font-semibold text-(--text-primary)">{request.displayName}</span>
-                            <span className="text-sm font-medium text-(--text-secondary)">{request.username}</span>
+                            <span className="text-sm font-medium text-(--text-secondary)">{request.name}</span>
                           </div>
                           <span className="text-xs text-(--text-secondary)">Incoming Friend Request</span>
                         </div>
@@ -331,7 +334,7 @@ export default function FriendsLayout() {
                         <div className="flex flex-col">
                           <div className="flex items-baseline gap-1">
                             <span className="text-base font-semibold text-(--text-primary)">{request.displayName}</span>
-                            <span className="text-sm font-medium text-(--text-secondary)">{request.username}</span>
+                            <span className="text-sm font-medium text-(--text-secondary)">{request.name}</span>
                           </div>
                           <span className="text-xs text-(--text-secondary)">Outgoing Friend Request</span>
                         </div>

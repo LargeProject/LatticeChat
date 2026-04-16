@@ -41,6 +41,8 @@ dependencies:
   flutter_dotenv: ^6.0.0
   zxcvbn: ^1.0.0
   pinput: ^6.0.2
+  socket_io_client: ^3.1.1
+
 
 dev_dependencies:
   flutter_test:

@@ -2,11 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import type { ZXCVBNFeedback } from 'zxcvbn';
 import { authClient } from '#/lib/auth';
-import {
-  setLastUsedEmail,
-  setLocalJWT,
-  setLocalUserId,
-} from '#/lib/util/storage.ts';
+import { setLastUsedEmail, setLocalJWT, setLocalUserId } from '#/lib/util/storage.ts';
 import { fetchIsEmailTaken, fetchIsUsernameTaken } from '#/lib/api/auth.ts';
 
 export function useDebounce<T>(value: T, delay: number): T {
@@ -32,12 +28,8 @@ export function useAuthLogic() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [emailAvailability, setEmailAvailability] = useState<string | null>(
-    null,
-  );
-  const [usernameAvailability, setUsernameAvailability] = useState<
-    string | null
-  >(null);
+  const [emailAvailability, setEmailAvailability] = useState<string | null>(null);
+  const [usernameAvailability, setUsernameAvailability] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
 
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);
@@ -134,10 +126,8 @@ export function useAuthLogic() {
 
     if (mode === 'signup') {
       if (!username.trim()) return 'Username is required';
-      if (username.trim().length < 3)
-        return 'Username must be at least 3 characters';
-      if (username.trim().length > 20)
-        return 'Username must be at most 20 characters';
+      if (username.trim().length < 3) return 'Username must be at least 3 characters';
+      if (username.trim().length > 20) return 'Username must be at most 20 characters';
     } else if (mode === 'login') {
       if (!password) return 'Password is required';
       return null;
@@ -215,8 +205,7 @@ export function useAuthLogic() {
   }, [password]);
 
   const isPasswordStrong = passwordStrength.score >= 3;
-  const passwordsMatch =
-    mode !== 'signup' || !confirmPassword ? true : confirmPassword === password;
+  const passwordsMatch = mode !== 'signup' || !confirmPassword ? true : confirmPassword === password;
 
   const debouncedEmail = useDebounce(email, 500);
   const debouncedUsername = useDebounce(username, 500);

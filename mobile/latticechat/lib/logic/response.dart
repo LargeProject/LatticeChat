@@ -37,30 +37,53 @@ class FetchBasicUserInfoResponse {
   FetchBasicUserInfoResponse._({required this.user, required this.message});
 
   static FetchBasicUserInfoResponse fromJson(Map<String, dynamic> json) {
+    final dynamic rawUser =
+        json['basicUserInfo'] ??
+            json['user'] ??
+            json['userInfo'] ??
+            json;
+
     return FetchBasicUserInfoResponse._(
-        user: BasicUserModel.fromJson(json['basicUserInfo']),
-        message: json['message']
+      user: BasicUserModel.fromJson(Map<String, dynamic>.from(rawUser)),
+      message: (json['message'] ?? '').toString(),
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'user': {
+        'id': user.id,
+        'username': user.username,
+        'createdAt': user.createdAt.toIso8601String(),
+      },
+      'message': message,
+    };
   }
 }
 
 class FetchFriendRequestsResponse {
-  final List<FriendRequestModel> friendRequests;
+  final List<dynamic> friendRequests;
   final String message;
 
-  FetchFriendRequestsResponse._({required this.friendRequests, required this.message});
+  FetchFriendRequestsResponse._({
+    required this.friendRequests,
+    required this.message,
+  });
 
   static FetchFriendRequestsResponse fromJson(Map<String, dynamic> json) {
-    List<Map<String, dynamic>> jsonFriendRequests = json['friendRequests'].cast<Map<String, dynamic>>();
-    final friendRequests = jsonFriendRequests.map((jsonFriendRequest) => FriendRequestModel.fromJson(jsonFriendRequest)).toList();
+    final raw = json['friendRequests'];
+
+    List<dynamic> friendRequests = [];
+    if (raw is List) {
+      friendRequests = raw;
+    }
 
     return FetchFriendRequestsResponse._(
       friendRequests: friendRequests,
-      message: json['message']
+      message: (json['message'] ?? '').toString(),
     );
   }
 }
-
 class FetchConversationsResponse {
   final List<ConversationModel> conversations;
   final String message;

@@ -27,8 +27,6 @@ entity Message {
   conversationId: ObjectId (Conversation)
   content: string
   createdAt: Date
-  keys: [ { id: ObjectId (User), encryptedKey: string } ]
-}
 
 entity FriendRequest {
   _id: ObjectId

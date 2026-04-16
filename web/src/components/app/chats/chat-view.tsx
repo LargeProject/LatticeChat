@@ -4,6 +4,7 @@ import { MessageList } from './messages';
 import { ChatInput } from './chat-input';
 import { AddMembersModal } from './add-members-modal';
 import { useWebsocket } from '#/lib/hooks/useWebsocket';
+import { useWebsocketListener } from '#/lib/hooks/useWebsocketListener';
 import type { Message } from '#/lib/api/conversation.ts';
 import { useUser } from '#/lib/context/UserContext.tsx';
 import { useConversation } from '#/components/hooks/useConversation';
@@ -15,15 +16,27 @@ type ChatViewProps = {
 };
 
 export function ChatView({ conversation }: ChatViewProps) {
-  const { createMessage } = useWebsocket();
-  const { userInfo } = useUser();
   const { setConvoId } = useAppState();
+  const { createMessage, isAuthenticated, leaveConversation, renameConversation } = useWebsocket();
+  const { userInfo, refreshUser } = useUser();
   const [pendingMessages, setPendingMessages] = useState<Array<Message & { optimistic: true }>>([]);
   const [isAddMembersOpen, setIsAddMembersOpen] = useState(false);
 
   useEffect(() => {
     setPendingMessages([]);
   }, [conversation.id]);
+
+  const [membersState, setMembersState] = useState(conversation.members);
+  useEffect(() => {
+    setMembersState(conversation.members);
+  }, [conversation.members]);
+
+  const onMemberLeftUI = (data: contracts.EmitMemberLeft) => {
+    if (data.conversationId === conversation.id) {
+      setMembersState((m) => m.filter((x) => x.id !== data.userId));
+    }
+  };
+  useWebsocketListener('memberLeft', onMemberLeftUI, isAuthenticated, [conversation.id]);
 
   const handleSend = useCallback(
     async (text: string) => {
@@ -59,7 +72,44 @@ export function ChatView({ conversation }: ChatViewProps) {
     setIsAddMembersOpen(false);
   }, []);
 
+  const handleLeave = useCallback(async () => {
+    if (!userInfo.data) return;
+    if (!confirm('Leave conversation?')) return;
+
+    try {
+      const result = await leaveConversation(conversation.id);
+      if ((result as any)?.success) {
+        await refreshUser();
+      } else {
+        alert('Failed to leave conversation');
+      }
+    } catch (e) {
+      console.error(e);
+      alert('Error leaving conversation');
+    }
+  }, [conversation.id, refreshUser, userInfo, leaveConversation]);
+
   const { name, messages } = useConversation(conversation);
+
+  const handleRename = useCallback(async () => {
+    if (!userInfo.data) return;
+    if (conversation.isDirectMessage) return;
+
+    const newName = prompt('Enter new conversation name:', name || '');
+    if (!newName) return;
+    const trimmed = newName.trim();
+    if (!trimmed || trimmed === name) return;
+
+    try {
+      const result = await renameConversation({ conversationId: conversation.id, newName: trimmed });
+      if (!(result as any)?.success) {
+        alert('Failed to rename conversation');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Failed to rename conversation');
+    }
+  }, [conversation.id, name, renameConversation, userInfo]);
 
   const allMessages = [...messages, ...pendingMessages];
 
@@ -84,6 +134,18 @@ export function ChatView({ conversation }: ChatViewProps) {
           </div>
 
           <div className="flex items-center gap-1">
+            {!conversation.isDirectMessage && (
+              <button
+                type="button"
+                onClick={handleRename}
+                className="inline-flex h-9 items-center justify-center rounded-lg px-3 text-(--text-secondary) transition-colors hover:bg-(--link-bg-hover) hover:text-(--text-primary) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--line)"
+                aria-label="Rename conversation"
+                title="Rename conversation"
+              >
+                Rename
+              </button>
+            )}
+
             <button
               type="button"
               onClick={() => setIsAddMembersOpen(true)}
@@ -93,11 +155,21 @@ export function ChatView({ conversation }: ChatViewProps) {
             >
               <UserPlus size={16} />
             </button>
+
+            <button
+              type="button"
+              onClick={handleLeave}
+              className="inline-flex h-9 items-center justify-center rounded-lg px-3 text-(--text-danger) transition-colors hover:bg-(--link-bg-hover) hover:text-(--text-primary) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--line)"
+              aria-label="Leave conversation"
+              title="Leave conversation"
+            >
+              Leave
+            </button>
           </div>
         </div>
       </header>
 
-      <MessageList messages={allMessages} currentUserId={userInfo.data?.id || ''} members={conversation.members} />
+      <MessageList messages={allMessages} currentUserId={userInfo.data?.id || ''} members={membersState} />
 
       <div className="border-t border-(--line) bg-(--surface)">
         <ChatInput onSend={handleSend} />

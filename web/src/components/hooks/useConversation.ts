@@ -8,7 +8,7 @@ import type * as contracts from '@latticechat/shared';
 import { getConversationName } from '#/lib/util/conversation';
 
 export function useConversation(conversation: Conversation) {
-  const { userInfo } = useUser();
+  const { userInfo, refreshUser } = useUser();
   const [messages, setMessages] = useState<Message[]>([]);
   const { isAuthenticated } = useWebsocket();
   const name = useMemo(() => {
@@ -21,7 +21,7 @@ export function useConversation(conversation: Conversation) {
   useEffect(() => {
     let ignore = false;
     setMessages([]);
-    
+
     fetchConversationMessages(conversation.id).then((data) => {
       if (!ignore) {
         setMessages(data);
@@ -44,6 +44,15 @@ export function useConversation(conversation: Conversation) {
   };
 
   useWebsocketListener('newMessage', onMessageReceive, isAuthenticated, [conversation.id]);
+
+  const onMemberLeft = (data: contracts.EmitMemberLeft) => {
+    if (data.conversationId === conversation.id) {
+      // refresh to update participants and UI
+      refreshUser().catch(() => {});
+    }
+  };
+
+  useWebsocketListener('memberLeft', onMemberLeft, isAuthenticated, [conversation.id]);
 
   const addMessage = (message: Message) => {
     setMessages((m) => {

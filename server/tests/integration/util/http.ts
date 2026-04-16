@@ -94,11 +94,11 @@ class Request {
       .send();
   }
 
-  async sendFriendRequest(jwt: string, targetId: string) {
+  async sendFriendRequest(jwt: string, targetUsername: string) {
     return await supertest(server)
       .post('/api/users/me/friend-requests')
       .set('Authorization', 'Bearer ' + jwt)
-      .send({ targetId: targetId });
+      .send({ targetUsername: targetUsername });
   }
 
   async acceptFriendRequest(jwt: string, targetId: string) {
@@ -137,7 +137,7 @@ class Request {
   }
 
   async makeFriends(account1: AccountInfo, account2: AccountInfo) {
-    await request.sendFriendRequest(account1.jwt, account2.userId);
+    await request.sendFriendRequest(account1.jwt, account2.username);
     await request.acceptFriendRequest(account2.jwt, account1.userId);
   }
 }

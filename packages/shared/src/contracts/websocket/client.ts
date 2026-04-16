@@ -32,3 +32,14 @@ export const addMember = z.object({
   userId: z.string().nonempty(),
 });
 export type AddMember = z.infer<typeof addMember>;
+
+export const leaveConversation = z.object({
+  conversationId: z.string().nonempty(),
+});
+export type LeaveConversation = z.infer<typeof leaveConversation>;
+
+export const renameConversation = z.object({
+  conversationId: z.string().nonempty(),
+  newName: z.string().nonempty(),
+});
+export type RenameConversation = z.infer<typeof renameConversation>;

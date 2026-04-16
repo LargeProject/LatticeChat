@@ -113,4 +113,68 @@ export class ConversationService {
       addedAt: new Date(),
     };
   }
+
+  static async removeMemberFromConversation(data: { conversationId: string; userId: string }) {
+    const conversation = await this.findConversation(data.conversationId);
+
+    const memberIdStr = data.userId;
+    const isMember = conversation.memberIds.some((m: any) => m.toString() === memberIdStr);
+    if (!isMember) {
+      throw new NotMemberError();
+    }
+
+    const remaining = conversation.memberIds.map((m: any) => m.toString()).filter((id: string) => id !== memberIdStr);
+
+    // If fewer than 2 members remain after removal, delete conversation
+    if (remaining.length < 2) {
+      // remove conversation from leaving user
+      await User.updateOne({ _id: data.userId }, { $pull: { conversationIds: conversation._id } });
+      await conversation.deleteOne();
+      return {
+        conversationId: conversation._id.toString(),
+        userId: memberIdStr,
+        leftAt: new Date(),
+        remainingMemberIds: remaining,
+        deleted: true,
+      };
+    }
+
+    // remove member from conversation and user's conversation list
+    await Conversation.updateOne({ _id: conversation._id }, { $pull: { memberIds: data.userId } });
+    await User.updateOne({ _id: data.userId }, { $pull: { conversationIds: conversation._id } });
+
+    let newOwnerId: string | undefined = undefined;
+    if (conversation.ownerId && conversation.ownerId.toString() === data.userId) {
+      newOwnerId = remaining[0];
+      await Conversation.updateOne({ _id: conversation._id }, { $set: { ownerId: newOwnerId } });
+    }
+
+    return {
+      conversationId: conversation._id.toString(),
+      userId: memberIdStr,
+      leftAt: new Date(),
+      remainingMemberIds: remaining,
+      ...(newOwnerId && { newOwnerId }),
+    };
+  }
+
+  static async renameConversation(data: { conversationId: string; newName: string; renamerId: string }) {
+    const conversation = await this.findConversation(data.conversationId);
+
+    if (conversation.isDirectMessage) {
+      throw new DirectMessageInviteError();
+    }
+
+    // Ensure renamer is a member
+    const isMember = conversation.memberIds.some((m: any) => m.toString() === data.renamerId);
+    if (!isMember) {
+      throw new NotMemberError();
+    }
+
+    // Update the conversation name
+    await Conversation.updateOne({ _id: conversation._id }, { $set: { name: data.newName } });
+
+    // Return the updated conversation
+    return await this.findConversation(data.conversationId);
+  }
 }

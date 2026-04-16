@@ -1,62 +1,54 @@
-import { useEffect, useState } from 'react'
-import { Moon, Sun } from 'lucide-react'
+import { useEffect, useState } from 'react';
+import { Moon, Sun } from 'lucide-react';
 
-type ThemeMode = 'light' | 'dark'
+type ThemeMode = 'light' | 'dark';
 
 function getInitialMode(): ThemeMode {
-  if (typeof window === 'undefined') return 'light'
-  const stored = window.localStorage.getItem('theme')
-  if (stored === 'light' || stored === 'dark') return stored
-  return window.matchMedia('(prefers-color-scheme: dark)').matches
-    ? 'dark'
-    : 'light'
+  if (typeof window === 'undefined') return 'light';
+  const stored = window.localStorage.getItem('theme');
+  if (stored === 'light' || stored === 'dark') return stored;
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 }
 
 function applyThemeMode(mode: ThemeMode) {
-  document.documentElement.classList.remove('light', 'dark')
-  document.documentElement.classList.add(mode)
-  document.documentElement.setAttribute('data-theme', mode)
-  document.documentElement.style.colorScheme = mode
+  document.documentElement.classList.remove('light', 'dark');
+  document.documentElement.classList.add(mode);
+  document.documentElement.setAttribute('data-theme', mode);
+  document.documentElement.style.colorScheme = mode;
 }
 
 export function AnimatedThemeToggler() {
-  const [theme, setTheme] = useState<ThemeMode>('light')
+  const [theme, setTheme] = useState<ThemeMode>('light');
 
   useEffect(() => {
-    const initial = getInitialMode()
-    setTheme(initial)
-    applyThemeMode(initial)
-  }, [])
+    const initial = getInitialMode();
+    setTheme(initial);
+    applyThemeMode(initial);
+  }, []);
 
   const toggleTheme = async (event: React.MouseEvent<HTMLButtonElement>) => {
-    const newTheme = theme === 'dark' ? 'light' : 'dark'
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
 
     if (!document.startViewTransition) {
-      setTheme(newTheme)
-      applyThemeMode(newTheme)
-      window.localStorage.setItem('theme', newTheme)
-      return
+      setTheme(newTheme);
+      applyThemeMode(newTheme);
+      window.localStorage.setItem('theme', newTheme);
+      return;
     }
 
-    const x = event.clientX
-    const y = event.clientY
-    const endRadius = Math.hypot(
-      Math.max(x, window.innerWidth - x),
-      Math.max(y, window.innerHeight - y),
-    )
+    const x = event.clientX;
+    const y = event.clientY;
+    const endRadius = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
 
     const transition = document.startViewTransition(() => {
-      setTheme(newTheme)
-      applyThemeMode(newTheme)
-      window.localStorage.setItem('theme', newTheme)
-    })
+      setTheme(newTheme);
+      applyThemeMode(newTheme);
+      window.localStorage.setItem('theme', newTheme);
+    });
 
-    await transition.ready
+    await transition.ready;
 
-    const clipPath = [
-      `circle(0px at ${x}px ${y}px)`,
-      `circle(${endRadius}px at ${x}px ${y}px)`,
-    ]
+    const clipPath = [`circle(0px at ${x}px ${y}px)`, `circle(${endRadius}px at ${x}px ${y}px)`];
 
     document.documentElement.animate(
       {
@@ -65,13 +57,10 @@ export function AnimatedThemeToggler() {
       {
         duration: 400,
         easing: 'ease-in-out',
-        pseudoElement:
-          theme === 'dark'
-            ? '::view-transition-old(root)'
-            : '::view-transition-new(root)',
+        pseudoElement: theme === 'dark' ? '::view-transition-old(root)' : '::view-transition-new(root)',
       },
-    )
-  }
+    );
+  };
 
   return (
     <button
@@ -84,5 +73,5 @@ export function AnimatedThemeToggler() {
       </div>
       <span className="sr-only">Toggle theme</span>
     </button>
-  )
+  );
 }
