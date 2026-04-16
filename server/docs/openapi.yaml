@@ -11,10 +11,7 @@ tags:
   - name: users
     description: User resources
 servers:
-  - url: http://localhost:{port}
-    variables:
-      port:
-        default: '3001'
+  - url: https://cop4331site.com
 paths:
   /api/auth/email-taken:
     post:
