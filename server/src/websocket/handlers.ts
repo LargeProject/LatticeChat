@@ -222,4 +222,35 @@ export class WebsocketHandlers {
       throw new WebsocketError('Failed to leave conversation', 'LEAVE_CONVERSATION_ERROR', 500);
     }
   }
+
+  static async handleRenameConversation(
+    data: actions.RenameConversation,
+    context: WebsocketContext,
+  ): Promise<actions.AckResponse> {
+    try {
+      const renamerId = context.userId;
+      const updatedConversation = await ConversationService.renameConversation({
+        conversationId: data.conversationId,
+        newName: data.newName,
+        renamerId,
+      });
+
+      // Broadcast updated conversation name to members
+      const conversation = await ConversationService.findConversation(data.conversationId);
+      const memberIds = conversation.memberIds.map((m: any) => m.toString());
+      const payload = {
+        conversationId: conversation._id.toString(),
+        name: conversation.name,
+      };
+
+      broadcastToConversationMembers(context, memberIds, 'conversationUpdated', payload);
+      return ACK_SUCCESS;
+    } catch (error) {
+      if (error instanceof WebsocketError) {
+        throw error;
+      }
+      Logger.error('[ConversationService] Error renaming conversation:', error);
+      throw new WebsocketError('Failed to rename conversation', 'CONVERSATION_RENAME_ERROR', 500);
+    }
+  }
 }
