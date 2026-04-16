@@ -126,7 +126,7 @@ export default function Auth() {
                       {mode === 'login' ? 'Welcome Back' : 'Create Account'}
                     </h2>
                     <p className="text-zinc-500 text-sm">
-                      {mode === 'login' ? 'Sign in to continue your encrypted chats' : 'Join to speak freely.'}
+                      {mode === 'login' ? 'Sign in to continue your chats' : 'Join to speak freely.'}
                     </p>
                   </motion.div>
 
