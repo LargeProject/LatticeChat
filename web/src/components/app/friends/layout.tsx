@@ -122,8 +122,8 @@ export default function FriendsLayout() {
 
     const newRequest: LayoutFriendRequest = {
       id: targetUser.id,
-      username: targetUser.name,
-      displayName: targetUser.name,
+      username: targetUser.username,
+      displayName: targetUser.username,
       mutualFriends: 0,
       avatarColor: 'bg-blue-500',
     };
