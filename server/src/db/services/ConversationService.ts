@@ -157,4 +157,24 @@ export class ConversationService {
       ...(newOwnerId && { newOwnerId }),
     };
   }
+
+  static async renameConversation(data: { conversationId: string; newName: string; renamerId: string }) {
+    const conversation = await this.findConversation(data.conversationId);
+
+    if (conversation.isDirectMessage) {
+      throw new DirectMessageInviteError();
+    }
+
+    // Ensure renamer is a member
+    const isMember = conversation.memberIds.some((m: any) => m.toString() === data.renamerId);
+    if (!isMember) {
+      throw new NotMemberError();
+    }
+
+    // Update the conversation name
+    await Conversation.updateOne({ _id: conversation._id }, { $set: { name: data.newName } });
+
+    // Return the updated conversation
+    return await this.findConversation(data.conversationId);
+  }
 }
