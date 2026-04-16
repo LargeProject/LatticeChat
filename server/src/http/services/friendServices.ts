@@ -21,9 +21,15 @@ const handleGetFriendRequests: Service = async (req: UserRequest, res) => {
 
 const handleAcceptFriendRequest: Service = async (req: UserRequest, res) => {
   const senderId = req.userInfo?.id ?? '';
-  const targetId = req.body.targetId ?? '';
+  let targetId = req.body?.targetId ?? '';
+  const targetUsername = req.body?.targetUsername ?? '';
 
   try {
+    if (targetUsername != null && targetUsername != '') {
+      const userInfo = await db.UserService.getBasicUserInfoByName(targetUsername);
+      targetId = userInfo.id;
+    }
+
     await db.UserService.acceptFriendRequest(targetId, senderId);
 
     res.status(200).send({
