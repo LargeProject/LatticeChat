@@ -15,7 +15,7 @@ export function getConversationName(user: UserInfo, conversation: Conversation) 
 
     if (!otherMember) return '';
 
-    return '[DM] with ' + otherMember.name;
+    return otherMember.name;
   } else {
     return conversation.name;
   }

@@ -171,7 +171,7 @@ export function ChatView({ conversation }: ChatViewProps) {
 
       <MessageList messages={allMessages} currentUserId={userInfo.data?.id || ''} members={membersState} />
 
-      <div className="border-t border-(--line) bg-(--surface)">
+      <div className="p-2">
         <ChatInput onSend={handleSend} />
       </div>
 
