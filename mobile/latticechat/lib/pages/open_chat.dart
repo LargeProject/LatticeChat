@@ -39,6 +39,10 @@ class _OpenChatPageState extends State<OpenChatPage> {
   }
 
   Future<List<Map<String, dynamic>>> _fetchMessages() async {
+    if (widget.conversationId.trim().isEmpty) {
+      return [];
+    }
+
     final response = await _conversationApi.fetchConversationMessages(
       widget.jwt,
       widget.conversationId,
@@ -47,10 +51,7 @@ class _OpenChatPageState extends State<OpenChatPage> {
     final raw = response.messages;
 
     if (raw is List) {
-      return raw
-          .whereType<Map>()
-          .map((e) => Map<String, dynamic>.from(e))
-          .toList();
+      return raw.whereType<Map>().map((e) => Map<String, dynamic>.from(e)).toList();
     }
 
     return [];
@@ -113,10 +114,7 @@ class _OpenChatPageState extends State<OpenChatPage> {
   }
 
   DateTime? _messageTime(Map<String, dynamic> message) {
-    final raw = message['createdAt'] ??
-        message['updatedAt'] ??
-        message['time'] ??
-        message['timestamp'];
+    final raw = message['createdAt'] ?? message['updatedAt'] ?? message['time'] ?? message['timestamp'];
 
     if (raw == null) return null;
     if (raw is DateTime) return raw.toLocal();
@@ -146,6 +144,8 @@ class _OpenChatPageState extends State<OpenChatPage> {
 
   @override
   Widget build(BuildContext context) {
+    final hasConversation = widget.conversationId.trim().isNotEmpty;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.otherUserName),
@@ -202,9 +202,13 @@ class _OpenChatPageState extends State<OpenChatPage> {
                         horizontal: 12,
                         vertical: 12,
                       ),
-                      children: const [
-                        SizedBox(height: 220),
-                        Center(child: Text('No messages yet.')),
+                      children: [
+                        const SizedBox(height: 220),
+                        Center(
+                          child: Text(
+                            hasConversation ? 'No messages yet.' : 'No messages yet.',
+                          ),
+                        ),
                       ],
                     ),
                   );
@@ -286,8 +290,7 @@ class _MessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bubbleColor =
-    isMe ? Theme.of(context).colorScheme.primary : Colors.grey.shade800;
+    final bubbleColor = isMe ? Theme.of(context).colorScheme.primary : Colors.grey.shade800;
 
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
@@ -307,8 +310,7 @@ class _MessageBubble extends StatelessWidget {
           ),
         ),
         child: Column(
-          crossAxisAlignment:
-          isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
             Text(
               text,

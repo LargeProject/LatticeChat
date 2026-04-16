@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:latticechat/logic/models/conversation.dart';
 import 'package:latticechat/logic/models/user.dart';
 import 'package:latticechat/logic/services/api.dart';
 import 'package:latticechat/logic/util/error.dart';
@@ -44,26 +45,121 @@ class _ChatListPageState extends State<ChatListPage> {
     _currentUser = user;
 
     final response = await _conversationApi.fetchConversations(widget.jwt);
-    return _normalizeMapList(response.conversations);
+    final conversations = _normalizeConversationList(response.conversations);
+    return _mergeFriendsIntoConversationList(user, conversations);
   }
 
-  List<Map<String, dynamic>> _normalizeMapList(dynamic raw) {
+  List<Map<String, dynamic>> _normalizeConversationList(dynamic raw) {
     if (raw is Iterable) {
-      return raw
-          .whereType<Map>()
-          .map((e) => Map<String, dynamic>.from(e))
-          .toList();
+      return raw.map((item) {
+        if (item is Map<String, dynamic>) {
+          return Map<String, dynamic>.from(item);
+        }
+
+        if (item is Map) {
+          return Map<String, dynamic>.from(item);
+        }
+
+        if (item is ConversationModel) {
+          return {
+            'id': item.id,
+            'name': item.name,
+            'isDirectMessage': item.isDirectMessage,
+            'ownerId': item.ownerId,
+            'members': item.members
+                .map((member) => {
+              'id': member.id,
+              'username': member.username,
+              'createdAt': member.createdAt.toIso8601String(),
+            })
+                .toList(),
+          };
+        }
+
+        return <String, dynamic>{};
+      }).where((item) => item.isNotEmpty).toList();
     }
+
     return [];
+  }
+
+  List<Map<String, dynamic>> _mergeFriendsIntoConversationList(
+      UserModel user,
+      List<Map<String, dynamic>> conversations,
+      ) {
+    final merged = List<Map<String, dynamic>>.from(conversations);
+    final existingFriendIds = <String>{};
+
+    for (final conversation in conversations) {
+      final members = conversation['members'];
+      if (members is List) {
+        for (final member in members) {
+          if (member is Map) {
+            final id = (member['id'] ?? member['_id'] ?? '').toString();
+            if (id.isNotEmpty && id != user.id) {
+              existingFriendIds.add(id);
+            }
+          }
+        }
+      }
+    }
+
+    for (final friend in user.friends) {
+      if (existingFriendIds.contains(friend.id)) {
+        continue;
+      }
+
+      merged.add({
+        'id': '',
+        'name': '',
+        'isDirectMessage': true,
+        'createdAt': friend.createdAt.toIso8601String(),
+        'updatedAt': friend.createdAt.toIso8601String(),
+        'members': [
+          {
+            'id': user.id,
+            'username': user.username,
+            'createdAt': user.createdAt.toIso8601String(),
+          },
+          {
+            'id': friend.id,
+            'username': friend.username,
+            'createdAt': friend.createdAt.toIso8601String(),
+          },
+        ],
+        'friendId': friend.id,
+        'friendUsername': friend.username,
+        'placeholder': true,
+      });
+    }
+
+    merged.sort((a, b) {
+      final aDate = _parseDate(
+        a['updatedAt'] ?? a['lastMessageAt'] ?? a['createdAt'],
+      );
+      final bDate = _parseDate(
+        b['updatedAt'] ?? b['lastMessageAt'] ?? b['createdAt'],
+      );
+
+      if (aDate == null && bDate == null) return 0;
+      if (aDate == null) return 1;
+      if (bDate == null) return -1;
+      return bDate.compareTo(aDate);
+    });
+
+    return merged;
+  }
+
+  DateTime? _parseDate(dynamic raw) {
+    if (raw == null) return null;
+    if (raw is DateTime) return raw;
+    return DateTime.tryParse(raw.toString());
   }
 
   UserModel? _extractCurrentUser(dynamic response) {
     try {
       final dynamic candidate =
-          response.user ??
-              response.currentUser ??
-              response.userInfo ??
-              response.basicUserInfo;
+          response.user ?? response.currentUser ?? response.userInfo ?? response.basicUserInfo;
 
       if (candidate is UserModel) {
         return candidate;
@@ -113,20 +209,20 @@ class _ChatListPageState extends State<ChatListPage> {
       return name;
     }
 
+    final friendUsername = conversation['friendUsername'];
+    if (friendUsername is String && friendUsername.trim().isNotEmpty) {
+      return friendUsername;
+    }
+
     final members = conversation['members'];
     if (members is List && currentUser != null) {
       final otherNames = members
           .whereType<Map>()
           .map((member) => Map<String, dynamic>.from(member))
           .where(
-            (member) =>
-        (member['id'] ?? member['_id'] ?? '').toString() !=
-            currentUser.id,
+            (member) => (member['id'] ?? member['_id'] ?? '').toString() != currentUser.id,
       )
-          .map(
-            (member) =>
-            (member['username'] ?? member['name'] ?? 'Unknown').toString(),
-      )
+          .map((member) => (member['username'] ?? member['name'] ?? 'Unknown').toString())
           .where((name) => name.trim().isNotEmpty)
           .toList();
 
@@ -151,10 +247,23 @@ class _ChatListPageState extends State<ChatListPage> {
       }
     }
 
+    if (lastMessage is Map) {
+      final content = lastMessage['content'];
+      if (content is String && content.trim().isNotEmpty) {
+        return content;
+      }
+    }
+
     final messages = conversation['messages'];
     if (messages is List && messages.isNotEmpty) {
       final last = messages.last;
       if (last is Map<String, dynamic>) {
+        final content = last['content'];
+        if (content is String && content.trim().isNotEmpty) {
+          return content;
+        }
+      }
+      if (last is Map) {
         final content = last['content'];
         if (content is String && content.trim().isNotEmpty) {
           return content;
@@ -166,10 +275,7 @@ class _ChatListPageState extends State<ChatListPage> {
   }
 
   String _timeLabel(Map<String, dynamic> conversation) {
-    final raw =
-        conversation['updatedAt'] ??
-            conversation['lastMessageAt'] ??
-            conversation['createdAt'];
+    final raw = conversation['updatedAt'] ?? conversation['lastMessageAt'] ?? conversation['createdAt'];
 
     if (raw == null) return '';
 
@@ -179,10 +285,7 @@ class _ChatListPageState extends State<ChatListPage> {
     final local = parsed.toLocal();
     final now = DateTime.now();
 
-    final sameDay =
-        local.year == now.year &&
-            local.month == now.month &&
-            local.day == now.day;
+    final sameDay = local.year == now.year && local.month == now.month && local.day == now.day;
 
     if (sameDay) {
       final hour = local.hour % 12 == 0 ? 12 : local.hour % 12;
@@ -412,15 +515,7 @@ class _AddFriendDialogState extends State<AddFriendDialog> {
     });
 
     try {
-      final dynamic response = await _userApi.fetchBasicUserByName(username);
-
-      // DEBUG: see exactly what came back from the API response object
-      try {
-        print('fetchBasicUserByName response.toJson(): ${response.toJson()}');
-      } catch (_) {
-        print('fetchBasicUserByName response: $response');
-      }
-
+      final response = await _userApi.fetchBasicUserByName(username);
       final user = _extractBasicUser(response);
 
       if (!mounted) return;
@@ -474,7 +569,7 @@ class _AddFriendDialogState extends State<AddFriendDialog> {
   }
 
   Future<void> _sendFriendRequest() async {
-    if (_foundUserId == null || _requestSent) return;
+    if (_foundUsername == null || _requestSent) return;
 
     if (_foundUserId == widget.currentUser.id) {
       setState(() {
@@ -489,7 +584,7 @@ class _AddFriendDialogState extends State<AddFriendDialog> {
     });
 
     try {
-      await _userApi.sendFriendRequest(widget.jwt, _foundUserId!);
+      await _userApi.sendFriendRequest(widget.jwt, _foundUsername!);
 
       if (!mounted) return;
 
@@ -522,8 +617,7 @@ class _AddFriendDialogState extends State<AddFriendDialog> {
 
   BasicUserModel? _extractBasicUser(dynamic response) {
     try {
-      final dynamic candidate =
-          response.basicUserInfo ?? response.user ?? response.userInfo;
+      final dynamic candidate = response.basicUserInfo ?? response.user ?? response.userInfo;
 
       if (candidate is BasicUserModel) {
         return candidate;
@@ -597,9 +691,7 @@ class _AddFriendDialogState extends State<AddFriendDialog> {
       ),
       actions: [
         TextButton(
-          onPressed: _isSearching || _isSending
-              ? null
-              : () => Navigator.pop(context, false),
+          onPressed: _isSearching || _isSending ? null : () => Navigator.pop(context, false),
           child: const Text('Cancel'),
         ),
         TextButton(
@@ -613,9 +705,7 @@ class _AddFriendDialogState extends State<AddFriendDialog> {
               : const Text('Find'),
         ),
         ElevatedButton(
-          onPressed: (_foundUserId != null && !_isSending && !_requestSent)
-              ? _sendFriendRequest
-              : null,
+          onPressed: (_foundUsername != null && !_isSending && !_requestSent) ? _sendFriendRequest : null,
           child: _isSending
               ? const SizedBox(
             width: 18,
