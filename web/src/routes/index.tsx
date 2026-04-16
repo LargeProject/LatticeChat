@@ -66,7 +66,7 @@ export default function Auth() {
 
         {/* Form Panel */}
         <motion.div
-          className="absolute top-0 h-full w-full md:w-1/3 z-20 flex p-4 md:p-12 pb-24 md:pb-32 overflow-y-auto"
+          className="absolute top-0 h-full w-full md:w-1/3 z-20 flex p-4 md:p-8 pb-12 md:pb-16 overflow-y-auto"
           initial={false}
           animate={{
             left: isMobile ? 0 : mode === 'login' ? '66.6667%' : 0,
@@ -101,11 +101,11 @@ export default function Auth() {
               <div className="relative group">
                 <div className="absolute -inset-0.5 bg-black rounded-2xl blur opacity-30 group-hover:opacity-50 transition duration-1000 animate-pulse" />
 
-                <div className="relative bg-zinc-900/60 backdrop-blur-md rounded-2xl border border-zinc-800 p-6 md:p-8 shadow-2xl overflow-hidden">
+                <div className="relative bg-zinc-900/60 backdrop-blur-md rounded-2xl border border-zinc-800 p-5 md:p-6 shadow-2xl overflow-hidden">
                   <ShineBorder shineColor={['#ffdf00', '#dfe6d5']} />
 
                   <motion.div
-                    className="mb-8"
+                    className="mb-5"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
@@ -124,8 +124,8 @@ export default function Auth() {
                     </p>
                   </motion.div>
 
-                  <form onSubmit={handleSubmit} noValidate className="space-y-5">
-                    <div className="space-y-2">
+                  <form onSubmit={handleSubmit} noValidate className="space-y-3.5">
+                    <div className="space-y-1.5">
                       <label className="block text-sm font-mono text-zinc-500">Email Address</label>
                       <div className="relative">
                         <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
@@ -137,7 +137,7 @@ export default function Auth() {
                             mode === 'signup' && emailAvailability && !emailAvailability.includes('taken')
                               ? 'border-emerald-500/50 focus:border-emerald-500'
                               : 'border-zinc-800 focus:border-zinc-600'
-                          } rounded-lg px-11 py-3 text-zinc-400 font-mono text-sm focus:outline-none transition-all`}
+                          } rounded-lg px-10 py-2.5 text-zinc-400 font-mono text-sm focus:outline-none transition-all`}
                           placeholder="you@example.com"
                         />
                       </div>
@@ -182,7 +182,7 @@ export default function Auth() {
                           initial={{ opacity: 0, height: 0 }}
                           animate={{ opacity: 1, height: 'auto' }}
                           exit={{ opacity: 0, height: 0 }}
-                          className="space-y-2 overflow-hidden"
+                          className="space-y-1.5 overflow-hidden"
                         >
                           <label className="block text-sm font-mono text-zinc-500">Username</label>
                           <div className="relative">
@@ -195,7 +195,7 @@ export default function Auth() {
                                 isCheckingUsername
                                   ? 'border-amber-500/50 focus:border-amber-500'
                                   : 'border-zinc-800 focus:border-zinc-600'
-                              } rounded-lg px-11 py-3 text-zinc-400 font-mono text-sm focus:outline-none transition-all`}
+                              } rounded-lg px-10 py-2.5 text-zinc-400 font-mono text-sm focus:outline-none transition-all`}
                               placeholder="your-handle"
                             />
                           </div>
@@ -229,7 +229,7 @@ export default function Auth() {
                       )}
                     </AnimatePresence>
 
-                    <div className="space-y-2">
+                    <div className="space-y-1.5">
                       <label className="block text-sm font-mono text-zinc-500">Password</label>
                       <div className="relative">
                         <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
@@ -237,7 +237,7 @@ export default function Auth() {
                           type={showPassword ? 'text' : 'password'}
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
-                          className="w-full bg-zinc-950 border border-zinc-800 focus:border-zinc-600 rounded-lg px-11 py-3 text-zinc-400 font-mono text-sm focus:outline-none transition-all"
+                          className="w-full bg-zinc-950 border border-zinc-800 focus:border-zinc-600 rounded-lg px-10 py-2.5 text-zinc-400 font-mono text-sm focus:outline-none transition-all"
                           placeholder="••••••••••••"
                         />
                         <button
@@ -272,7 +272,7 @@ export default function Auth() {
                           initial={{ opacity: 0, height: 0 }}
                           animate={{ opacity: 1, height: 'auto' }}
                           exit={{ opacity: 0, height: 0 }}
-                          className="space-y-2 overflow-hidden"
+                          className="space-y-1.5 overflow-hidden"
                         >
                           <label className="block text-sm font-mono text-zinc-500">Confirm Password</label>
                           <div className="relative">
@@ -281,7 +281,7 @@ export default function Auth() {
                               type={showConfirmPassword ? 'text' : 'password'}
                               value={confirmPassword}
                               onChange={(e) => setConfirmPassword(e.target.value)}
-                              className="w-full bg-zinc-950 border border-zinc-800 focus:border-zinc-600 rounded-lg px-11 py-3 text-zinc-400 font-mono text-sm focus:outline-none transition-all"
+                              className="w-full bg-zinc-950 border border-zinc-800 focus:border-zinc-600 rounded-lg px-10 py-2.5 text-zinc-400 font-mono text-sm focus:outline-none transition-all"
                               placeholder="••••••••••••"
                             />
                             <button
@@ -312,13 +312,13 @@ export default function Auth() {
                     <motion.button
                       type="submit"
                       disabled={isPending || (mode === 'login' ? !email || !password : !email || !username || !password || !confirmPassword)}
-                      className="w-full mt-6 relative group overflow-hidden rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full mt-4 relative group overflow-hidden rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
                       whileHover={!isPending && (mode === 'login' ? email && password : email && username && password && confirmPassword) ? { scale: 1.02 } : undefined}
                       whileTap={!isPending && (mode === 'login' ? email && password : email && username && password && confirmPassword) ? { scale: 0.98 } : undefined}
                     >
                       <div className="absolute inset-0 bg-white text-clip opacity-100 group-hover:opacity-90 transition-opacity" />
                       <div className="absolute inset-0 bg-white text-clip opacity-0 group-hover:opacity-100 blur transition-opacity" />
-                      <span className="relative block py-3 text-black font-mono font-bold text-sm tracking-wide">
+                      <span className="relative block py-2.5 text-black font-mono font-bold text-sm tracking-wide">
                         {isPending ? 'Processing...' : mode === 'login' ? 'Log In' : 'Sign Up'}
                       </span>
                     </motion.button>
