@@ -15,7 +15,7 @@ class MessageModel {
   
   static MessageModel fromJson(Map<String, dynamic> json) {
     return MessageModel._(
-        id: json['_id'],
+        id: json['id'],
         senderId: json['senderId'],
         conversationId: json['conversationId'],
         content: json['content'],
