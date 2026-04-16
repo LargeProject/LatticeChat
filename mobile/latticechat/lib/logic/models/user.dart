@@ -50,10 +50,14 @@ class BasicUserModel {
   });
 
   static BasicUserModel fromJson(Map<String, dynamic> json) {
+    final data = json['user'] is Map<String, dynamic>
+        ? json['user'] as Map<String, dynamic>
+        : json;
+
     return BasicUserModel._(
-      id: json['id'],
-      username: json['name'],
-      createdAt: DateTime.parse(json['createdAt'])
+      id: (data['id'] ?? data['_id'] ?? '').toString(),
+      username: (data['username'] ?? data['name'] ?? '').toString(),
+      createdAt: DateTime.parse(data['createdAt']),
     );
   }
 }
