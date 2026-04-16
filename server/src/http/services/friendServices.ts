@@ -19,11 +19,17 @@ const handleGetFriendRequests: Service = async (req: UserRequest, res) => {
   }
 };
 
-const handleAcceptFriendRequest: Service = async(req: UserRequest, res) => {
+const handleAcceptFriendRequest: Service = async (req: UserRequest, res) => {
   const senderId = req.userInfo?.id ?? '';
-  const targetId = req.body.targetId ?? '';
+  let targetId = req.body?.targetId ?? '';
+  const targetUsername = req.body?.targetUsername ?? '';
 
   try {
+    if (targetUsername != null && targetUsername != '') {
+      const userInfo = await db.UserService.getBasicUserInfoByName(targetUsername);
+      targetId = userInfo.id;
+    }
+
     await db.UserService.acceptFriendRequest(targetId, senderId);
 
     res.status(200).send({
@@ -33,14 +39,15 @@ const handleAcceptFriendRequest: Service = async(req: UserRequest, res) => {
   } catch (error) {
     handleHttpError(error, res);
   }
-}
+};
 
 const handleAddFriendRequest: Service = async (req: UserRequest, res) => {
   const senderId = req.userInfo?.id ?? '';
-  const targetId = req.body.targetId ?? '';
+  const targetUsername = req.body.targetUsername ?? '';
 
   try {
-    await db.UserService.createFriendRequest(senderId, targetId);
+    const target = await db.UserService.getBasicUserInfoByName(targetUsername);
+    await db.UserService.createFriendRequest(senderId, target.id);
 
     res.status(200).send({
       success: true,
@@ -87,4 +94,10 @@ const handleRemoveFriend: Service = async (req: UserRequest, res) => {
   }
 };
 
-export { handleGetFriendRequests, handleAddFriendRequest, handleRemoveFriendRequest, handleRemoveFriend, handleAcceptFriendRequest };
+export {
+  handleGetFriendRequests,
+  handleAddFriendRequest,
+  handleRemoveFriendRequest,
+  handleRemoveFriend,
+  handleAcceptFriendRequest,
+};

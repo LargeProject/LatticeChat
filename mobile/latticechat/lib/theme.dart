@@ -145,6 +145,17 @@ class AppButtonStyles {
     disabledBackgroundColor: quatenaryColor,
   );
 
+    static ButtonStyle invertedElevated = ElevatedButton.styleFrom(
+    minimumSize: const Size(double.infinity, 0),
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+    textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+    side: BorderSide(color: TwColors.zinc.shade100),
+    backgroundColor: Colors.black,
+    foregroundColor: TwColors.zinc.shade100,
+    disabledForegroundColor: quatenaryColor,
+    disabledBackgroundColor: tertiaryColor,
+  );
+
   static ButtonStyle secondaryElevated = ElevatedButton.styleFrom(
     minimumSize: const Size(double.infinity, 0),
     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -156,8 +167,9 @@ class AppButtonStyles {
   );
 
   static ButtonStyle dangerElevated = ElevatedButton.styleFrom(
-    backgroundColor: badboyRed,
-    foregroundColor: Colors.white,
+    backgroundColor: Colors.black,
+    foregroundColor: Colors.red,
+    side: const BorderSide(color: badboyRed),
     minimumSize: const Size(double.infinity, 0),
     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),

@@ -61,7 +61,15 @@ const handleGetConversationMessages: Service = async (req: UserRequest, res) => 
     res.status(200).send({
       success: true,
       message: 'Conversation messages were successfully found',
-      messages: messages.map((message) => message.toObject()),
+      messages: messages.map((message) => {
+        return {
+          id: message.id,
+          senderId: message.senderId,
+          conversationId: message.conversationId.toString(),
+          content: message.content,
+          createdAt: message.createdAt,
+        };
+      }),
     });
   } catch (error) {
     handleHttpError(error, res);

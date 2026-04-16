@@ -8,9 +8,8 @@ import 'package:latticechat/utils/validators.dart';
 import 'package:latticechat/utils/severity.dart';
 import 'package:latticechat/pages/login.dart';
 import 'package:latticechat/pages/verify.dart';
-
-import '../logic/services/api.dart';
-import '../logic/util/error.dart';
+import 'package:latticechat/logic/services/api.dart';
+import 'package:latticechat/logic/util/error.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -55,8 +54,6 @@ class _RegisterPageState extends State<RegisterPage> {
   }
   
   // A function meant to be called by the Sign Up button
-  // TODO: Make status messages flicker when submitted with an invalid field?
-  // TODO: Display some kind of error when the API call fails.
   void _handleSignUp() async {
     if (!_isFormValid) {
       debugPrint('Sign Up button was pressed with an invalid form. Do nothing');
@@ -68,13 +65,21 @@ class _RegisterPageState extends State<RegisterPage> {
       final authApi = ApiServices.getAuthServices();
 
       if (!await authApi.signUp(_username, _email, _password)) {
-        debugPrint("Sign up unsuccessful, check information.");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Sign up unsuccessful, check information.'),
+            backgroundColor: Colors.white),
+        );
         return;
       }
       debugPrint("Sign up successful!");
 
       if (!await authApi.sendEmailVerification(_email)) {
-        debugPrint("Failed to send email verification code, check information.");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Verification code failed to send. Try again later.'),
+            backgroundColor: Colors.white),
+        );
         return;
       }
       debugPrint("Sent email verification code. Proceeding to Verify page...");
@@ -83,7 +88,7 @@ class _RegisterPageState extends State<RegisterPage> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => VerifyPage(email: _email),
+          builder: (context) => VerifyPage(email: _email)
         ),
       );
 
@@ -100,7 +105,9 @@ class _RegisterPageState extends State<RegisterPage> {
     // Temporary page navigation
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => LoginPage()),
+      MaterialPageRoute(
+        builder: (context) => LoginPage()
+      ),
     );
   }
 

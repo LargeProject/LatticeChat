@@ -97,19 +97,21 @@ class _DebouncedValidationFieldState extends State<DebouncedValidationField> {
 
         if (value.isEmpty) {
           setState(() => _status = widget.emptyStatus);
+          _notifyParent(value, false);
           return;
         }
 
         final validatorMessage = widget.validator(value);
         if (validatorMessage != null) {
           setState(() => _status = validatorMessage);
+          _notifyParent(value, false);
           return;
         }
 
         setState(() => _status = widget.requestingStatus);
         if (widget.availabilityChecker == null) {
           setState(() => _status = widget.noContactStatus);
-          widget.onValueChanged?.call(value);
+          _notifyParent(value, false);
           return;
         }
 

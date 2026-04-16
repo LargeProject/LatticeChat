@@ -10,3 +10,7 @@ export async function tryCatch<T>(callback: () => Promise<T>): Promise<TryCatchR
     return { data: null, error: error };
   }
 }
+
+export function bufferToString(buffer: any) {
+  return Buffer.from(buffer).toString('hex');
+}
