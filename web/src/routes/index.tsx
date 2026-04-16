@@ -39,7 +39,13 @@ export default function Auth() {
   } = useAuthLogic();
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex overflow-hidden w-screen">
+    <motion.div 
+      className="min-h-screen bg-zinc-950 flex overflow-hidden w-screen"
+      initial={{ opacity: 0, scale: 0.97 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.97 }}
+      transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+    >
       <motion.div className="flex w-full h-screen relative" initial={false}>
         {/* Animated Background Panel */}
         <motion.div
@@ -360,7 +366,7 @@ export default function Auth() {
           100% { background-position: 0% 50%; }
         }
       `}</style>
-    </div>
+    </motion.div>
   );
 }
 
