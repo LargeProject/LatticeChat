@@ -22,7 +22,6 @@ export function ChatInput({ onSend }: { onSend: (text: string) => void }) {
   };
 
   useLayoutEffect(() => {
-    resizeTextarea();
   }, [text]);
 
   const handleSend = () => {
@@ -33,7 +32,6 @@ export function ChatInput({ onSend }: { onSend: (text: string) => void }) {
     setText('');
 
     requestAnimationFrame(() => {
-      textareaRef.current?.focus();
       resizeTextarea();
     });
   };
