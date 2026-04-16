@@ -45,11 +45,11 @@ export async function fetchFriendRequests(): Promise<FriendRequest[]> {
   return friendRequests;
 }
 
-export async function acceptFriendRequest(targetUsername: string) {
+export async function acceptFriendRequest(targetId: string) {
   const senderId = getLocalUserId();
   const jwt = getLocalJWT();
 
-  const requestBody = { targetUsername: targetUsername };
+  const requestBody = { targetId: targetId };
   const response = await fetch(import.meta.env.VITE_API_BASE_URL + '/users/' + senderId + '/friend-requests', {
     method: 'PATCH',
     headers: {
@@ -65,11 +65,11 @@ export async function acceptFriendRequest(targetUsername: string) {
   }
 }
 
-export async function sendFriendRequest(targetId: string) {
+export async function sendFriendRequest(targetUsername: string) {
   const senderId = getLocalUserId();
   const jwt = getLocalJWT();
 
-  const requestBody = { targetId: targetId };
+  const requestBody = { targetUsername: targetUsername };
   const response = await fetch(import.meta.env.VITE_API_BASE_URL + '/users/' + senderId + '/friend-requests', {
     method: 'POST',
     headers: {
