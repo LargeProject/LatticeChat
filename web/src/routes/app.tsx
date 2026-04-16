@@ -10,6 +10,26 @@ import { AppStateProvider } from '#/lib/provider/AppProvider';
 
 type Section = 'chats' | 'friends' | 'calls' | 'settings';
 
+const SECTION_ORDER: Section[] = ['chats', 'friends', 'calls', 'settings'];
+
+const tabVariants = {
+  enter: (dir: number) => ({
+    opacity: 0,
+    x: dir === 1 ? 100 : -100,
+    scale: 0.95,
+  }),
+  center: {
+    opacity: 1,
+    x: 0,
+    scale: 1,
+  },
+  exit: (dir: number) => ({
+    opacity: 0,
+    x: dir === 1 ? -100 : 100,
+    scale: 0.95,
+  }),
+};
+
 function RouteComponent() {
   const { userInfo } = useUser();
   const navigate = useNavigate();
@@ -22,6 +42,15 @@ function RouteComponent() {
   }, []);
 
   const [activeSection, setActiveSection] = useState<Section>('chats');
+  const [direction, setDirection] = useState(1);
+
+  const handleSectionChange = (newSection: Section) => {
+    const currentIndex = SECTION_ORDER.indexOf(activeSection);
+    const newIndex = SECTION_ORDER.indexOf(newSection);
+    setDirection(newIndex > currentIndex ? 1 : -1);
+    setActiveSection(newSection);
+  };
+
   const content = useMemo(() => {
     if (activeSection === 'settings') return <SettingsLayout />;
     if (activeSection === 'friends') return <FriendsLayout />;
@@ -75,14 +104,16 @@ function RouteComponent() {
       }}
     >
       <AppStateProvider>
-        <Sidebar activeSection={activeSection} onSelectSection={setActiveSection} />
+        <Sidebar activeSection={activeSection} onSelectSection={handleSectionChange} />
         <div className="relative flex-1 overflow-hidden">
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="wait" custom={direction}>
             <motion.div
               key={activeSection}
-              initial={{ opacity: 0, x: 100, scale: 0.95 }}
-              animate={{ opacity: 1, x: 0, scale: 1 }}
-              exit={{ opacity: 0, x: -100, scale: 0.95 }}
+              custom={direction}
+              variants={tabVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
               transition={{ duration: 0.2, ease: 'easeInOut' }}
               className="absolute inset-0"
             >
