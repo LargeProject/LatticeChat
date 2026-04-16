@@ -36,7 +36,7 @@ export default function Sidebar({ defaultSection = 'chats', activeSection, onSel
 
   return (
     <aside
-      className="flex h-screen w-20 flex-col items-center border-r border-(--line) bg-(--surface-strong)/90 px-3 py-4 backdrop-blur-xl"
+      className="flex h-screen w-20 flex-col items-center border-r border-zinc-200 dark:border-zinc-800/80 bg-white/60 dark:bg-zinc-950/60 px-3 py-4 backdrop-blur-2xl z-30 relative shadow-2xl"
       aria-label="Primary"
     >
       <nav className="mt-1 flex w-full flex-1 flex-col items-center gap-1.5" aria-label="Main sections">
@@ -55,10 +55,10 @@ export default function Sidebar({ defaultSection = 'chats', activeSection, onSel
               className={[
                 'group relative grid h-12 w-12 place-items-center rounded-2xl',
                 'transition-all duration-200 ease-out',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500/80 focus-visible:ring-offset-2 focus-visible:ring-offset-(--surface-strong)',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500/80 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-zinc-950',
                 isActive
-                  ? 'bg-zinc-500/15 text-(--text-primary) shadow-sm'
-                  : 'text-(--text-secondary) hover:bg-(--link-bg-hover) hover:text-(--text-primary)',
+                  ? 'bg-zinc-100 dark:bg-zinc-800/50 text-cyan-600 dark:text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.15)] ring-1 ring-cyan-500/30'
+                  : 'text-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-900/60 hover:text-zinc-900 dark:hover:text-zinc-200',
               ].join(' ')}
             >
               <span
@@ -66,8 +66,8 @@ export default function Sidebar({ defaultSection = 'chats', activeSection, onSel
                 className={[
                   'pointer-events-none absolute -left-2.5 h-7 w-1 rounded-full transition-all duration-200',
                   isActive
-                    ? 'bg-zinc-600 opacity-100 dark:bg-zinc-300'
-                    : 'bg-zinc-500/50 opacity-0 group-hover:opacity-100',
+                    ? 'bg-cyan-500 dark:bg-cyan-400 opacity-100 shadow-[0_0_8px_rgba(6,182,212,0.8)]'
+                    : 'bg-zinc-300 dark:bg-zinc-700 opacity-0 group-hover:opacity-100',
                 ].join(' ')}
               />
               <Icon
@@ -86,7 +86,7 @@ export default function Sidebar({ defaultSection = 'chats', activeSection, onSel
       <div className="mt-2 flex w-full flex-col items-center gap-2">
         <AnimatedThemeToggler />
         <div
-          className="rounded-xl border border-(--line) bg-(--surface) px-2.5 py-1 text-[10px] font-semibold tracking-[0.14em] text-(--text-secondary)"
+          className="rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-2.5 py-1 text-[10px] font-mono tracking-[0.14em] text-cyan-600 dark:text-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.15)]"
           aria-label="Application status: beta"
           title="Application status: beta"
         >
