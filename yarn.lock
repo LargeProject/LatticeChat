@@ -9291,12 +9291,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lucide-react@npm:^0.545.0":
-  version: 0.545.0
-  resolution: "lucide-react@npm:0.545.0"
+"lucide-react@npm:^1.8.0":
+  version: 1.8.0
+  resolution: "lucide-react@npm:1.8.0"
   peerDependencies:
     react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
-  checksum: 10c0/942622c8e5d113e6fc6f66407703dc06474cf1a36ee9998b9f562f2e64737ea098c0db5a4e5ba2a8eb14abecb9da05be4584e9400c4a192ba5b2781f21928c21
+  checksum: 10c0/f7398f89a0f5b2cbfd1b7a7f6b2f00b0abd05d4b21d948bbd281ab141c42cdff9f1d2aed4e32b78b4bbdfa78308b6577705698af8bf9945bad23ed7d56e255b4
   languageName: node
   linkType: hard
 
@@ -13023,7 +13023,7 @@ __metadata:
     framer-motion: "npm:^12.38.0"
     install: "npm:^0.13.0"
     jsdom: "npm:^28.1.0"
-    lucide-react: "npm:^0.545.0"
+    lucide-react: "npm:^1.8.0"
     motion: "npm:^12.38.0"
     nitro: "npm:^3.0.260311-beta"
     prettier: "npm:^3.8.1"

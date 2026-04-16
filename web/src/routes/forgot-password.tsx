@@ -134,15 +134,6 @@ function ForgotPassword() {
           </p>
         </div>
 
-        {step === 1 && (
-          <div className="rounded-lg border border-zinc-800 bg-zinc-900/60 p-4 text-sm text-red-500 space-y-2">
-            <p>
-              All of your messages will be deleted when you reset your password, but your account and contacts will
-              remain intact.
-            </p>
-          </div>
-        )}
-
         <form onSubmit={step === 1 ? handleSendOtp : handleResetPassword} noValidate className="space-y-4">
           {step === 1 ? (
             <div className="space-y-2 text-left bg-transparent">
