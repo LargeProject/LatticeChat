@@ -229,14 +229,13 @@ export class WebsocketHandlers {
   ): Promise<actions.AckResponse> {
     try {
       const renamerId = context.userId;
-      const updatedConversation = await ConversationService.renameConversation({
+      const conversation = await ConversationService.renameConversation({
         conversationId: data.conversationId,
         newName: data.newName,
         renamerId,
       });
 
       // Broadcast updated conversation name to members
-      const conversation = await ConversationService.findConversation(data.conversationId);
       const memberIds = conversation.memberIds.map((m: any) => m.toString());
       const payload = {
         conversationId: conversation._id.toString(),
@@ -244,6 +243,29 @@ export class WebsocketHandlers {
       };
 
       broadcastToConversationMembers(context, memberIds, 'conversationUpdated', payload);
+
+      // Broadcast system message to members
+      try {
+        const renamer = await UserService.findUser(renamerId, 'user');
+        const message = await MessageService.createMessage({
+          conversationId: conversation._id.toString(),
+          senderId: 'system',
+          content: `${renamer.name} renamed the conversation to ${conversation.name}`,
+        });
+
+        const emitMessage = {
+          id: message._id.toString(),
+          conversationId: message.conversationId,
+          senderId: message.senderId,
+          content: message.content,
+          createdAt: message.createdAt,
+        };
+
+        broadcastToConversationMembers(context, memberIds, 'newMessage', emitMessage);
+      } catch (e) {
+        Logger.error(e);
+      }
+
       return ACK_SUCCESS;
     } catch (error) {
       if (error instanceof WebsocketError) {
