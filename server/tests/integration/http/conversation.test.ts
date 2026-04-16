@@ -54,13 +54,13 @@ describe('GET /api/users/me/conversations/:conversation_id/messages', async () =
     expect(response.body.success).toBe(true);
     expect(response.body.messages).toMatchObject([
       {
-        _id: message1.id,
+        id: message1.id,
         senderId: account1.userId,
         conversationId: conversation.id,
         content: 'Hello!',
       },
       {
-        _id: message2.id,
+        id: message2.id,
         senderId: account2.userId,
         conversationId: conversation.id,
         content: 'Hey!',

@@ -59,7 +59,7 @@ describe('POST api/users/me/friend-requests', () => {
     const account1 = await request.createAndSignIn(account1Credentials);
     const account2 = await request.createAndSignIn(account2Credentials);
 
-    await request.sendFriendRequest(account1.jwt, account2.userId);
+    await request.sendFriendRequest(account1.jwt, account2.username);
     const response = await request.sendFriendRequest(account1.jwt, account2.username);
 
     expect(response.status).toBe(409);
