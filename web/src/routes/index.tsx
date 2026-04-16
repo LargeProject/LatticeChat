@@ -92,7 +92,7 @@ export default function Auth() {
                     initial={{ opacity: 0, y: -10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                    className="absolute bottom-full left-0 w-full mb-6 p-4 rounded-lg bg-red-500/15 border border-red-500/30 backdrop-blur-sm shadow-lg shadow-red-500/20 z-30"
+                    className="mb-6 p-4 rounded-lg bg-red-500/15 border border-red-500/30 backdrop-blur-sm shadow-lg shadow-red-500/20 relative z-30"
                   >
                     <div className="flex items-start gap-3">
                       <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
@@ -126,7 +126,7 @@ export default function Auth() {
                       {mode === 'login' ? 'Welcome Back' : 'Create Account'}
                     </h2>
                     <p className="text-zinc-500 text-sm">
-                      {mode === 'login' ? 'Sign in to continue your chats' : 'Join to speak freely.'}
+                      {mode === 'login' ? 'Sign in to continue your encrypted chats' : 'Join to speak freely.'}
                     </p>
                   </motion.div>
 

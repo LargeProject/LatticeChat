@@ -22,15 +22,6 @@ function RouteComponent() {
   }, []);
 
   const [activeSection, setActiveSection] = useState<Section>('chats');
-  const [direction, setDirection] = useState(1);
-
-  const handleSectionChange = (newSection: Section) => {
-    if (newSection === activeSection) return;
-    const order = { chats: 0, friends: 1, calls: 2, settings: 3 };
-    setDirection(order[newSection] > order[activeSection] ? 1 : -1);
-    setActiveSection(newSection);
-  };
-
   const content = useMemo(() => {
     if (activeSection === 'settings') return <SettingsLayout />;
     if (activeSection === 'friends') return <FriendsLayout />;
@@ -80,24 +71,18 @@ function RouteComponent() {
       exit={{ opacity: 0, scale: 0.9, y: -40 }}
       transition={{
         duration: 1,
-        ease: [0.16, 0.8, 0.3, 1],
+        ease: [0.16, 1, 0.3, 1],
       }}
     >
       <AppStateProvider>
-        <Sidebar activeSection={activeSection} onSelectSection={handleSectionChange} />
+        <Sidebar activeSection={activeSection} onSelectSection={setActiveSection} />
         <div className="relative flex-1 overflow-hidden">
-          <AnimatePresence mode="wait" custom={direction}>
+          <AnimatePresence mode="wait">
             <motion.div
               key={activeSection}
-              custom={direction}
-              variants={{
-                enter: (dir: number) => ({ opacity: 0, x: dir > 0 ? 100 : -100, scale: 0.95 }),
-                center: { opacity: 1, x: 0, scale: 1 },
-                exit: (dir: number) => ({ opacity: 0, x: dir > 0 ? -100 : 100, scale: 0.95 }),
-              }}
-              initial="enter"
-              animate="center"
-              exit="exit"
+              initial={{ opacity: 0, x: 100, scale: 0.95 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              exit={{ opacity: 0, x: -100, scale: 0.95 }}
               transition={{ duration: 0.2, ease: 'easeInOut' }}
               className="absolute inset-0"
             >
