@@ -57,7 +57,9 @@ class _VerifyPageState extends State<VerifyPage> {
       debugPrint(error.toString());
     }
   }
-  
+
+  // TODO: Add an AppBar with a back button to return to the previous page
+
   @override
   Widget build(BuildContext context) {
     // Theme for each of the pin squares
