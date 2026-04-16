@@ -62,22 +62,28 @@ class FetchBasicUserInfoResponse {
 }
 
 class FetchFriendRequestsResponse {
-  final List<FriendRequestModel> friendRequests;
+  final List<dynamic> friendRequests;
   final String message;
 
-  FetchFriendRequestsResponse._({required this.friendRequests, required this.message});
+  FetchFriendRequestsResponse._({
+    required this.friendRequests,
+    required this.message,
+  });
 
   static FetchFriendRequestsResponse fromJson(Map<String, dynamic> json) {
-    List<Map<String, dynamic>> jsonFriendRequests = json['friendRequests'].cast<Map<String, dynamic>>();
-    final friendRequests = jsonFriendRequests.map((jsonFriendRequest) => FriendRequestModel.fromJson(jsonFriendRequest)).toList();
+    final raw = json['friendRequests'];
+
+    List<dynamic> friendRequests = [];
+    if (raw is List) {
+      friendRequests = raw;
+    }
 
     return FetchFriendRequestsResponse._(
       friendRequests: friendRequests,
-      message: json['message']
+      message: (json['message'] ?? '').toString(),
     );
   }
 }
-
 class FetchConversationsResponse {
   final List<ConversationModel> conversations;
   final String message;
