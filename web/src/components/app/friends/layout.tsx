@@ -112,6 +112,7 @@ export default function FriendsLayout() {
     let targetUser = null;
     try {
       targetUser = await fetchBasicUserInfo(normalizedInput, true);
+      console.log(targetUser);
       await sendFriendRequest(targetUser!.name);
     } catch (error: any) {
       // TODO: add specific http errors
