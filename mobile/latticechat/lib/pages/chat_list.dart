@@ -3,7 +3,10 @@ import 'package:latticechat/logic/models/conversation.dart';
 import 'package:latticechat/logic/models/user.dart';
 import 'package:latticechat/logic/services/api.dart';
 import 'package:latticechat/logic/util/error.dart';
+import 'package:latticechat/pages/account.dart';
 import 'package:latticechat/pages/friend_requests.dart';
+import 'package:latticechat/theme.dart';
+import 'package:latticechat/utils/severity.dart';
 import 'open_chat.dart';
 
 class ChatListPage extends StatefulWidget {
@@ -337,6 +340,93 @@ class _ChatListPageState extends State<ChatListPage> {
     }
   }
 
+  void _openAccountPage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AccountPage(jsonWT: widget.jwt),
+      ),
+    );
+  }
+
+  Widget _buildConversationList(List<Map<String, dynamic>> conversations) {
+    return ListView.separated(
+      padding: EdgeInsets.zero,
+      itemCount: conversations.length,
+      separatorBuilder: (_, index) => Divider(
+        height: 1,
+        color: borderColor,
+      ),
+      itemBuilder: (context, index) {
+        final currentUser = _currentUser;
+        if (currentUser == null) {
+          return const SizedBox.shrink();
+        }
+
+        final conversation = conversations[index];
+        final title = _conversationTitle(conversation);
+        final lastMessage = _lastMessageText(conversation);
+        final time = _timeLabel(conversation);
+        final conversationId = _conversationId(conversation);
+
+        return ListTile(
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 10,
+          ),
+          leading: Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              border: Border.all(color: borderColor),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              title.isNotEmpty ? title[0].toUpperCase() : '?',
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          title: Text(
+            title,
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          subtitle: Padding(
+            padding: const EdgeInsets.only(top: 6),
+            child: Text(
+              lastMessage,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ),
+          trailing: Text(
+            time,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => OpenChatPage(
+                  otherUserName: title,
+                  conversationId: conversationId,
+                  currentUser: currentUser,
+                  jwt: widget.jwt,
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -352,117 +442,99 @@ class _ChatListPageState extends State<ChatListPage> {
             icon: const Icon(Icons.person_add_alt_1),
             onPressed: _openAddFriendDialog,
           ),
+          IconButton(
+            icon: const Icon(Icons.manage_accounts_outlined),
+            onPressed: _openAccountPage,
+          ),
         ],
       ),
-      body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: _conversationsFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (snapshot.hasError) {
-            String message = 'Failed to load conversations.';
-            final error = snapshot.error;
-            if (error is ApiError) {
-              message = error.message;
-            }
-
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(message, textAlign: TextAlign.center),
-                    const SizedBox(height: 12),
-                    ElevatedButton(
-                      onPressed: _refreshConversations,
-                      child: const Text('Retry'),
-                    ),
-                  ],
-                ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
+          child: Column(
+            children: [
+              primaryGradientText(context, 'Messages'),
+              const SizedBox(height: 12),
+              Text(
+                'Continue your encrypted chats',
+                style: Theme.of(context).textTheme.bodyMedium,
+                textAlign: TextAlign.center,
               ),
-            );
-          }
-
-          final conversations = snapshot.data ?? [];
-
-          if (conversations.isEmpty) {
-            return RefreshIndicator(
-              onRefresh: _refreshConversations,
-              child: ListView(
-                children: const [
-                  SizedBox(height: 220),
-                  Center(child: Text('No conversations yet.')),
-                ],
-              ),
-            );
-          }
-
-          return RefreshIndicator(
-            onRefresh: _refreshConversations,
-            child: ListView.separated(
-              itemCount: conversations.length,
-              separatorBuilder: (_, __) => const Divider(height: 1),
-              itemBuilder: (context, index) {
-                final currentUser = _currentUser;
-                if (currentUser == null) {
-                  return const SizedBox.shrink();
-                }
-
-                final conversation = conversations[index];
-                final title = _conversationTitle(conversation);
-                final lastMessage = _lastMessageText(conversation);
-                final time = _timeLabel(conversation);
-                final conversationId = _conversationId(conversation);
-
-                return ListTile(
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  leading: CircleAvatar(
-                    radius: 24,
-                    child: Text(
-                      title.isNotEmpty ? title[0].toUpperCase() : '?',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  title: Text(
-                    title,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  subtitle: Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                      lastMessage,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  trailing: Text(
-                    time,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => OpenChatPage(
-                          otherUserName: title,
-                          conversationId: conversationId,
-                          currentUser: currentUser,
-                          jwt: widget.jwt,
+              const SizedBox(height: 16),
+              Expanded(
+                child: FutureBuilder<List<Map<String, dynamic>>>(
+                  future: _conversationsFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Container(
+                        width: double.infinity,
+                        decoration: AppContainerStyles.genericBox,
+                        child: const Center(
+                          child: CircularProgressIndicator(),
                         ),
+                      );
+                    }
+
+                    if (snapshot.hasError) {
+                      String message = 'Failed to load conversations.';
+                      final error = snapshot.error;
+                      if (error is ApiError) {
+                        message = error.message;
+                      }
+
+                      return Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(24),
+                        decoration: AppContainerStyles.genericBox,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              message,
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                            const SizedBox(height: 12),
+                            ElevatedButton(
+                              onPressed: _refreshConversations,
+                              style: AppButtonStyles.primaryElevated,
+                              child: const Text('Retry'),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+
+                    final conversations = snapshot.data ?? [];
+
+                    return Container(
+                      width: double.infinity,
+                      decoration: AppContainerStyles.genericBox,
+                      child: RefreshIndicator(
+                        onRefresh: _refreshConversations,
+                        color: primaryColor,
+                        backgroundColor: foregroundColor,
+                        child: conversations.isEmpty
+                            ? ListView(
+                          children: [
+                            const SizedBox(height: 220),
+                            Center(
+                              child: Text(
+                                'No conversations yet.',
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            ),
+                          ],
+                        )
+                            : _buildConversationList(conversations),
                       ),
                     );
                   },
-                );
-              },
-            ),
-          );
-        },
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -660,6 +732,24 @@ class _AddFriendDialogState extends State<AddFriendDialog> {
     return null;
   }
 
+  Widget _buildStatus() {
+    if (_statusMessage == null || _statusMessage!.trim().isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final lower = _statusMessage!.toLowerCase();
+    final severity = lower.contains('sent') || lower.contains('found')
+        ? Severity.none
+        : lower.contains('cannot') || lower.contains('failed') || lower.contains('does not exist')
+        ? Severity.critical
+        : Severity.major;
+
+    return StatusMessage(
+      message: _statusMessage!,
+      severity: severity,
+    );
+  }
+
   @override
   void dispose() {
     _controller.dispose();
@@ -669,26 +759,37 @@ class _AddFriendDialogState extends State<AddFriendDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Add Friend'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextField(
-            controller: _controller,
-            decoration: const InputDecoration(
-              labelText: 'Username',
-              hintText: 'Enter username',
-            ),
-            onSubmitted: (_) => _findUser(),
-          ),
-          const SizedBox(height: 12),
-          if (_statusMessage != null)
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(_statusMessage!),
-            ),
-        ],
+      backgroundColor: foregroundColor,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: BorderSide(color: borderColor),
       ),
+      title: Text(
+        'Add Friend',
+        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+      content: SizedBox(
+        width: 300,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _controller,
+              decoration: const InputDecoration(
+                labelText: 'Username',
+                hintText: 'Enter username',
+              ),
+              onSubmitted: (_) => _findUser(),
+            ),
+            const SizedBox(height: 12),
+            _buildStatus(),
+          ],
+        ),
+      ),
+      actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       actions: [
         TextButton(
           onPressed: _isSearching || _isSending ? null : () => Navigator.pop(context, false),
@@ -704,15 +805,21 @@ class _AddFriendDialogState extends State<AddFriendDialog> {
           )
               : const Text('Find'),
         ),
-        ElevatedButton(
-          onPressed: (_foundUsername != null && !_isSending && !_requestSent) ? _sendFriendRequest : null,
-          child: _isSending
-              ? const SizedBox(
-            width: 18,
-            height: 18,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          )
-              : Text(_requestSent ? 'Sent' : 'Add'),
+        SizedBox(
+          width: 84,
+          child: ElevatedButton(
+            onPressed: (_foundUsername != null && !_isSending && !_requestSent)
+                ? _sendFriendRequest
+                : null,
+            style: AppButtonStyles.primaryElevated,
+            child: _isSending
+                ? const SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+                : Text(_requestSent ? 'Sent' : 'Add'),
+          ),
         ),
       ],
     );

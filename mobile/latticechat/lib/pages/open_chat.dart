@@ -8,6 +8,7 @@ import 'package:latticechat/logic/models/ws/hand_shake.dart';
 import 'package:latticechat/logic/services/api.dart';
 import 'package:latticechat/logic/services/socket.dart';
 import 'package:latticechat/logic/util/error.dart';
+import 'package:latticechat/theme.dart';
 
 class OpenChatPage extends StatefulWidget {
   final String otherUserName;
@@ -118,7 +119,6 @@ class _OpenChatPageState extends State<OpenChatPage> {
       return;
     }
 
-    _socketWaitTimer?.cancel();
     _socketWaitTimer =
         Timer.periodic(const Duration(milliseconds: 300), (timer) {
           if (!mounted) {
@@ -160,11 +160,7 @@ class _OpenChatPageState extends State<OpenChatPage> {
           existing.senderId == message.senderId &&
           existing.conversationId == message.conversationId &&
           existing.content.trim() == message.content.trim() &&
-          existing.createdAt
-              .difference(message.createdAt)
-              .inSeconds
-              .abs() <=
-              15,
+          existing.createdAt.difference(message.createdAt).inSeconds.abs() <= 15,
     );
 
     setState(() {
@@ -422,6 +418,23 @@ class _OpenChatPageState extends State<OpenChatPage> {
     return '$hour:$minuteStr $period';
   }
 
+  Widget _buildMessages() {
+    return ListView.builder(
+      controller: _scrollController,
+      padding: const EdgeInsets.fromLTRB(12, 16, 12, 16),
+      itemCount: _messages.length,
+      itemBuilder: (context, index) {
+        final message = _messages[index];
+        return _MessageBubble(
+          text: _messageText(message),
+          isMe: _isMe(message),
+          time: _formatTime(_messageTime(message)),
+          isPending: message.isPending,
+        );
+      },
+    );
+  }
+
   @override
   void dispose() {
     _socketWaitTimer?.cancel();
@@ -439,85 +452,84 @@ class _OpenChatPageState extends State<OpenChatPage> {
       appBar: AppBar(
         title: Text(widget.otherUserName),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: Builder(
-              builder: (context) {
-                if (_isLoading) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
-                }
+      body: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+        child: Column(
+          children: [
+            Expanded(
+              child: Container(
+                width: double.infinity,
+                decoration: AppContainerStyles.genericBox,
+                child: Builder(
+                  builder: (context) {
+                    if (_isLoading) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
 
-                if (_loadError != null) {
-                  return Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(_loadError!, textAlign: TextAlign.center),
-                          const SizedBox(height: 12),
-                          ElevatedButton(
-                            onPressed: _refreshMessages,
-                            child: const Text('Retry'),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }
-
-                if (_messages.isEmpty) {
-                  return RefreshIndicator(
-                    onRefresh: _refreshMessages,
-                    child: ListView(
-                      controller: _scrollController,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 12,
-                      ),
-                      children: [
-                        const SizedBox(height: 220),
-                        Center(
-                          child: Text(
-                            hasConversation ? 'No messages yet.' : 'No messages yet.',
+                    if (_loadError != null) {
+                      return Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(24),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                _loadError!,
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                              const SizedBox(height: 12),
+                              ElevatedButton(
+                                onPressed: _refreshMessages,
+                                style: AppButtonStyles.primaryElevated,
+                                child: const Text('Retry'),
+                              ),
+                            ],
                           ),
                         ),
-                      ],
-                    ),
-                  );
-                }
-
-                return RefreshIndicator(
-                  onRefresh: _refreshMessages,
-                  child: ListView.builder(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 12,
-                    ),
-                    itemCount: _messages.length,
-                    itemBuilder: (context, index) {
-                      final message = _messages[index];
-                      return _MessageBubble(
-                        text: _messageText(message),
-                        isMe: _isMe(message),
-                        time: _formatTime(_messageTime(message)),
-                        isPending: message.isPending,
                       );
-                    },
-                  ),
-                );
-              },
+                    }
+
+                    if (_messages.isEmpty) {
+                      return RefreshIndicator(
+                        onRefresh: _refreshMessages,
+                        color: primaryColor,
+                        backgroundColor: foregroundColor,
+                        child: ListView(
+                          controller: _scrollController,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 12,
+                          ),
+                          children: [
+                            const SizedBox(height: 220),
+                            Center(
+                              child: Text(
+                                hasConversation ? 'No messages yet.' : 'No messages yet.',
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+
+                    return RefreshIndicator(
+                      onRefresh: _refreshMessages,
+                      color: primaryColor,
+                      backgroundColor: foregroundColor,
+                      child: _buildMessages(),
+                    );
+                  },
+                ),
+              ),
             ),
-          ),
-          const Divider(height: 1),
-          SafeArea(
-            top: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+            const SizedBox(height: 12),
+            Container(
+              decoration: AppContainerStyles.genericBox,
+              padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
               child: Row(
                 children: [
                   Expanded(
@@ -529,21 +541,16 @@ class _OpenChatPageState extends State<OpenChatPage> {
                         hintText: hasConversation
                             ? 'Type a message...'
                             : 'This chat is not ready for sending yet',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(24),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
                       ),
                     ),
                   ),
                   const SizedBox(width: 8),
-                  CircleAvatar(
-                    child: IconButton(
+                  SizedBox(
+                    width: 64,
+                    child: ElevatedButton(
                       onPressed: _sendMessage,
-                      icon: _isSending
+                      style: AppButtonStyles.primaryElevated,
+                      child: _isSending
                           ? const SizedBox(
                         width: 18,
                         height: 18,
@@ -555,8 +562,8 @@ class _OpenChatPageState extends State<OpenChatPage> {
                 ],
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -577,8 +584,8 @@ class _MessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bubbleColor =
-    isMe ? Theme.of(context).colorScheme.primary : Colors.grey.shade800;
+    final bubbleColor = isMe ? Colors.white : backgroundColor;
+    final textColor = isMe ? Colors.black : primaryColor;
 
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
@@ -588,15 +595,18 @@ class _MessageBubble extends StatelessWidget {
           margin: const EdgeInsets.symmetric(vertical: 4),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           constraints: BoxConstraints(
-            maxWidth: MediaQuery.of(context).size.width * 0.75,
+            maxWidth: MediaQuery.of(context).size.width * 0.72,
           ),
           decoration: BoxDecoration(
             color: bubbleColor,
+            border: Border.all(
+              color: isMe ? Colors.white : borderColor,
+            ),
             borderRadius: BorderRadius.only(
-              topLeft: const Radius.circular(16),
-              topRight: const Radius.circular(16),
-              bottomLeft: Radius.circular(isMe ? 16 : 4),
-              bottomRight: Radius.circular(isMe ? 4 : 16),
+              topLeft: const Radius.circular(8),
+              topRight: const Radius.circular(8),
+              bottomLeft: Radius.circular(isMe ? 8 : 2),
+              bottomRight: Radius.circular(isMe ? 2 : 8),
             ),
           ),
           child: Column(
@@ -605,8 +615,8 @@ class _MessageBubble extends StatelessWidget {
             children: [
               Text(
                 text,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: textColor,
                   fontSize: 15,
                 ),
               ),
@@ -616,10 +626,10 @@ class _MessageBubble extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     if (isPending) ...[
-                      const Text(
+                      Text(
                         'Sending',
                         style: TextStyle(
-                          color: Colors.white70,
+                          color: textColor.withAlpha(170),
                           fontSize: 11,
                         ),
                       ),
@@ -628,8 +638,8 @@ class _MessageBubble extends StatelessWidget {
                     if (time.isNotEmpty)
                       Text(
                         time,
-                        style: const TextStyle(
-                          color: Colors.white70,
+                        style: TextStyle(
+                          color: textColor.withAlpha(170),
                           fontSize: 11,
                         ),
                       ),
