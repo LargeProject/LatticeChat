@@ -204,7 +204,7 @@ class _FriendRequestsPageState extends State<FriendRequestsPage> {
       }) {
     final resolved = request['_resolvedUsername'];
     if (resolved != null && resolved.toString().trim().isNotEmpty) {
-      return resolved.toString();y
+      return resolved.toString();
     }
 
     for (final key in preferredKeys) {
