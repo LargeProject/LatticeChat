@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { HiOutlineChatBubbleOvalLeft, HiOutlinePhone, HiOutlineCog6Tooth, HiUserPlus } from 'react-icons/hi2';
+import { useAppState } from '#/lib/context/AppStateContext';
 import { AnimatedThemeToggler } from '../../registry/magicui/animated-theme-toggler';
 
 type Section = 'chats' | 'friends' | 'calls' | 'settings';
@@ -26,6 +27,8 @@ const ICON_SIZE = 22;
 
 export default function Sidebar({ defaultSection = 'chats', activeSection, onSelectSection }: SidebarProps) {
   const [active, setActive] = useState<Section>(defaultSection);
+  const { convoId } = useAppState();
+  const isChatOpen = convoId !== '';
 
   const handleSelect = (key: Section) => {
     if (activeSection === undefined) {
@@ -36,7 +39,10 @@ export default function Sidebar({ defaultSection = 'chats', activeSection, onSel
 
   return (
     <aside
-      className="flex h-[100dvh] w-20 flex-col items-center border-r border-zinc-200 dark:border-zinc-800/80 bg-white/60 dark:bg-zinc-950/60 px-3 py-4 backdrop-blur-2xl z-30 relative shadow-2xl"
+      className={[
+        'flex h-[100dvh] w-20 flex-col items-center border-r border-zinc-200 dark:border-zinc-800/80 bg-white/60 dark:bg-zinc-950/60 px-3 py-4 backdrop-blur-2xl z-30 relative shadow-2xl',
+        isChatOpen ? 'hidden md:flex' : 'flex',
+      ].join(' ')}
       aria-label="Primary"
     >
       <nav className="mt-1 flex w-full flex-1 flex-col items-center gap-1.5" aria-label="Main sections">
