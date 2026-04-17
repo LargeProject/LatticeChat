@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:latticechat/theme.dart';
 import 'package:latticechat/logic/models/user.dart';
 import 'package:latticechat/logic/services/api.dart';
 import 'package:latticechat/logic/util/error.dart';
@@ -467,9 +468,11 @@ class _FriendRequestsPageState extends State<FriendRequestsPage> {
       ),
       title: Text(
         username,
-        style: const TextStyle(fontWeight: FontWeight.w600),
+        style: const TextStyle(fontWeight: FontWeight.w600, color: secondaryColor),
       ),
-      subtitle: const Text('Sent you a friend request'),
+      subtitle: Text(
+        'Sent you a friend request',
+        style: Theme.of(context).textTheme.bodyMedium),
       trailing: Wrap(
         spacing: 8,
         children: [
@@ -500,9 +503,11 @@ class _FriendRequestsPageState extends State<FriendRequestsPage> {
       ),
       title: Text(
         username,
-        style: const TextStyle(fontWeight: FontWeight.w600),
+        style: const TextStyle(fontWeight: FontWeight.w600, color: secondaryColor),
       ),
-      subtitle: const Text('Pending'),
+      subtitle: Text(
+        'Pending',
+        style: Theme.of(context).textTheme.bodyMedium),
       trailing: TextButton(
         onPressed: () => _cancelOutgoingRequest(request),
         child: const Text('Cancel'),
