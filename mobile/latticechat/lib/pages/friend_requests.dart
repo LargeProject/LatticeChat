@@ -21,6 +21,8 @@ class _FriendRequestsPageState extends State<FriendRequestsPage> {
   final _userApi = ApiServices.getUserServices();
   late Future<_FriendRequestSections> _requestsFuture;
 
+  final Map<String, String> _usernameCache = {};
+
   @override
   void initState() {
     super.initState();
@@ -36,11 +38,9 @@ class _FriendRequestsPageState extends State<FriendRequestsPage> {
     final raw = response.friendRequests;
 
     final requests = <Map<String, dynamic>>[];
-    if (raw is List) {
-      requests.addAll(
-        raw.whereType<Map>().map((e) => Map<String, dynamic>.from(e)),
-      );
-    }
+    requests.addAll(
+      raw.whereType<Map>().map((e) => Map<String, dynamic>.from(e)),
+    );
 
     final incoming = <Map<String, dynamic>>[];
     final outgoing = <Map<String, dynamic>>[];
@@ -70,16 +70,23 @@ class _FriendRequestsPageState extends State<FriendRequestsPage> {
           'requestedId',
           'friendId',
         ],
-        nestedKeys: const ['receiver', 'target', 'to', 'recipient', 'requestedUser', 'friend'],
+        nestedKeys: const [
+          'receiver',
+          'target',
+          'to',
+          'recipient',
+          'requestedUser',
+          'friend',
+        ],
       );
 
       if (receiverId == widget.currentUser.id) {
-        incoming.add(request);
+        incoming.add(Map<String, dynamic>.from(request));
         continue;
       }
 
       if (senderId == widget.currentUser.id) {
-        outgoing.add(request);
+        outgoing.add(Map<String, dynamic>.from(request));
         continue;
       }
 
@@ -90,14 +97,61 @@ class _FriendRequestsPageState extends State<FriendRequestsPage> {
       );
 
       if (fallbackId.isNotEmpty && fallbackId != widget.currentUser.id) {
-        incoming.add(request);
+        incoming.add(Map<String, dynamic>.from(request));
       }
     }
+
+    await Future.wait([
+      ...incoming.map((request) => _resolveRequestUsername(request, isIncoming: true)),
+      ...outgoing.map((request) => _resolveRequestUsername(request, isIncoming: false)),
+    ]);
 
     return _FriendRequestSections(
       incoming: incoming,
       outgoing: outgoing,
     );
+  }
+
+  Future<void> _resolveRequestUsername(
+      Map<String, dynamic> request, {
+        required bool isIncoming,
+      }) async {
+    final existing = isIncoming ? _incomingUsername(request) : _outgoingUsername(request);
+    if (existing != 'Unknown User') {
+      request['_resolvedUsername'] = existing;
+      return;
+    }
+
+    final userId = isIncoming ? _incomingUserId(request) : _outgoingUserId(request);
+    if (userId.isEmpty) {
+      request['_resolvedUsername'] = 'Unknown User';
+      return;
+    }
+
+    final username = await _fetchUsernameByUserId(userId);
+    request['_resolvedUsername'] = username;
+  }
+
+  Future<String> _fetchUsernameByUserId(String userId) async {
+    if (_usernameCache.containsKey(userId)) {
+      return _usernameCache[userId]!;
+    }
+
+    try {
+      final response = await _userApi.fetchBasicUserById(userId);
+
+      String username = '';
+
+      try {
+        username = response.user.username;
+      } catch (_) {}
+
+      final resolved = username.trim().isNotEmpty ? username : 'Unknown User';
+      _usernameCache[userId] = resolved;
+      return resolved;
+    } catch (_) {
+      return 'Unknown User';
+    }
   }
 
   Future<void> _refreshRequests() async {
@@ -147,6 +201,11 @@ class _FriendRequestsPageState extends State<FriendRequestsPage> {
         List<String> preferredKeys = const [],
         List<String> nestedKeys = const [],
       }) {
+    final resolved = request['_resolvedUsername'];
+    if (resolved != null && resolved.toString().trim().isNotEmpty) {
+      return resolved.toString();y
+    }
+
     for (final key in preferredKeys) {
       final value = request[key];
       if (value != null && value.toString().trim().isNotEmpty) {
@@ -193,8 +252,6 @@ class _FriendRequestsPageState extends State<FriendRequestsPage> {
         'creatorId',
         'ownerId',
         'userId',
-        'id',
-        '_id',
       ],
       nestedKeys: const ['sender', 'from', 'requester', 'sourceUser', 'user'],
     );
@@ -203,7 +260,13 @@ class _FriendRequestsPageState extends State<FriendRequestsPage> {
   String _incomingUsername(Map<String, dynamic> request) {
     return _extractUsername(
       request,
-      preferredKeys: const ['senderUsername', 'fromUsername', 'requesterUsername', 'username', 'name'],
+      preferredKeys: const [
+        'senderUsername',
+        'fromUsername',
+        'requesterUsername',
+        'username',
+        'name',
+      ],
       nestedKeys: const ['sender', 'from', 'requester', 'sourceUser', 'user'],
     );
   }
@@ -218,18 +281,39 @@ class _FriendRequestsPageState extends State<FriendRequestsPage> {
         'recipientId',
         'requestedId',
         'friendId',
-        'id',
-        '_id',
       ],
-      nestedKeys: const ['receiver', 'target', 'to', 'recipient', 'requestedUser', 'friend', 'user'],
+      nestedKeys: const [
+        'receiver',
+        'target',
+        'to',
+        'recipient',
+        'requestedUser',
+        'friend',
+        'user',
+      ],
     );
   }
 
   String _outgoingUsername(Map<String, dynamic> request) {
     return _extractUsername(
       request,
-      preferredKeys: const ['receiverUsername', 'targetUsername', 'toUsername', 'recipientUsername', 'username', 'name'],
-      nestedKeys: const ['receiver', 'target', 'to', 'recipient', 'requestedUser', 'friend', 'user'],
+      preferredKeys: const [
+        'receiverUsername',
+        'targetUsername',
+        'toUsername',
+        'recipientUsername',
+        'username',
+        'name',
+      ],
+      nestedKeys: const [
+        'receiver',
+        'target',
+        'to',
+        'recipient',
+        'requestedUser',
+        'friend',
+        'user',
+      ],
     );
   }
 
@@ -255,6 +339,8 @@ class _FriendRequestsPageState extends State<FriendRequestsPage> {
       );
 
       await _refreshRequests();
+
+      if (!mounted) return;
       Navigator.pop(context, true);
     } on ApiError catch (e) {
       if (!mounted) return;
