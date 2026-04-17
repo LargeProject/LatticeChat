@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef } from 'react';
 import type { Message } from '#/lib/api/conversation';
 import type { BasicUserInfo } from '#/lib/api/user';
 
@@ -11,9 +11,9 @@ type MessageBubbleProps = {
   members?: BasicUserInfo[];
 };
 
-const bubbleBaseClass = 'max-w-[100%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed shadow-sm ring-1';
-const userBubbleClass = 'bg-[var(--accent,#14b8a6)] text-white ring-transparent rounded-br-md';
-const assistantBubbleClass = 'bg-(--surface) text-(--text-primary) ring-(--line) rounded-bl-md';
+const bubbleBaseClass = 'max-w-[100%] rounded-2xl px-4 py-2.5 text-[15px] leading-relaxed shadow-sm';
+const userBubbleClass = 'bg-gradient-to-br from-cyan-500/90 to-blue-600/90 text-white ring-1 ring-white/10 rounded-br-md shadow-[0_0_15px_rgba(6,182,212,0.15)] backdrop-blur-md';
+const assistantBubbleClass = 'bg-white/80 dark:bg-zinc-900/60 backdrop-blur-md text-zinc-900 dark:text-zinc-100 ring-1 ring-zinc-200 dark:ring-zinc-800 rounded-bl-md';
 
 function Avatar({ name }: { name: string }) {
   const initials = name
@@ -23,7 +23,7 @@ function Avatar({ name }: { name: string }) {
     .join('')
     .toUpperCase();
   return (
-    <div className="h-9 w-9 flex-none rounded-full bg-(--line) flex items-center justify-center text-xs font-semibold text-(--text-primary)">
+    <div className="h-9 w-9 flex-none rounded-full bg-gradient-to-tr from-zinc-200 to-zinc-300 dark:from-zinc-800 dark:to-zinc-700 ring-1 ring-zinc-300 dark:ring-zinc-600/50 shadow-inner flex items-center justify-center text-xs font-bold text-zinc-700 dark:text-zinc-200">
       {initials}
     </div>
   );
@@ -33,7 +33,7 @@ export const MessageBubble = memo(function MessageBubble({ message, isOwnMessage
   if (message.senderId === SYSTEM_USER_ID) {
     return (
       <li className="flex w-full justify-center">
-        <div className="text-gray-400 italic text-xs font-normal py-1 px-2 text-center w-full select-none">
+        <div className="text-zinc-500 font-mono text-[10px] uppercase tracking-widest py-2 px-3 text-center w-full select-none">
           {message.content}
         </div>
       </li>
@@ -62,8 +62,7 @@ export const MessageBubble = memo(function MessageBubble({ message, isOwnMessage
         <Avatar name={senderName} />
         <div>
           <div className="mb-1 flex items-center gap-2">
-            <span className="text-xs font-medium text-(--text-primary)">{senderName}</span>
-            <span className="text-xs text-(--text-secondary)">·</span>
+            <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300">{senderName}</span>
           </div>
           <article className={`${bubbleBaseClass} ${bubbleClass}`}>
             <p className="whitespace-pre-wrap wrap-break-word">{message.content}</p>
@@ -92,8 +91,9 @@ export function MessageList({
   smoothScroll = true,
 }: MessageListProps) {
   const viewportRef = useRef<HTMLDivElement>(null);
-  const [isUserNearBottom, setIsUserNearBottom] = useState(true);
+  const isNearBottomRef = useRef(true);
   const lastMessageId = useMemo(() => messages[messages.length - 1]?.id, [messages]);
+  const prevMessageCountRef = useRef(messages.length);
 
   useEffect(() => {
     const viewport = viewportRef.current;
@@ -101,7 +101,7 @@ export function MessageList({
 
     const updateIsNearBottom = () => {
       const distanceFromBottom = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight;
-      setIsUserNearBottom(distanceFromBottom <= SCROLL_THRESHOLD_PX);
+      isNearBottomRef.current = distanceFromBottom <= SCROLL_THRESHOLD_PX;
     };
 
     updateIsNearBottom();
@@ -116,13 +116,20 @@ export function MessageList({
     const viewport = viewportRef.current;
     if (!viewport) return;
 
-    if (!isUserNearBottom && messages.length > 1) return;
+    const isNewMessage = messages.length > prevMessageCountRef.current;
+    prevMessageCountRef.current = messages.length;
 
-    viewport.scrollTo({
-      top: viewport.scrollHeight,
-      behavior: 'auto',
+    if (!isNearBottomRef.current && isNewMessage) return;
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        viewport.scrollTo({
+          top: viewport.scrollHeight,
+          behavior: 'auto',
+        });
+      });
     });
-  }, [lastMessageId, messages.length, smoothScroll, isUserNearBottom]);
+  }, [lastMessageId, messages.length, smoothScroll]);
 
   return (
     <div
@@ -142,6 +149,7 @@ export function MessageList({
           />
         ))}
       </ol>
+
     </div>
   );
 }

@@ -134,20 +134,7 @@ function ForgotPassword() {
           </p>
         </div>
 
-        {step === 1 && (
-          <div className="rounded-lg border border-zinc-800 bg-zinc-900/60 p-4 text-sm text-red-500 space-y-2">
-            <p>
-              All of your messages will be deleted when you reset your password,
-              but your account and contacts will remain intact.
-            </p>
-          </div>
-        )}
-
-        <form
-          onSubmit={step === 1 ? handleSendOtp : handleResetPassword}
-          noValidate
-          className="space-y-4"
-        >
+        <form onSubmit={step === 1 ? handleSendOtp : handleResetPassword} noValidate className="space-y-4">
           {step === 1 ? (
             <div className="space-y-2 text-left bg-transparent">
               <label className="text-sm text-zinc-400">Email</label>
@@ -158,9 +145,7 @@ function ForgotPassword() {
                 placeholder="you@lattice.com"
                 className="w-full bg-zinc-900 text-zinc-200 placeholder:text-zinc-500 border border-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500 px-3 py-2"
               />
-              <p className="text-xs text-zinc-500">
-                We’ll send a secure reset link to this email if it exists.
-              </p>
+              <p className="text-xs text-zinc-500">We’ll send a secure reset link to this email if it exists.</p>
             </div>
           ) : (
             <>
@@ -191,9 +176,7 @@ function ForgotPassword() {
                     : 'border-rose-500/40 bg-rose-500/5 text-rose-200'
                 }`}
               >
-                <p className="font-mono">
-                  Password strength: {passwordStrength.label}
-                </p>
+                <p className="font-mono">Password strength: {passwordStrength.label}</p>
                 {!isPasswordStrong && (
                   <p className="text-[11px] text-rose-300/90">
                     Use 8+ chars with upper, lower, numbers, and symbols.
@@ -202,8 +185,8 @@ function ForgotPassword() {
                 )}
                 <p>
                   <br></br>
-                  Encryption strength relies on password complexity, so a stronger
-                  password is recommended for better security.
+                  Encryption strength relies on password complexity, so a stronger password is recommended for better
+                  security.
                 </p>
               </div>
             </>
@@ -220,11 +203,7 @@ function ForgotPassword() {
                 : 'bg-white text-black hover:bg-zinc-200 hover:-translate-y-px shadow-lg shadow-white/10'
             }`}
           >
-            {isLoading
-              ? 'Processing...'
-              : step === 1
-                ? 'Send reset link'
-                : 'Reset Password'}
+            {isLoading ? 'Processing...' : step === 1 ? 'Send reset link' : 'Reset Password'}
           </motion.button>
         </form>
 

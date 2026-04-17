@@ -11,16 +11,17 @@ tags:
   - name: users
     description: User resources
 servers:
-  - url: http://localhost:{port}
-    variables:
-      port:
-        default: '3001'
+  - url: https://cop4331site.com
+  - url: http://localhost:3001
+security:
+  - bearerAuth: []
 paths:
   /api/auth/email-taken:
     post:
       tags:
         - auth
       summary: Check if email is taken
+      security: []
       requestBody:
         required: true
         content:
@@ -37,52 +38,13 @@ paths:
                 properties:
                   isTaken:
                     type: boolean
-  /api/auth/email-verified:
-    post:
-      tags:
-        - auth
-      summary: Check if email is verified
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/EmailVerifiedRequest'
-      responses:
-        '200':
-          description: response
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  isVerified:
-                    type: boolean
-  /api/auth/username-taken:
-    get:
-      tags:
-        - auth
-      summary: Check if username is taken
-      parameters:
-        - in: query
-          name: username
-          schema:
-            type: string
-      responses:
-        '200':
-          description: response
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  isTaken:
-                    type: boolean
-  /api/auth/signup:
+
+  /api/auth/sign-up/email:
     post:
       tags:
         - auth
       summary: Create user (sign up via email)
+      security: []
       requestBody:
         required: true
         content:
@@ -90,17 +52,19 @@ paths:
             schema:
               $ref: '#/components/schemas/SignUpRequest'
       responses:
-        '201':
-          description: Created
+        '200':
+          description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CurrentUserResponse'
-  /api/auth/signin:
+
+  /api/auth/sign-in/email:
     post:
       tags:
         - auth
       summary: Sign in via email
+      security: []
       requestBody:
         required: true
         content:
@@ -119,11 +83,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CurrentUserResponse'
-  /api/auth/email-otp/send-verification:
+
+  /api/auth/email-otp/send-verification-otp:
     post:
       tags:
         - auth
       summary: Send email verification OTP
+      security: []
       requestBody:
         required: true
         content:
@@ -133,11 +99,13 @@ paths:
       responses:
         '200':
           description: OTP sent
-  /api/auth/email-otp/verify:
+
+  /api/auth/email-otp/verify-email:
     post:
       tags:
         - auth
       summary: Verify email OTP
+      security: []
       requestBody:
         required: true
         content:
@@ -147,11 +115,58 @@ paths:
       responses:
         '200':
           description: Verification successful
+
+  /api/auth/change-password:
+    post:
+      tags:
+        - auth
+      summary: Change password (authenticated)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                currentPassword:
+                  type: string
+                newPassword:
+                  type: string
+              required:
+                - currentPassword
+                - newPassword
+      responses:
+        '200':
+          description: Password changed successfully
+  /api/auth/username-taken:
+    get:
+      tags:
+        - auth
+      summary: Check if username is taken
+      security: []
+      parameters:
+        - in: query
+          name: username
+          schema:
+            type: string
+      responses:
+        '200':
+          description: response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isTaken:
+                    type: boolean
   /api/auth/email-otp/request-password-reset:
     post:
       tags:
         - auth
       summary: Request password reset OTP
+      security: []
       requestBody:
         required: true
         content:
@@ -166,6 +181,7 @@ paths:
       tags:
         - auth
       summary: Reset password using OTP
+      security: []
       requestBody:
         required: true
         content:
@@ -178,6 +194,8 @@ paths:
   /api/users/me:
     get:
       summary: Get current user
+      security:
+        - bearerAuth: []
       responses:
         '200':
           description: Current user
@@ -185,6 +203,172 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CurrentUserResponse'
+    delete:
+      summary: Delete current user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: user deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+
+  /api/users/me/friend-requests:
+    get:
+      tags:
+        - users
+      summary: List friend requests for current user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: friend requests
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  friendRequests:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FriendRequest'
+    post:
+      tags:
+        - users
+      summary: Send friend request (by username)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                targetUsername:
+                  type: string
+              required:
+                - targetUsername
+      responses:
+        '200':
+          description: friend request sent
+    patch:
+      tags:
+        - users
+      summary: Accept a friend request
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TargetIdRequest'
+      responses:
+        '200':
+          description: friend request accepted
+    delete:
+      tags:
+        - users
+      summary: Remove a friend request
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TargetIdRequest'
+      responses:
+        '200':
+          description: friend request removed
+
+  /api/users/me/friends:
+    delete:
+      tags:
+        - users
+      summary: Remove a friend
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TargetIdRequest'
+      responses:
+        '200':
+          description: friend removed
+
+  /api/users/me/conversations:
+    get:
+      tags:
+        - users
+      summary: Search user's conversations (current user)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: search
+          schema:
+            type: string
+      responses:
+        '200':
+          description: list of conversations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  conversations:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Conversation'
+
+  /api/users/me/conversations/{conversation_id}/messages:
+    get:
+      tags:
+        - users
+      summary: Get messages for a conversation (current user)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: conversation_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: messages
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  messages:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Message'
   /api/users/{user_id}:
     get:
       tags:
@@ -218,6 +402,8 @@ paths:
       tags:
         - users
       summary: Delete user account (authenticated)
+      security:
+        - bearerAuth: []
       parameters:
         - in: path
           name: user_id
@@ -227,53 +413,6 @@ paths:
       responses:
         '200':
           description: user deleted
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                  message:
-                    type: string
-  /api/users/{user_id}/public-key:
-    get:
-      tags:
-        - users
-      summary: Get user's public key
-      parameters:
-        - in: path
-          name: user_id
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: response
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                  message:
-                    type: string
-                  publicKey:
-                    type: string
-    post:
-      tags:
-        - users
-      summary: Set user's public key (authenticated)
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PublicKeyRequest'
-      responses:
-        '200':
-          description: public key set
           content:
             application/json:
               schema:
@@ -456,65 +595,16 @@ paths:
       responses:
         '200':
           description: friend removed
-  /api/users/{user_id}/key-exchange-requests:
-    post:
-      tags:
-        - users
-      summary: Create key exchange request
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateKeyExchangeRequest'
-      responses:
-        '200':
-          description: key exchange request created
-    get:
-      tags:
-        - users
-      summary: Get key exchange requests
-      parameters:
-        - in: path
-          name: user_id
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: key exchange requests
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                  message:
-                    type: string
-                  keyExchangeRequests:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/KeyExchangeRequest'
-    delete:
-      tags:
-        - users
-      summary: Delete key exchange requests
-      parameters:
-        - in: path
-          name: user_id
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: key exchange requests deleted
 components:
+  responses:
+    UnauthorizedError:
+      description: Access token is missing or invalid
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
+      description: "Enter the raw JWT (do NOT include the 'Bearer ' prefix). Swagger UI will add the 'Bearer ' scheme when sending the Authorization header."
   schemas:
     BasicUserInfo:
       type: object
@@ -586,6 +676,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/BasicUserInfo'
+        token:
+          type: string
+          description: JWT authentication token (returned in response header 'set-auth-token' and optionally in body for client convenience)
+      required:
+        - user
     SignUpRequest:
       type: object
       properties:

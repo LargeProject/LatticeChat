@@ -23,7 +23,7 @@ describe('GET api/users/me/friend-requests', () => {
     const account1 = await request.createAndSignIn(account1Credentials);
     const account2 = await request.createAndSignIn(account2Credentials);
 
-    await request.sendFriendRequest(account1.jwt, account2.userId);
+    await request.sendFriendRequest(account1.jwt, account2.username);
 
     const response = await request.fetchFriendRequests(account2.jwt);
 
@@ -42,7 +42,7 @@ describe('POST api/users/me/friend-requests', () => {
     const account1 = await request.createAndSignIn(account1Credentials);
     const account2 = await request.createAndSignIn(account2Credentials);
 
-    const sendResponse = await request.sendFriendRequest(account1.jwt, account2.userId);
+    const sendResponse = await request.sendFriendRequest(account1.jwt, account2.username);
     const fetchResponse = await request.fetchFriendRequests(account1.jwt);
 
     expect(sendResponse.status).toBe(200);
@@ -59,16 +59,16 @@ describe('POST api/users/me/friend-requests', () => {
     const account1 = await request.createAndSignIn(account1Credentials);
     const account2 = await request.createAndSignIn(account2Credentials);
 
-    await request.sendFriendRequest(account1.jwt, account2.userId);
-    const response = await request.sendFriendRequest(account1.jwt, account2.userId);
+    await request.sendFriendRequest(account1.jwt, account2.username);
+    const response = await request.sendFriendRequest(account1.jwt, account2.username);
 
     expect(response.status).toBe(409);
     expect(response.body.code).toBe('FRIEND_REQUEST_EXISTS');
   });
 
   it('should return 409 and SELF_FRIEND_REQUEST', async () => {
-    const { jwt, userId } = await request.createAndSignIn(account1Credentials);
-    const response = await request.sendFriendRequest(jwt, userId);
+    const { jwt, username } = await request.createAndSignIn(account1Credentials);
+    const response = await request.sendFriendRequest(jwt, username);
 
     expect(response.status).toBe(409);
     expect(response.body.code).toBe('SELF_FRIEND_REQUEST');
@@ -78,10 +78,10 @@ describe('POST api/users/me/friend-requests', () => {
     const account1 = await request.createAndSignIn(account1Credentials);
     const account2 = await request.createAndSignIn(account2Credentials);
 
-    await request.sendFriendRequest(account1.jwt, account2.userId);
+    await request.sendFriendRequest(account1.jwt, account2.username);
     await request.acceptFriendRequest(account2.jwt, account1.userId);
 
-    const response = await request.sendFriendRequest(account1.jwt, account2.userId);
+    const response = await request.sendFriendRequest(account1.jwt, account2.username);
 
     expect(response.status).toBe(409);
     expect(response.body.code).toBe('FRIEND_EXISTS');
@@ -93,7 +93,7 @@ describe('PATCH api/users/me/friend-requests', () => {
     const account1 = await request.createAndSignIn(account1Credentials);
     const account2 = await request.createAndSignIn(account2Credentials);
 
-    await request.sendFriendRequest(account1.jwt, account2.userId);
+    await request.sendFriendRequest(account1.jwt, account2.username);
     const acceptRequestResponse = await request.acceptFriendRequest(account2.jwt, account1.userId);
 
     const userInfoResponse = await request.fetchUserInfo(account1.jwt);
@@ -128,7 +128,7 @@ describe('DELETE api/users/me/friend-requests', () => {
     const account1 = await request.createAndSignIn(account1Credentials);
     const account2 = await request.createAndSignIn(account2Credentials);
 
-    await request.sendFriendRequest(account1.jwt, account2.userId);
+    await request.sendFriendRequest(account1.jwt, account2.username);
     const removeResponse = await request.removeFriendRequest(account1.jwt, account2.userId);
 
     const fetchResponse = await request.fetchFriendRequests(account1.jwt);
@@ -142,7 +142,7 @@ describe('DELETE api/users/me/friend-requests', () => {
     const account1 = await request.createAndSignIn(account1Credentials);
     const account2 = await request.createAndSignIn(account2Credentials);
 
-    await request.sendFriendRequest(account1.jwt, account2.userId);
+    await request.sendFriendRequest(account1.jwt, account2.username);
     const removeResponse = await request.removeFriendRequest(account2.jwt, account1.userId);
 
     const fetchResponse = await request.fetchFriendRequests(account1.jwt);

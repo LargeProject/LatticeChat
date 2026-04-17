@@ -15,6 +15,6 @@ apiRouter.all('/auth/*any', toNodeHandler(auth));
 apiRouter.get('/users/me', attachSession, validateUser, handleGetCurrentUser);
 
 apiRouter.use('/users/:user_id', userRouter);
-apiRouter.use('/status', (req, res) => res.status(200).json({ok: true}))
+apiRouter.use('/status', (req, res) => res.status(200).json({ ok: true }));
 
 export default apiRouter;

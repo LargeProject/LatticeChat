@@ -8,7 +8,7 @@ export function useWebsocketListener<T extends keyof ServerEventMap>(
   eventName: T,
   callback: EventCallback<ServerEventMap[T]>,
   enabled: boolean = true,
-  deps: any[] = []
+  deps: any[] = [],
 ) {
   const context = useWebsocketContext();
   const callbackRef = useRef(callback);

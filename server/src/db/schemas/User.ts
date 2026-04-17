@@ -115,9 +115,9 @@ export const userSchema = new Schema(
         const filteredConversations = conversations.filter((conversation) => {
           if (conversation.isDirectMessage) {
             const otherMember = conversation.members.filter((member) => member.id != this.id);
-            return otherMember[0]?.name.includes(search) ?? false;
+            return otherMember[0]?.name?.toLowerCase().includes(search.toLowerCase()) ?? false;
           } else {
-            return conversation?.name?.includes(search) ?? false;
+            return conversation?.name?.toLowerCase().includes(search.toLowerCase()) ?? false;
           }
         });
         return filteredConversations;
@@ -155,7 +155,16 @@ userSchema.pre('deleteOne', { document: true, query: false }, async function () 
     $or: [{ fromId: this._id }, { toId: this._id }],
   });
 
-  // Delete all direct messages
+  // delete all conversations with only this user
+  await Conversation.deleteMany({
+    isDirectMessage: false,
+    memberIds: {
+      $size: 2,
+      $all: [this._id],
+    },
+  });
+
+  // delete all direct messages
   await Conversation.deleteMany({ memberIds: this._id, isDirectMessage: true }, { $pull: { memberIds: this._id } });
 
   // remove this user from all conversations that include them

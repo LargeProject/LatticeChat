@@ -1,14 +1,19 @@
 import { useEffect, useRef, useState } from 'react';
 import { Check, X, User, UserPlus, Inbox, Send, UserMinus, Users } from 'lucide-react';
 import { useUser } from '#/lib/context/UserContext.tsx';
-import { type FriendRequest, removeFriendRequest, sendFriendRequest, removeFriend, acceptFriendRequest  } from '#/lib/api/friend.ts';
+import {
+  type FriendRequest,
+  removeFriendRequest,
+  sendFriendRequest,
+  removeFriend,
+  acceptFriendRequest,
+} from '#/lib/api/friend.ts';
 import { fetchBasicUserInfo } from '#/lib/api/user.ts';
 import { useAsyncEffect } from '#/components/hooks/useAsyncEffect.ts';
 
 type LayoutFriendRequest = {
   id: string;
-  username: string;
-  displayName: string;
+  name: string;
   mutualFriends: number;
   avatarColor: string;
 };
@@ -28,8 +33,7 @@ function toLayoutFriendRequests(friendRequests: FriendRequest[]) {
   for (const friendRequest of friendRequests) {
     const layoutFriendRequest: LayoutFriendRequest = {
       id: friendRequest.associatedUser.id,
-      username: friendRequest.associatedUser.name,
-      displayName: friendRequest.associatedUser.name,
+      name: friendRequest.associatedUser.name,
       mutualFriends: 0,
       avatarColor: 'bg-blue-500',
     };
@@ -91,8 +95,8 @@ export default function FriendsLayout() {
     e.preventDefault();
     if (!canSend) return;
 
-    const alreadySent = sentRequests.some((r) => r.username.toLowerCase() === normalizedInput);
-    const alreadyIncoming = incomingRequests.some((r) => r.username.toLowerCase() === normalizedInput);
+    const alreadySent = sentRequests.some((r) => r.name.toLowerCase() === normalizedInput);
+    const alreadyIncoming = incomingRequests.some((r) => r.name.toLowerCase() === normalizedInput);
 
     if (alreadySent) {
       pushMessage(`You already sent a request to @${normalizedInput}`, 'error');
@@ -106,18 +110,18 @@ export default function FriendsLayout() {
     let targetUser = null;
     try {
       targetUser = await fetchBasicUserInfo(normalizedInput, true);
-      await sendFriendRequest(targetUser!.id);
+
+      if (!targetUser) return;
+      await sendFriendRequest(targetUser.name);
     } catch (error: any) {
       // TODO: add specific http errors
       pushMessage(`Error Occurred: ${error.message}`, 'error');
       return;
     }
-    if (targetUser == null) return;
 
     const newRequest: LayoutFriendRequest = {
       id: targetUser.id,
-      username: targetUser.name,
-      displayName: targetUser.name,
+      name: targetUser.name,
       mutualFriends: 0,
       avatarColor: 'bg-blue-500',
     };
@@ -168,35 +172,37 @@ export default function FriendsLayout() {
   };
 
   return (
-    <section className="flex h-full min-h-0 flex-1 flex-col bg-(--bg-base)" aria-label="Friends">
+    <section className="flex h-full min-h-0 flex-1 flex-col bg-white dark:bg-black relative" aria-label="Friends">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-zinc-100/50 via-white to-white dark:from-zinc-900/20 dark:via-black dark:to-black opacity-60" />
+      
       {/* Content Area */}
-      <div className="min-h-0 flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-3xl px-6 py-8">
+      <div className="z-10 min-h-0 flex-1 overflow-y-auto">
+        <div className="mx-auto max-w-3xl px-6 py-12">
           {/* Add Friend Banner */}
-          <div className="mb-10">
-            <h2 className="mb-2 text-base font-bold uppercase tracking-wide text-(--text-primary)">Add Friend</h2>
-            <p className="mb-4 text-sm text-(--text-secondary)">
+          <div className="mb-10 rounded-2xl border border-zinc-200 dark:border-zinc-800/60 bg-white/60 dark:bg-zinc-900/40 backdrop-blur-md p-6 shadow-lg relative overflow-hidden">
+            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-400 to-cyan-500 opacity-50" />
+            <h2 className="mb-2 text-lg font-bold tracking-wide text-zinc-900 dark:text-zinc-100">Add Friend</h2>
+            <p className="mb-6 text-sm text-zinc-500 dark:text-zinc-400">
               You can add friends with their Lattice username. It's case sensitive!
             </p>
 
             <form
               onSubmit={handleSendRequest}
-              className="relative flex items-center overflow-hidden rounded-lg border border-(--line) bg-(--surface-strong) transition-colors focus-within:border-emerald-500"
+              className="relative flex items-center overflow-hidden rounded-xl border border-zinc-300 dark:border-zinc-800 bg-white dark:bg-zinc-950 transition-all focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500 shadow-inner"
             >
               <input
                 type="text"
                 value={friendInput}
                 onChange={(e) => setFriendInput(e.target.value.slice(0, 20))}
-                placeholder="You can add friends with their lattice username."
-                className="h-12 flex-1 bg-transparent px-4 text-sm text-(--text-primary) outline-none placeholder:text-(--text-secondary)/70"
+                placeholder="username"
+                className="h-12 flex-1 min-w-0 bg-transparent px-4 text-sm font-medium text-zinc-900 dark:text-zinc-100 outline-none placeholder:text-zinc-400 dark:placeholder:text-zinc-600"
               />
-              <div className="pr-2">
+              <div className="pr-2 shrink-0">
                 <button
                   type="submit"
                   disabled={!canSend}
                   className="group inline-flex items-center gap-2 rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-150 hover:bg-emerald-700 hover:shadow-md active:scale-95 disabled:cursor-not-allowed disabled:bg-emerald-600/40 disabled:text-white/50 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2"
                 >
-                  <span>Send Friend Request</span>
                   <UserPlus className="h-4 w-4 transition-transform duration-150 group-hover:translate-x-0.5" />
                 </button>
               </div>
@@ -210,45 +216,45 @@ export default function FriendsLayout() {
             )}
           </div>
 
-          <div className="mb-8 border-t border-(--line)" />
+          <div className="mb-8 border-t border-zinc-200 dark:border-zinc-800/60" />
 
           {/* Requests Lists */}
-          <div className="flex flex-col gap-10">
+          <div className="flex flex-col gap-8">
             {/* Friends List */}
-            <div>
-              <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-(--text-secondary)">
+            <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800/60 bg-white/60 dark:bg-zinc-900/40 backdrop-blur-md p-6 shadow-lg">
+              <div className="mb-4 flex items-center gap-2 text-[11px] font-mono font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
                 <Users size={16} />
                 <h2>All Friends — {friends.length}</h2>
               </div>
 
               {friends.length === 0 ? (
-                <div className="flex h-24 items-center justify-center rounded-lg border border-dashed border-(--line) text-sm text-(--text-secondary)">
+                <div className="flex h-24 items-center justify-center rounded-xl border border-dashed border-zinc-300 dark:border-zinc-800 bg-zinc-50/50 dark:bg-black/20 text-sm font-medium text-zinc-500 dark:text-zinc-600">
                   No friends yet
                 </div>
               ) : (
-                <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-2">
                   {friends.map((friend) => (
                     <div
                       key={friend.id}
-                      className="group flex items-center justify-between rounded-lg p-2 transition-colors hover:bg-(--surface-strong)"
+                      className="group flex items-center justify-between rounded-xl p-3 border border-transparent transition-all hover:bg-zinc-100/50 hover:border-zinc-200 dark:hover:bg-zinc-800/40 dark:hover:border-zinc-700/50"
                     >
                       <div className="flex items-center gap-3">
-                        <Avatar color="bg-blue-500" />
+                        <Avatar color="bg-gradient-to-br from-blue-400 to-indigo-500 shadow-inner" />
                         <div className="flex flex-col">
                           <div className="flex items-baseline gap-1">
-                            <span className="text-base font-semibold text-(--text-primary)">{friend.name}</span>
+                            <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100">{friend.name}</span>
                           </div>
-                          <span className="text-xs text-(--text-secondary)">Friend</span>
+                          <span className="text-[11px] font-mono text-zinc-500 dark:text-zinc-400">Friend</span>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-2 opacity-100 transition-opacity">
                         <button
                           onClick={() => handleRemoveFriend(friend.id)}
-                          className="flex size-9 items-center justify-center rounded-full bg-(--surface) text-(--text-secondary) transition-colors hover:bg-rose-500 hover:text-white"
+                          className="flex size-9 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800/80 text-zinc-500 transition-colors hover:bg-rose-500 hover:text-white dark:hover:bg-rose-500/20 dark:hover:text-rose-400 active:scale-95"
                           title="Remove Friend"
                         >
-                          <UserMinus size={20} />
+                          <UserMinus size={18} />
                         </button>
                       </div>
                     </div>
@@ -258,48 +264,47 @@ export default function FriendsLayout() {
             </div>
 
             {/* Incoming Requests */}
-            <div>
-              <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-(--text-secondary)">
+            <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800/60 bg-white/60 dark:bg-zinc-900/40 backdrop-blur-md p-6 shadow-lg">
+              <div className="mb-4 flex items-center gap-2 text-[11px] font-mono font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
                 <Inbox size={16} />
                 <h2>Incoming Requests — {incomingRequests.length}</h2>
               </div>
 
               {incomingRequests.length === 0 ? (
-                <div className="flex h-24 items-center justify-center rounded-lg border border-dashed border-(--line) text-sm text-(--text-secondary)">
+                <div className="flex h-24 items-center justify-center rounded-xl border border-dashed border-zinc-300 dark:border-zinc-800 bg-zinc-50/50 dark:bg-black/20 text-sm font-medium text-zinc-500 dark:text-zinc-600">
                   No pending incoming requests
                 </div>
               ) : (
-                <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-2">
                   {incomingRequests.map((request) => (
                     <div
                       key={request.id}
-                      className="group flex items-center justify-between rounded-lg p-2 transition-colors hover:bg-(--surface-strong)"
+                      className="group flex items-center justify-between rounded-xl p-3 border border-transparent transition-all hover:bg-zinc-100/50 hover:border-zinc-200 dark:hover:bg-zinc-800/40 dark:hover:border-zinc-700/50"
                     >
                       <div className="flex items-center gap-3">
-                        <Avatar color={request.avatarColor} />
+                        <Avatar color="bg-gradient-to-br from-emerald-400 to-teal-500 shadow-inner" />
                         <div className="flex flex-col">
                           <div className="flex items-baseline gap-1">
-                            <span className="text-base font-semibold text-(--text-primary)">{request.displayName}</span>
-                            <span className="text-sm font-medium text-(--text-secondary)">{request.username}</span>
+                            <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100">{request.name}</span>
                           </div>
-                          <span className="text-xs text-(--text-secondary)">Incoming Friend Request</span>
+                          <span className="text-[11px] font-mono text-zinc-500 dark:text-zinc-400">Incoming Friend Request</span>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-2 opacity-100 transition-opacity">
                         <button
                           onClick={() => handleAccept(request.id)}
-                          className="flex size-9 items-center justify-center rounded-full bg-(--surface) text-(--text-secondary) transition-colors hover:bg-emerald-500 hover:text-white"
+                          className="flex size-9 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800/80 text-zinc-500 transition-colors hover:bg-emerald-500 hover:text-white dark:hover:bg-emerald-500/20 dark:hover:text-emerald-400 active:scale-95"
                           title="Accept"
                         >
-                          <Check size={20} />
+                          <Check size={18} />
                         </button>
                         <button
                           onClick={() => handleDecline(request.id)}
-                          className="flex size-9 items-center justify-center rounded-full bg-(--surface) text-(--text-secondary) transition-colors hover:bg-rose-500 hover:text-white"
+                          className="flex size-9 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800/80 text-zinc-500 transition-colors hover:bg-rose-500 hover:text-white dark:hover:bg-rose-500/20 dark:hover:text-rose-400 active:scale-95"
                           title="Ignore"
                         >
-                          <X size={20} />
+                          <X size={18} />
                         </button>
                       </div>
                     </div>
@@ -309,41 +314,40 @@ export default function FriendsLayout() {
             </div>
 
             {/* Sent Requests */}
-            <div>
-              <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-(--text-secondary)">
+            <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800/60 bg-white/60 dark:bg-zinc-900/40 backdrop-blur-md p-6 shadow-lg">
+              <div className="mb-4 flex items-center gap-2 text-[11px] font-mono font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
                 <Send size={16} />
                 <h2>Sent Requests — {sentRequests.length}</h2>
               </div>
 
               {sentRequests.length === 0 ? (
-                <div className="flex h-24 items-center justify-center rounded-lg border border-dashed border-(--line) text-sm text-(--text-secondary)">
+                <div className="flex h-24 items-center justify-center rounded-xl border border-dashed border-zinc-300 dark:border-zinc-800 bg-zinc-50/50 dark:bg-black/20 text-sm font-medium text-zinc-500 dark:text-zinc-600">
                   No pending sent requests
                 </div>
               ) : (
-                <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-2">
                   {sentRequests.map((request) => (
                     <div
                       key={request.id}
-                      className="group flex items-center justify-between rounded-lg p-2 transition-colors hover:bg-(--surface-strong)"
+                      className="group flex items-center justify-between rounded-xl p-3 border border-transparent transition-all hover:bg-zinc-100/50 hover:border-zinc-200 dark:hover:bg-zinc-800/40 dark:hover:border-zinc-700/50"
                     >
                       <div className="flex items-center gap-3">
-                        <Avatar color={request.avatarColor} />
+                        <Avatar color="bg-gradient-to-br from-zinc-400 to-zinc-500 dark:from-zinc-600 dark:to-zinc-700 shadow-inner" />
                         <div className="flex flex-col">
                           <div className="flex items-baseline gap-1">
-                            <span className="text-base font-semibold text-(--text-primary)">{request.displayName}</span>
-                            <span className="text-sm font-medium text-(--text-secondary)">{request.username}</span>
+                            <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100">{request.displayName || request.name}</span>
                           </div>
-                          <span className="text-xs text-(--text-secondary)">Outgoing Friend Request</span>
+                          <span className="text-[11px] font-mono text-zinc-500 dark:text-zinc-400">Outgoing Friend Request</span>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-2 opacity-100 transition-opacity">
                         <button
                           onClick={() => handleCancelSent(request.id)}
-                          className="flex size-9 items-center justify-center rounded-full bg-(--surface) text-(--text-secondary) transition-colors hover:bg-rose-500 hover:text-white"
+                          className="flex size-9 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800/80 text-zinc-500 transition-colors hover:bg-rose-500 hover:text-white dark:hover:bg-rose-500/20 dark:hover:text-rose-400 active:scale-95"
                           title="Cancel Request"
                         >
-                          <X size={20} />
+                          <X size={18} />
                         </button>
                       </div>
                     </div>

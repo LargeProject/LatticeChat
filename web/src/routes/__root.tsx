@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router';
+import { HeadContent, Scripts, createRootRoute, Outlet, useLocation } from '@tanstack/react-router';
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 import { TanStackDevtools } from '@tanstack/react-devtools';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { AnimatePresence } from 'framer-motion';
 
 import appCss from '../styles.css?url';
 import { UserProvider } from '#/lib/provider/UserProvider';
@@ -14,26 +15,28 @@ const THEME_INIT_SCRIPT = `(function(){try{var stored=window.localStorage.getIte
 export const Route = createRootRoute({
   head: () => ({
     meta: [
-      {
-        charSet: 'utf-8',
-      },
-      {
-        name: 'viewport',
-        content: 'width=device-width, initial-scale=1',
-      },
-      {
-        title: 'LatticeChat',
-      },
+      { charSet: 'utf-8' },
+      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+      { title: 'LatticeChat' },
     ],
     links: [
-      {
-        rel: 'stylesheet',
-        href: appCss,
-      },
+      { rel: 'stylesheet', href: appCss },
     ],
   }),
+  component: RootComponent,
   shellComponent: RootDocument,
 });
+
+function RootComponent() {
+  const location = useLocation();
+  return (
+    <AnimatePresence mode="wait">
+      <div key={location.pathname} style={{ height: '100%', width: '100%' }}>
+        <Outlet />
+      </div>
+    </AnimatePresence>
+  );
+}
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());

@@ -1,18 +1,15 @@
 import { HttpError } from '#/lib/util/error.ts';
 
 export async function fetchIsEmailTaken(email: string) {
-  const response = await fetch(
-    import.meta.env.VITE_API_BASE_URL + '/auth/email-taken',
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        email: email,
-      }),
+  const response = await fetch(import.meta.env.VITE_API_BASE_URL + '/auth/email-taken', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
     },
-  );
+    body: JSON.stringify({
+      email: email,
+    }),
+  });
   const body = await response.json();
   if (!response.ok) {
     throw new HttpError(response.status, body.code, body.message);
@@ -21,12 +18,9 @@ export async function fetchIsEmailTaken(email: string) {
 }
 
 export async function fetchIsUsernameTaken(username: string) {
-  const response = await fetch(
-    import.meta.env.VITE_API_BASE_URL + '/auth/username-taken?username=' + username,
-    {
-      method: 'GET',
-    },
-  );
+  const response = await fetch(import.meta.env.VITE_API_BASE_URL + '/auth/username-taken?username=' + username, {
+    method: 'GET',
+  });
   const body = await response.json();
   if (!response.ok) {
     throw new HttpError(response.status, body.code, body.message);
@@ -35,18 +29,15 @@ export async function fetchIsUsernameTaken(username: string) {
 }
 
 export async function fetchIsEmailVerified(email: string) {
-  const response = await fetch(
-    import.meta.env.VITE_API_BASE_URL + '/auth/email-verified',
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        email: email,
-      }),
+  const response = await fetch(import.meta.env.VITE_API_BASE_URL + '/auth/email-verified', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
     },
-  );
+    body: JSON.stringify({
+      email: email,
+    }),
+  });
   const body = await response.json();
   if (!response.ok) {
     throw new HttpError(response.status, body.code, body.message);

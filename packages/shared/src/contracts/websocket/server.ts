@@ -16,3 +16,17 @@ export const emitMemberAdded = z.object({
   addedAt: z.date(),
 });
 export type EmitMemberAdded = z.infer<typeof emitMemberAdded>;
+
+export const emitMemberLeft = z.object({
+  conversationId: z.string().nonempty(),
+  userId: z.string().nonempty(),
+  leftAt: z.date(),
+  newOwnerId: z.string().optional(),
+});
+export type EmitMemberLeft = z.infer<typeof emitMemberLeft>;
+
+export const emitConversationUpdated = z.object({
+  conversationId: z.string().nonempty(),
+  name: z.string().nonempty(),
+});
+export type EmitConversationUpdated = z.infer<typeof emitConversationUpdated>;

@@ -4,8 +4,11 @@ import { fetchFriendRequests } from '#/lib/api/friend.ts';
 import type { BasicUserInfo } from '#/lib/api/user.ts';
 import { fetchUserInfo } from '#/lib/api/user.ts';
 import type { Conversation } from '@latticechat/shared';
+import type * as contracts from '@latticechat/shared';
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
+import { useWebsocketListener } from '#/lib/hooks/useWebsocketListener';
+import { useWebsocketContext } from '#/lib/context/WebsocketContext';
 import type { UserInfoState } from '../context/UserContext.tsx';
 import { UserContext } from '../context/UserContext.tsx';
 
@@ -54,6 +57,17 @@ export function UserProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     refreshUser();
   }, []);
+
+  const wsContext = useWebsocketContext();
+
+  useWebsocketListener(
+    'conversationUpdated',
+    (payload: contracts.EmitConversationUpdated) => {
+      setConversations((prev) => prev.map((c) => (c.id === payload.conversationId ? { ...c, name: payload.name } : c)));
+    },
+    wsContext.isAuthenticated,
+    [setConversations],
+  );
 
   return (
     <UserContext.Provider
