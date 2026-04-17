@@ -183,11 +183,6 @@ function ForgotPassword() {
                     <br></br>
                   </p>
                 )}
-                <p>
-                  <br></br>
-                  Encryption strength relies on password complexity, so a stronger password is recommended for better
-                  security.
-                </p>
               </div>
             </>
           )}
