@@ -164,9 +164,7 @@ export function ChatView({ conversation }: ChatViewProps) {
       <MessageList messages={allMessages} currentUserId={userInfo.data?.id || ''} members={membersState} />
 
       <div className="z-10 p-3 md:p-6 w-full max-w-5xl mx-auto">
-        <div className="rounded-2xl bg-white/60 dark:bg-zinc-900/40 backdrop-blur-md border border-zinc-200/80 dark:border-zinc-800/60 shadow-lg p-1">
-          <ChatInput onSend={handleSend} />
-        </div>
+        <ChatInput onSend={handleSend} />
       </div>
 
       <AddMembersModal
