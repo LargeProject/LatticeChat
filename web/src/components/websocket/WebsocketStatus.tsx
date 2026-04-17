@@ -16,7 +16,8 @@ export function WebsocketStatus() {
     }
   }, [error]);
 
-  if ((!show && isAuthenticated) || location.pathname === '/') return null;
+  if ((!show && isAuthenticated) || location.pathname === '/' || location.pathname === '/forgot-password' ||
+    location.pathname === '/verify-email') return null;
 
   const statusMessages = {
     disconnected: 'Disconnected from server',
