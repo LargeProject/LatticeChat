@@ -12,12 +12,16 @@ tags:
     description: User resources
 servers:
   - url: https://cop4331site.com
+  - url: http://localhost:3001
+security:
+  - bearerAuth: []
 paths:
   /api/auth/email-taken:
     post:
       tags:
         - auth
       summary: Check if email is taken
+      security: []
       requestBody:
         required: true
         content:
@@ -40,6 +44,7 @@ paths:
       tags:
         - auth
       summary: Create user (sign up via email)
+      security: []
       requestBody:
         required: true
         content:
@@ -59,6 +64,7 @@ paths:
       tags:
         - auth
       summary: Sign in via email
+      security: []
       requestBody:
         required: true
         content:
@@ -83,6 +89,7 @@ paths:
       tags:
         - auth
       summary: Send email verification OTP
+      security: []
       requestBody:
         required: true
         content:
@@ -98,6 +105,7 @@ paths:
       tags:
         - auth
       summary: Verify email OTP
+      security: []
       requestBody:
         required: true
         content:
@@ -113,6 +121,8 @@ paths:
       tags:
         - auth
       summary: Change password (authenticated)
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -135,6 +145,7 @@ paths:
       tags:
         - auth
       summary: Check if username is taken
+      security: []
       parameters:
         - in: query
           name: username
@@ -155,6 +166,7 @@ paths:
       tags:
         - auth
       summary: Request password reset OTP
+      security: []
       requestBody:
         required: true
         content:
@@ -169,6 +181,7 @@ paths:
       tags:
         - auth
       summary: Reset password using OTP
+      security: []
       requestBody:
         required: true
         content:
@@ -181,6 +194,8 @@ paths:
   /api/users/me:
     get:
       summary: Get current user
+      security:
+        - bearerAuth: []
       responses:
         '200':
           description: Current user
@@ -190,6 +205,8 @@ paths:
                 $ref: '#/components/schemas/CurrentUserResponse'
     delete:
       summary: Delete current user
+      security:
+        - bearerAuth: []
       responses:
         '200':
           description: user deleted
@@ -208,6 +225,8 @@ paths:
       tags:
         - users
       summary: List friend requests for current user
+      security:
+        - bearerAuth: []
       responses:
         '200':
           description: friend requests
@@ -228,6 +247,8 @@ paths:
       tags:
         - users
       summary: Send friend request (by username)
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -246,6 +267,8 @@ paths:
       tags:
         - users
       summary: Accept a friend request
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -259,6 +282,8 @@ paths:
       tags:
         - users
       summary: Remove a friend request
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -274,6 +299,8 @@ paths:
       tags:
         - users
       summary: Remove a friend
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -289,6 +316,8 @@ paths:
       tags:
         - users
       summary: Search user's conversations (current user)
+      security:
+        - bearerAuth: []
       parameters:
         - in: query
           name: search
@@ -316,6 +345,8 @@ paths:
       tags:
         - users
       summary: Get messages for a conversation (current user)
+      security:
+        - bearerAuth: []
       parameters:
         - in: path
           name: conversation_id
@@ -371,6 +402,8 @@ paths:
       tags:
         - users
       summary: Delete user account (authenticated)
+      security:
+        - bearerAuth: []
       parameters:
         - in: path
           name: user_id
@@ -563,11 +596,15 @@ paths:
         '200':
           description: friend removed
 components:
+  responses:
+    UnauthorizedError:
+      description: Access token is missing or invalid
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
+      description: "Enter the raw JWT (do NOT include the 'Bearer ' prefix). Swagger UI will add the 'Bearer ' scheme when sending the Authorization header."
   schemas:
     BasicUserInfo:
       type: object
@@ -639,6 +676,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/BasicUserInfo'
+        token:
+          type: string
+          description: JWT authentication token (returned in response header 'set-auth-token' and optionally in body for client convenience)
+      required:
+        - user
     SignUpRequest:
       type: object
       properties:
