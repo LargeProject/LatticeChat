@@ -1,5 +1,4 @@
 import 'package:latticechat/logic/models/conversation.dart';
-import 'package:latticechat/logic/models/friend_request.dart';
 import 'package:latticechat/logic/models/user.dart';
 
 import 'models/message.dart';
