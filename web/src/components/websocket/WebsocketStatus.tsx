@@ -1,10 +1,12 @@
 import { useWebsocketContext } from '#/lib/context/WebsocketContext';
 import { useEffect, useState } from 'react';
+import {useLocation} from '@tanstack/react-router';
 import type { ReactNode } from 'react';
 
 export function WebsocketStatus() {
   const { connectionState, error, isAuthenticated } = useWebsocketContext();
   const [show, setShow] = useState(false);
+  const location= useLocation();
 
   useEffect(() => {
     if (error) {
@@ -14,7 +16,7 @@ export function WebsocketStatus() {
     }
   }, [error]);
 
-  if (!show && isAuthenticated) return null;
+  if ((!show && isAuthenticated) || location.pathname === '/') return null;
 
   const statusMessages = {
     disconnected: 'Disconnected from server',
