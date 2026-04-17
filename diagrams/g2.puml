@@ -1,0 +1,46 @@
+@startgantt
+title LatticeChat Detailed Development Timeline (5-Person Team)
+
+Project starts 2026-03-09
+
+-- Infrastructure & CI/CD --
+[Noah: Init Web & Server] starts 2026-03-09 and ends 2026-03-10
+[Noah: CI Pipeline] happens 2026-03-18
+[Poojith: Deploy Workflow] happens 2026-03-27
+[Noah: CI Fixes] starts 2026-03-29 and ends 2026-03-30
+
+-- Database & Data Models --
+[Noah: Mongoose & User Model] starts 2026-03-13 and ends 2026-03-17
+[Noah: Message Models] starts 2026-03-18 and ends 2026-03-19
+[Andrew: Friend Request Model] happens 2026-03-25
+[Andrew: Schema Utils] happens 2026-03-31
+
+-- Backend Core & Auth --
+[Andrew: Routes & Middleware] starts 2026-03-11 and ends 2026-03-12
+[Andrew: Email Logic] happens 2026-03-18
+[Andrew: Validation] happens 2026-03-25
+[Andrew: Sendgrid] starts 2026-03-27 and ends 2026-03-29
+[Andrew: Error Handling] happens 2026-04-02
+
+-- Backend APIs & WebSockets --
+[Andrew: Socket.io Packets] happens 2026-03-11
+[Andrew: Friend API] starts 2026-03-25 and ends 2026-03-31
+[Noah: WS Handlers] starts 2026-03-29 and ends 2026-03-31
+[Andrew: Conv. API] happens 2026-04-02
+
+-- Web App (React) --
+[Danny: Login/Forgot Pwd] starts 2026-03-10 and ends 2026-03-11
+[Danny: Verify Page] starts 2026-03-16 and ends 2026-03-27
+[Danny: Chats Page] starts 2026-03-18 and ends 2026-03-19
+[Danny: Settings] happens 2026-03-27
+[Danny: Friends Page] happens 2026-04-01
+[Danny: Match Validation] happens 2026-04-04
+
+-- Mobile App (Flutter) --
+[Tristan: Init Mobile] happens 2026-03-18
+[Cuckhands: Theme] happens 2026-03-28
+[Cuckhands: Registration UI] happens 2026-03-29
+[Tristan: Messaging Views] happens 2026-03-30
+[Cuckhands: Pwd Strength] starts 2026-03-31 and ends 2026-04-04
+
+@endgantt
