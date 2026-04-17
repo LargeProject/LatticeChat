@@ -28,7 +28,7 @@ const ICON_SIZE = 22;
 export default function Sidebar({ defaultSection = 'chats', activeSection, onSelectSection }: SidebarProps) {
   const [active, setActive] = useState<Section>(defaultSection);
   const { convoId } = useAppState();
-  const isChatOpen = convoId !== '';
+  const isChatOpen = convoId !== null && convoId !== '';
 
   const handleSelect = (key: Section) => {
     if (activeSection === undefined) {
