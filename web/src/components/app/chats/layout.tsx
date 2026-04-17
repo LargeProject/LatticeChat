@@ -18,7 +18,7 @@ export default function ChatLayout() {
       <aside
         className={`${
           conversation ? 'hidden md:flex' : 'flex'
-        } h-full min-h-0 w-full shrink-0 border-r border-zinc-200 dark:border-zinc-800/60 bg-white dark:bg-zinc-950 md:w-72 lg:w-80`}
+        } h-full min-h-0 w-full shrink-0 border-r border-(--line) bg-(--surface) md:w-72 lg:w-80`}
       >
         <div className="flex h-full min-h-0 w-full flex-col overflow-hidden">
           <ChatList />

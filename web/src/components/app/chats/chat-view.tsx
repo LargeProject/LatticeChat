@@ -125,15 +125,27 @@ export function ChatView({ conversation }: ChatViewProps) {
 
           <div className="flex items-center gap-1">
             {!conversation.isDirectMessage && (
-              <button
-                type="button"
-                onClick={() => setIsRenameOpen(true)}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-md text-zinc-600 dark:text-zinc-400 transition-colors border border-transparent hover:border-zinc-300 dark:hover:border-zinc-700/50 hover:bg-zinc-100 dark:hover:bg-zinc-800/40 hover:text-zinc-900 dark:hover:text-zinc-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300 dark:focus-visible:ring-zinc-700"
-                aria-label="Rename conversation"
-                title="Rename conversation"
-              >
-                <Edit2 size={15} />
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={() => setIsRenameOpen(true)}
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-md text-zinc-600 dark:text-zinc-400 transition-colors border border-transparent hover:border-zinc-300 dark:hover:border-zinc-700/50 hover:bg-zinc-100 dark:hover:bg-zinc-800/40 hover:text-zinc-900 dark:hover:text-zinc-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300 dark:focus-visible:ring-zinc-700"
+                  aria-label="Rename conversation"
+                  title="Rename conversation"
+                >
+                  <Edit2 size={15} />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setIsLeaveOpen(true)}
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-md text-rose-600/80 dark:text-rose-500/80 transition-colors border border-transparent hover:border-rose-200 dark:hover:border-rose-500/20 hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:text-rose-700 dark:hover:text-rose-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500/50"
+                  aria-label="Leave conversation"
+                  title="Leave conversation"
+                >
+                  <LogOut size={15} />
+                </button>
+              </>
             )}
 
             <button
@@ -144,16 +156,6 @@ export function ChatView({ conversation }: ChatViewProps) {
               title="Add members"
             >
               <UserPlus size={15} />
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setIsLeaveOpen(true)}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-md text-rose-600/80 dark:text-rose-500/80 transition-colors border border-transparent hover:border-rose-200 dark:hover:border-rose-500/20 hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:text-rose-700 dark:hover:text-rose-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500/50"
-              aria-label="Leave conversation"
-              title="Leave conversation"
-            >
-              <LogOut size={15} />
             </button>
           </div>
         </div>
