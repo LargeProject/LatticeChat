@@ -1,0 +1,118 @@
+@startgantt
+<style>
+ganttDiagram {
+task {
+  FontName Helvetica
+  FontSize 12
+  FontColor black
+  BackGroundColor White
+  LineColor #666666
+}
+separator {
+  LineColor #AAAAAA
+  BackGroundColor #F8F8F8
+  FontSize 12
+  FontStyle bold
+  FontColor #333333
+}
+}
+</style>
+printscale daily
+saturday are closed
+sunday are closed
+Project starts 2026-03-09
+legend right
+|= Person |
+| Noah Gerard |
+| Poojith Pranav Cheruku |
+| Andrew |
+| Darren Squires Jr |
+| Tristan J Manfendi |
+endlegend
+-- Backend --
+[Backend - Implementation] on {Backend} starts 2026-03-09 and requires 37 days
+[Backend - Stabilization] on {Backend} starts 2026-04-15 and requires 2 days
+[Andrew (Backend) #1] on {Andrew} starts 2026-03-11 and requires 2 days
+[Andrew (Backend) #2] on {Andrew} starts 2026-03-18 and requires 1 days
+[Andrew (Backend) #3] on {Andrew} starts 2026-03-25 and requires 21 days
+[Noah Gerard (Backend) #1] on {Noah_Gerard} starts 2026-03-09 and requires 2 days
+[Noah Gerard (Backend) #2] on {Noah_Gerard} starts 2026-03-13 and requires 1 days
+[Noah Gerard (Backend) #3] on {Noah_Gerard} starts 2026-03-17 and requires 3 days
+[Noah Gerard (Backend) #4] on {Noah_Gerard} starts 2026-03-27 and requires 5 days
+[Noah Gerard (Backend) #5] on {Noah_Gerard} starts 2026-04-07 and requires 7 days
+[Poojith Pranav Cheruku (Backend) #1] on {Poojith_Pranav_Cheruku} starts 2026-03-19 and requires 1 days
+[Poojith Pranav Cheruku (Backend) #2] on {Poojith_Pranav_Cheruku} starts 2026-03-27 and requires 1 days
+[Poojith Pranav Cheruku (Backend) #3] on {Poojith_Pranav_Cheruku} starts 2026-04-03 and requires 1 days
+[Poojith Pranav Cheruku (Backend) #4] on {Poojith_Pranav_Cheruku} starts 2026-04-10 and requires 2 days
+-- API --
+[API - Implementation] on {API} starts 2026-03-27 and requires 7 days
+[API - Stabilization] on {API} starts 2026-04-03 and requires 12 days
+[Andrew (API) #1] on {Andrew} starts 2026-03-27 and requires 1 days
+[Andrew (API) #2] on {Andrew} starts 2026-04-02 and requires 1 days
+[Poojith Pranav Cheruku (API)] on {Poojith_Pranav_Cheruku} starts 2026-03-27 and requires 1 days
+[Noah Gerard (API)] on {Noah_Gerard} starts 2026-03-29 and requires 1 days
+-- Frontend --
+[Frontend - Implementation] on {Frontend} starts 2026-03-09 and requires 38 days
+[Frontend - Stabilization] on {Frontend} starts 2026-04-16 and requires 1 days
+[Poojith Pranav Cheruku (Frontend) #1] on {Poojith_Pranav_Cheruku} starts 2026-03-10 and requires 4 days
+[Poojith Pranav Cheruku (Frontend) #2] on {Poojith_Pranav_Cheruku} starts 2026-03-16 and requires 4 days
+[Poojith Pranav Cheruku (Frontend) #3] on {Poojith_Pranav_Cheruku} starts 2026-03-24 and requires 1 days
+[Poojith Pranav Cheruku (Frontend) #4] on {Poojith_Pranav_Cheruku} starts 2026-03-27 and requires 1 days
+[Poojith Pranav Cheruku (Frontend) #5] on {Poojith_Pranav_Cheruku} starts 2026-04-01 and requires 3 days
+[Poojith Pranav Cheruku (Frontend) #6] on {Poojith_Pranav_Cheruku} starts 2026-04-06 and requires 1 days
+[Poojith Pranav Cheruku (Frontend) #7] on {Poojith_Pranav_Cheruku} starts 2026-04-10 and requires 6 days
+[Andrew (Frontend) #1] on {Andrew} starts 2026-03-27 and requires 5 days
+[Andrew (Frontend) #2] on {Andrew} starts 2026-04-05 and requires 9 days
+[Noah Gerard (Frontend) #1] on {Noah_Gerard} starts 2026-03-09 and requires 1 days
+[Noah Gerard (Frontend) #2] on {Noah_Gerard} starts 2026-03-18 and requires 1 days
+[Noah Gerard (Frontend) #3] on {Noah_Gerard} starts 2026-03-27 and requires 7 days
+[Noah Gerard (Frontend) #4] on {Noah_Gerard} starts 2026-04-07 and requires 5 days
+[Noah Gerard (Frontend) #5] on {Noah_Gerard} starts 2026-04-15 and requires 1 days
+-- Mobile --
+[Mobile - Implementation] on {Mobile} starts 2026-03-18 and requires 29 days
+[Mobile - Stabilization] on {Mobile} starts 2026-04-16 and requires 1 days
+[Andrew (Mobile) #1] on {Andrew} starts 2026-03-28 and requires 9 days
+[Andrew (Mobile) #2] on {Andrew} starts 2026-04-09 and requires 7 days
+[Poojith Pranav Cheruku (Mobile)] on {Poojith_Pranav_Cheruku} starts 2026-04-03 and requires 2 days
+[Tristan J Manfendi (Mobile)] on {Tristan_J_Manfendi} starts 2026-03-18 and requires 1 days
+-- Packages --
+[Packages - Implementation] on {Packages} starts 2026-03-28 and requires 14 days
+[Packages - Stabilization] on {Packages} starts 2026-04-11 and requires 2 days
+[Noah Gerard (Packages) #1] on {Noah_Gerard} starts 2026-03-28 and requires 2 days
+[Noah Gerard (Packages) #2] on {Noah_Gerard} starts 2026-04-05 and requires 1 days
+[Noah Gerard (Packages) #3] on {Noah_Gerard} starts 2026-04-09 and requires 1 days
+[Andrew (Packages)] on {Andrew} starts 2026-04-10 and requires 1 days
+-- DB --
+[DB - Implementation] on {DB} starts 2026-03-17 and requires 1 days
+[DB - Stabilization] on {DB} starts 2026-03-17 and requires 1 days
+[Andrew (DB)] on {Andrew} starts 2026-03-17 and requires 1 days
+-- DevOps --
+[DevOps - Implementation] on {DevOps} starts 2026-03-18 and requires 27 days
+[DevOps - Stabilization] on {DevOps} starts 2026-04-14 and requires 3 days
+[Noah Gerard (DevOps) #1] on {Noah_Gerard} starts 2026-03-18 and requires 1 days
+[Noah Gerard (DevOps) #2] on {Noah_Gerard} starts 2026-03-27 and requires 4 days
+[Noah Gerard (DevOps) #3] on {Noah_Gerard} starts 2026-04-13 and requires 1 days
+[Andrew (DevOps) #1] on {Andrew} starts 2026-03-27 and requires 1 days
+[Andrew (DevOps) #2] on {Andrew} starts 2026-04-02 and requires 1 days
+[Andrew (DevOps) #3] on {Andrew} starts 2026-04-08 and requires 1 days
+[Andrew (DevOps) #4] on {Andrew} starts 2026-04-13 and requires 1 days
+-- Other --
+[Other - Implementation] on {Other} starts 2026-03-10 and requires 36 days
+[Other - Stabilization] on {Other} starts 2026-04-15 and requires 2 days
+[Poojith Pranav Cheruku (Other) #1] on {Poojith_Pranav_Cheruku} starts 2026-03-10 and requires 4 days
+[Poojith Pranav Cheruku (Other) #2] on {Poojith_Pranav_Cheruku} starts 2026-03-17 and requires 3 days
+[Poojith Pranav Cheruku (Other) #3] on {Poojith_Pranav_Cheruku} starts 2026-03-27 and requires 9 days
+[Poojith Pranav Cheruku (Other) #4] on {Poojith_Pranav_Cheruku} starts 2026-04-09 and requires 5 days
+[Noah Gerard (Other) #1] on {Noah_Gerard} starts 2026-03-12 and requires 1 days
+[Noah Gerard (Other) #2] on {Noah_Gerard} starts 2026-03-18 and requires 2 days
+[Noah Gerard (Other) #3] on {Noah_Gerard} starts 2026-03-29 and requires 4 days
+[Noah Gerard (Other) #4] on {Noah_Gerard} starts 2026-04-10 and requires 1 days
+[Andrew (Other) #1] on {Andrew} starts 2026-03-18 and requires 1 days
+[Andrew (Other) #2] on {Andrew} starts 2026-04-08 and requires 7 days
+[Tristan J Manfendi (Other) #1] on {Tristan_J_Manfendi} starts 2026-03-18 and requires 1 days
+[Tristan J Manfendi (Other) #2] on {Tristan_J_Manfendi} starts 2026-03-28 and requires 1 days
+[Tristan J Manfendi (Other) #3] on {Tristan_J_Manfendi} starts 2026-04-07 and requires 1 days
+[Tristan J Manfendi (Other) #4] on {Tristan_J_Manfendi} starts 2026-04-10 and requires 3 days
+[Darren Squires Jr (Other) #1] on {Darren_Squires_Jr} starts 2026-04-09 and requires 1 days
+[Darren Squires Jr (Other) #2] on {Darren_Squires_Jr} starts 2026-04-14 and requires 1 days
+@endgantt
