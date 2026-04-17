@@ -183,11 +183,6 @@ export default function SettingsLayout() {
                               Use 8+ chars with upper, lower, numbers, and symbols.<br></br>
                             </p>
                           )}
-                          <p>
-                            <br></br>
-                            Encryption strength relies on password complexity, so a stronger password is recommended for
-                            better security.
-                          </p>
                         </div>
 
                         <div className="space-y-2">
