@@ -689,7 +689,8 @@ class _AddFriendDialogState extends State<AddFriendDialog> {
 
   BasicUserModel? _extractBasicUser(dynamic response) {
     try {
-      final dynamic candidate = response.basicUserInfo ?? response.user ?? response.userInfo;
+      final dynamic candidate = response.basicUserInfo ?? response.user ??
+          response.userInfo;
 
       if (candidate is BasicUserModel) {
         return candidate;
@@ -740,7 +741,8 @@ class _AddFriendDialogState extends State<AddFriendDialog> {
     final lower = _statusMessage!.toLowerCase();
     final severity = lower.contains('sent') || lower.contains('found')
         ? Severity.none
-        : lower.contains('cannot') || lower.contains('failed') || lower.contains('does not exist')
+        : lower.contains('cannot') || lower.contains('failed') ||
+        lower.contains('does not exist')
         ? Severity.critical
         : Severity.major;
 
@@ -766,7 +768,11 @@ class _AddFriendDialogState extends State<AddFriendDialog> {
       ),
       title: Text(
         'Add Friend',
-        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+        style: Theme
+            .of(context)
+            .textTheme
+            .bodyLarge
+            ?.copyWith(
           fontSize: 18,
           fontWeight: FontWeight.w700,
         ),
@@ -792,7 +798,8 @@ class _AddFriendDialogState extends State<AddFriendDialog> {
       actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       actions: [
         TextButton(
-          onPressed: _isSearching || _isSending ? null : () => Navigator.pop(context, false),
+          onPressed: _isSearching || _isSending ? null : () =>
+              Navigator.pop(context, false),
           child: const Text('Cancel'),
         ),
         TextButton(
@@ -823,3 +830,5 @@ class _AddFriendDialogState extends State<AddFriendDialog> {
         ),
       ],
     );
+  }
+}
