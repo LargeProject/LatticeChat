@@ -22,7 +22,7 @@ export function EmptyState() {
         </h1>
 
         <p className="text-zinc-400 text-base leading-relaxed">
-          Messages encrypted in transit
+          Messages encrypted during transit
         </p>
 
       </div>

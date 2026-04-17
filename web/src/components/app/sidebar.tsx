@@ -36,7 +36,7 @@ export default function Sidebar({ defaultSection = 'chats', activeSection, onSel
 
   return (
     <aside
-      className="flex h-screen w-20 flex-col items-center border-r border-zinc-200 dark:border-zinc-800/80 bg-white/60 dark:bg-zinc-950/60 px-3 py-4 backdrop-blur-2xl z-30 relative shadow-2xl"
+      className="flex h-[100dvh] w-20 flex-col items-center border-r border-zinc-200 dark:border-zinc-800/80 bg-white/60 dark:bg-zinc-950/60 px-3 py-4 backdrop-blur-2xl z-30 relative shadow-2xl"
       aria-label="Primary"
     >
       <nav className="mt-1 flex w-full flex-1 flex-col items-center gap-1.5" aria-label="Main sections">

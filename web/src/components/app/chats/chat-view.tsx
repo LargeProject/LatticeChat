@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { UserPlus, ChevronLeft } from 'lucide-react';
 import { MessageList } from './messages';
 import { ChatInput } from './chat-input';
@@ -60,10 +60,16 @@ export function ChatView({ conversation }: ChatViewProps) {
         content: normalized,
       });
 
-      setPendingMessages((msgs) => msgs.filter((m) => m.id !== tempId));
       if ((result as any).success === false && !(result as any).queued) {
+        setPendingMessages((msgs) => msgs.filter((m) => m.id !== tempId));
         alert('Failed to send message.');
+        return;
       }
+
+      // Keep optimistic message briefly to avoid visual gaps before server message lands.
+      window.setTimeout(() => {
+        setPendingMessages((msgs) => msgs.filter((m) => m.id !== tempId));
+      }, 1800);
     },
     [conversation, userInfo, createMessage],
   );
@@ -111,7 +117,19 @@ export function ChatView({ conversation }: ChatViewProps) {
     }
   }, [conversation.id, name, renameConversation, userInfo]);
 
-  const allMessages = [...messages, ...pendingMessages];
+  const allMessages = useMemo(() => {
+    if (pendingMessages.length === 0) return messages;
+
+    // Hide optimistic messages once a matching real message appears.
+    const recentRealMessages = messages.slice(-80);
+    const unresolvedPending = pendingMessages.filter((pending) => {
+      return !recentRealMessages.some(
+        (real) => real.senderId === pending.senderId && real.content === pending.content,
+      );
+    });
+
+    return [...messages, ...unresolvedPending];
+  }, [messages, pendingMessages]);
 
   return (
     <section className="flex flex-1 flex-col overflow-hidden bg-white dark:bg-black relative" aria-label={`Conversation with ${name}`}>
@@ -133,7 +151,7 @@ export function ChatView({ conversation }: ChatViewProps) {
               <h2 className="truncate text-sm font-bold text-zinc-900 dark:text-zinc-100 tracking-wide">{name}</h2>
               <div className="flex items-center gap-1.5 mt-0.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <p className="truncate text-[11px] font-mono text-zinc-500 uppercase tracking-wider">Live connection</p>
+                <p className="truncate text-[11px] font-mono text-zinc-500 uppercase tracking-wider">Connected</p>
               </div>
             </div>
           </div>

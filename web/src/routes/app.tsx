@@ -37,7 +37,7 @@ function RouteComponent() {
   const [showMinLoading, setShowMinLoading] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => setShowMinLoading(false), 1000);
+    const timer = setTimeout(() => setShowMinLoading(false), 700);
     return () => clearTimeout(timer);
   }, []);
 
@@ -64,7 +64,7 @@ function RouteComponent() {
         key="loading"
         exit={{ opacity: 0 }}
         transition={{ duration: 0.7, ease: 'easeInOut' }}
-        className="flex h-screen w-screen flex-col items-center justify-center bg-white dark:bg-zinc-950"
+        className="flex h-[100dvh] w-screen flex-col items-center justify-center bg-white dark:bg-zinc-950"
       >
         <div className="relative flex items-center justify-center">
           <motion.div
@@ -94,7 +94,7 @@ function RouteComponent() {
   return (
     <motion.main
       key="app"
-      className="flex h-screen overflow-hidden bg-white dark:bg-black text-zinc-900 dark:text-zinc-100"
+      className="flex h-[100dvh] overflow-hidden bg-white dark:bg-black text-zinc-900 dark:text-zinc-100"
       initial={{ opacity: 0, scale: 0.6, y: 80 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.9, y: -40 }}

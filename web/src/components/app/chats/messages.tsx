@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef } from 'react';
 import type { Message } from '#/lib/api/conversation';
 import type { BasicUserInfo } from '#/lib/api/user';
 
@@ -91,8 +91,9 @@ export function MessageList({
   smoothScroll = true,
 }: MessageListProps) {
   const viewportRef = useRef<HTMLDivElement>(null);
-  const [isUserNearBottom, setIsUserNearBottom] = useState(true);
+  const isNearBottomRef = useRef(true);
   const lastMessageId = useMemo(() => messages[messages.length - 1]?.id, [messages]);
+  const prevMessageCountRef = useRef(messages.length);
 
   useEffect(() => {
     const viewport = viewportRef.current;
@@ -100,7 +101,7 @@ export function MessageList({
 
     const updateIsNearBottom = () => {
       const distanceFromBottom = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight;
-      setIsUserNearBottom(distanceFromBottom <= SCROLL_THRESHOLD_PX);
+      isNearBottomRef.current = distanceFromBottom <= SCROLL_THRESHOLD_PX;
     };
 
     updateIsNearBottom();
@@ -115,13 +116,20 @@ export function MessageList({
     const viewport = viewportRef.current;
     if (!viewport) return;
 
-    if (!isUserNearBottom && messages.length > 1) return;
+    const isNewMessage = messages.length > prevMessageCountRef.current;
+    prevMessageCountRef.current = messages.length;
 
-    viewport.scrollTo({
-      top: viewport.scrollHeight,
-      behavior: 'auto',
+    if (!isNearBottomRef.current && isNewMessage) return;
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        viewport.scrollTo({
+          top: viewport.scrollHeight,
+          behavior: 'auto',
+        });
+      });
     });
-  }, [lastMessageId, messages.length, smoothScroll, isUserNearBottom]);
+  }, [lastMessageId, messages.length, smoothScroll]);
 
   return (
     <div
@@ -141,6 +149,7 @@ export function MessageList({
           />
         ))}
       </ol>
+
     </div>
   );
 }
