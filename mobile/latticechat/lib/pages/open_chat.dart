@@ -452,7 +452,8 @@ class _OpenChatPageState extends State<OpenChatPage> {
       appBar: AppBar(
         title: Text(widget.otherUserName),
       ),
-      body: Padding(
+      body: SafeArea(
+      child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
         child: Column(
           children: [
@@ -541,6 +542,7 @@ class _OpenChatPageState extends State<OpenChatPage> {
                         hintText: hasConversation
                             ? 'Type a message...'
                             : 'This chat is not ready for sending yet',
+                        hintStyle: TextStyle(color: fadedTextColor),
                       ),
                     ),
                   ),
@@ -565,6 +567,7 @@ class _OpenChatPageState extends State<OpenChatPage> {
           ],
         ),
       ),
+    )
     );
   }
 }
