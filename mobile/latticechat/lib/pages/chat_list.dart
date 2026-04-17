@@ -766,7 +766,11 @@ class _AddFriendDialogState extends State<AddFriendDialog> {
       ),
       title: Text(
         'Add Friend',
-        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+        style: Theme
+            .of(context)
+            .textTheme
+            .bodyLarge
+            ?.copyWith(
           fontSize: 18,
           fontWeight: FontWeight.w700,
         ),
@@ -792,7 +796,8 @@ class _AddFriendDialogState extends State<AddFriendDialog> {
       actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       actions: [
         TextButton(
-          onPressed: _isSearching || _isSending ? null : () => Navigator.pop(context, false),
+          onPressed: _isSearching || _isSending ? null : () =>
+              Navigator.pop(context, false),
           child: const Text('Cancel'),
         ),
         TextButton(
@@ -823,3 +828,4 @@ class _AddFriendDialogState extends State<AddFriendDialog> {
         ),
       ],
     );
+  }}

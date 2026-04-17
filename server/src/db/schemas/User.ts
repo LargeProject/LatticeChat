@@ -155,7 +155,16 @@ userSchema.pre('deleteOne', { document: true, query: false }, async function () 
     $or: [{ fromId: this._id }, { toId: this._id }],
   });
 
-  // Delete all direct messages
+  // delete all conversations with only this user
+  await Conversation.deleteMany({
+    isDirectMessage: false,
+    memberIds: {
+      $size: 2,
+      $all: [this._id],
+    },
+  });
+
+  // delete all direct messages
   await Conversation.deleteMany({ memberIds: this._id, isDirectMessage: true }, { $pull: { memberIds: this._id } });
 
   // remove this user from all conversations that include them
