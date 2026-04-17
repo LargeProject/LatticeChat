@@ -80,7 +80,7 @@ export default function FriendsLayout() {
     type: 'success' | 'error';
   } | null>(null);
 
-  const normalizedInput = friendInput.trim().toLowerCase();
+  const normalizedInput = friendInput.trim();
   const canSend = normalizedInput.length >= 3;
 
   const pushMessage = (text: string, type: 'success' | 'error') => {
@@ -95,8 +95,8 @@ export default function FriendsLayout() {
     e.preventDefault();
     if (!canSend) return;
 
-    const alreadySent = sentRequests.some((r) => r.name.toLowerCase() === normalizedInput);
-    const alreadyIncoming = incomingRequests.some((r) => r.name.toLowerCase() === normalizedInput);
+    const alreadySent = sentRequests.some((r) => r.name === normalizedInput);
+    const alreadyIncoming = incomingRequests.some((r) => r.name === normalizedInput);
 
     if (alreadySent) {
       pushMessage(`You already sent a request to @${normalizedInput}`, 'error');
