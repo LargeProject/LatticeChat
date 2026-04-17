@@ -38,9 +38,9 @@ final ThemeData darkTheme = ThemeData.dark().copyWith(
     onSurface: foregroundColor,
     surfaceContainerHighest: Colors.white,
   ),
-  
+
   scaffoldBackgroundColor: backgroundColor,
-  
+
   // AppBar theme
   appBarTheme: AppBarTheme(
     backgroundColor: foregroundColor,
@@ -52,14 +52,12 @@ final ThemeData darkTheme = ThemeData.dark().copyWith(
       fontWeight: FontWeight.w600,
     ),
   ),
-  
+
   // Text theme - choose the substyle depending on the situation
   textTheme: ThemeData.dark().textTheme.copyWith(
-    // Your custom text styles
-    bodyLarge: const TextStyle(color: primaryColor),  // for large body text
-    bodyMedium: TextStyle(color: fadedTextColor),       // for medium body text
-    bodySmall: TextStyle(color: medialTextColor),       // for small body text
-    // Additional text styles needed for login page
+    bodyLarge: const TextStyle(color: primaryColor),
+    bodyMedium: TextStyle(color: fadedTextColor),
+    bodySmall: TextStyle(color: medialTextColor),
     headlineLarge: const TextStyle(
       fontSize: 36,
       fontWeight: FontWeight.bold,
@@ -71,14 +69,14 @@ final ThemeData darkTheme = ThemeData.dark().copyWith(
       letterSpacing: 0.5,
     ),
   ),
-  
-  // Text selection theme (cursor, highlight, handles)
+
+  // Text selection theme
   textSelectionTheme: const TextSelectionThemeData(
     cursorColor: cursorColor,
-    selectionColor: selectionColor,   // semi-transparent green
-    selectionHandleColor: selectionHandleColor, // opaque green
+    selectionColor: selectionColor,
+    selectionHandleColor: selectionHandleColor,
   ),
-  
+
   // Input decoration theme
   inputDecorationTheme: InputDecorationTheme(
     filled: true,
@@ -98,7 +96,7 @@ final ThemeData darkTheme = ThemeData.dark().copyWith(
     ),
     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
   ),
-  
+
   // ElevatedButton theme
   elevatedButtonTheme: ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
@@ -107,7 +105,7 @@ final ThemeData darkTheme = ThemeData.dark().copyWith(
       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(0),
-        side: BorderSide(color: primaryColor, width: 1),  // outline
+        side: BorderSide(color: primaryColor, width: 1),
       ),
       backgroundColor: TwColors.zinc.shade100,
       foregroundColor: Colors.black,
@@ -117,7 +115,7 @@ final ThemeData darkTheme = ThemeData.dark().copyWith(
       ),
     ),
   ),
-  
+
   // TextButton theme
   textButtonTheme: TextButtonThemeData(
     style: ButtonStyle(
@@ -132,6 +130,23 @@ final ThemeData darkTheme = ThemeData.dark().copyWith(
       foregroundColor: WidgetStatePropertyAll(tertiaryColor),
     ),
   ),
+
+  // SnackBar theme
+  snackBarTheme: SnackBarThemeData(
+    backgroundColor: Colors.white,
+    contentTextStyle: const TextStyle(
+      color: Colors.black,
+      fontSize: 14,
+      fontWeight: FontWeight.w500,
+    ),
+    actionTextColor: Colors.black,
+    behavior: SnackBarBehavior.floating,
+    elevation: 8,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(8),
+      side: BorderSide(color: TwColors.zinc.shade300),
+    ),
+  ),
 );
 
 // Additional Button Styles
@@ -140,12 +155,12 @@ class AppButtonStyles {
     minimumSize: const Size(double.infinity, 0),
     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-    shape: RoundedRectangleBorder(),  // remove outline
+    shape: RoundedRectangleBorder(),
     disabledForegroundColor: tertiaryColor,
     disabledBackgroundColor: quatenaryColor,
   );
 
-    static ButtonStyle invertedElevated = ElevatedButton.styleFrom(
+  static ButtonStyle invertedElevated = ElevatedButton.styleFrom(
     minimumSize: const Size(double.infinity, 0),
     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
@@ -163,7 +178,6 @@ class AppButtonStyles {
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
     disabledForegroundColor: tertiaryColor,
     disabledBackgroundColor: quatenaryColor,
-    
   );
 
   static ButtonStyle dangerElevated = ElevatedButton.styleFrom(
@@ -189,9 +203,8 @@ final class AppContainerStyles {
 AnimatedGradientText primaryGradientText(BuildContext context, String text) {
   return AnimatedGradientText(
     text: text,
-    textStyle: Theme.of(context).textTheme.headlineLarge, // fallback
+    textStyle: Theme.of(context).textTheme.headlineLarge,
     colors: [
-      // Title gradient
       Colors.cyan,
       Colors.purple,
       Colors.blue,
@@ -199,6 +212,7 @@ AnimatedGradientText primaryGradientText(BuildContext context, String text) {
     ],
   );
 }
+
 AnimatedGradientText secondaryGradientText(BuildContext context, String text) {
   return AnimatedGradientText(
     text: text,
@@ -206,9 +220,8 @@ AnimatedGradientText secondaryGradientText(BuildContext context, String text) {
       color: primaryColor,
       fontSize: 30,
       fontWeight: FontWeight.w700,
-    ), // fallback
+    ),
     colors: [
-      // Title gradient
       TwColors.green.shade400,
       TwColors.teal.shade400,
       TwColors.cyan.shade400,
