@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { UserPlus, ChevronLeft } from 'lucide-react';
+import { UserPlus, ChevronLeft, LogOut, Edit2 } from 'lucide-react';
 import { MessageList } from './messages';
 import { ChatInput } from './chat-input';
 import { AddMembersModal } from './add-members-modal';
+import { RenameConversationModal } from './rename-conversation-modal';
+import { LeaveConversationModal } from './leave-conversation-modal';
 import { useWebsocket } from '#/lib/hooks/useWebsocket';
 import { useWebsocketListener } from '#/lib/hooks/useWebsocketListener';
 import type { Message } from '#/lib/api/conversation.ts';
@@ -21,6 +23,8 @@ export function ChatView({ conversation }: ChatViewProps) {
   const { userInfo, refreshUser } = useUser();
   const [pendingMessages, setPendingMessages] = useState<Array<Message & { optimistic: true }>>([]);
   const [isAddMembersOpen, setIsAddMembersOpen] = useState(false);
+  const [isRenameOpen, setIsRenameOpen] = useState(false);
+  const [isLeaveOpen, setIsLeaveOpen] = useState(false);
 
   useEffect(() => {
     setPendingMessages([]);
@@ -78,44 +82,7 @@ export function ChatView({ conversation }: ChatViewProps) {
     setIsAddMembersOpen(false);
   }, []);
 
-  const handleLeave = useCallback(async () => {
-    if (!userInfo.data) return;
-    if (!confirm('Leave conversation?')) return;
-
-    try {
-      const result = await leaveConversation(conversation.id);
-      if ((result as any)?.success) {
-        await refreshUser();
-      } else {
-        alert('Failed to leave conversation');
-      }
-    } catch (e) {
-      console.error(e);
-      alert('Error leaving conversation');
-    }
-  }, [conversation.id, refreshUser, userInfo, leaveConversation]);
-
   const { name, messages } = useConversation(conversation);
-
-  const handleRename = useCallback(async () => {
-    if (!userInfo.data) return;
-    if (conversation.isDirectMessage) return;
-
-    const newName = prompt('Enter new conversation name:', name || '');
-    if (!newName) return;
-    const trimmed = newName.trim();
-    if (!trimmed || trimmed === name) return;
-
-    try {
-      const result = await renameConversation({ conversationId: conversation.id, newName: trimmed });
-      if (!(result as any)?.success) {
-        alert('Failed to rename conversation');
-      }
-    } catch (err) {
-      console.error(err);
-      alert('Failed to rename conversation');
-    }
-  }, [conversation.id, name, renameConversation, userInfo]);
 
   const allMessages = useMemo(() => {
     if (pendingMessages.length === 0) return messages;
@@ -160,12 +127,12 @@ export function ChatView({ conversation }: ChatViewProps) {
             {!conversation.isDirectMessage && (
               <button
                 type="button"
-                onClick={handleRename}
-                className="inline-flex h-8 items-center justify-center rounded-md px-3 text-xs font-mono text-zinc-600 dark:text-zinc-400 transition-colors border border-transparent hover:border-zinc-300 dark:hover:border-zinc-700/50 hover:bg-zinc-100 dark:hover:bg-zinc-800/40 hover:text-zinc-900 dark:hover:text-zinc-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300 dark:focus-visible:ring-zinc-700"
+                onClick={() => setIsRenameOpen(true)}
+                className="inline-flex h-8 w-8 items-center justify-center rounded-md text-zinc-600 dark:text-zinc-400 transition-colors border border-transparent hover:border-zinc-300 dark:hover:border-zinc-700/50 hover:bg-zinc-100 dark:hover:bg-zinc-800/40 hover:text-zinc-900 dark:hover:text-zinc-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300 dark:focus-visible:ring-zinc-700"
                 aria-label="Rename conversation"
                 title="Rename conversation"
               >
-                Rename
+                <Edit2 size={15} />
               </button>
             )}
 
@@ -181,12 +148,12 @@ export function ChatView({ conversation }: ChatViewProps) {
 
             <button
               type="button"
-              onClick={handleLeave}
-              className="inline-flex h-8 items-center justify-center rounded-md px-3 text-xs font-mono text-rose-600/80 dark:text-rose-500/80 transition-colors border border-transparent hover:border-rose-200 dark:hover:border-rose-500/20 hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:text-rose-700 dark:hover:text-rose-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500/50"
+              onClick={() => setIsLeaveOpen(true)}
+              className="inline-flex h-8 w-8 items-center justify-center rounded-md text-rose-600/80 dark:text-rose-500/80 transition-colors border border-transparent hover:border-rose-200 dark:hover:border-rose-500/20 hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:text-rose-700 dark:hover:text-rose-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500/50"
               aria-label="Leave conversation"
               title="Leave conversation"
             >
-              Leave
+              <LogOut size={15} />
             </button>
           </div>
         </div>
@@ -205,6 +172,18 @@ export function ChatView({ conversation }: ChatViewProps) {
         isOpen={isAddMembersOpen}
         onClose={() => setIsAddMembersOpen(false)}
         onMemberAdded={handleMemberAdded}
+      />
+
+      <RenameConversationModal
+        conversation={conversation}
+        isOpen={isRenameOpen}
+        onClose={() => setIsRenameOpen(false)}
+      />
+
+      <LeaveConversationModal
+        conversation={conversation}
+        isOpen={isLeaveOpen}
+        onClose={() => setIsLeaveOpen(false)}
       />
     </section>
   );

@@ -195,9 +195,9 @@ export default function FriendsLayout() {
                 value={friendInput}
                 onChange={(e) => setFriendInput(e.target.value.slice(0, 20))}
                 placeholder="username"
-                className="h-12 flex-1 bg-transparent px-4 text-sm font-medium text-zinc-900 dark:text-zinc-100 outline-none placeholder:text-zinc-400 dark:placeholder:text-zinc-600"
+                className="h-12 flex-1 min-w-0 bg-transparent px-4 text-sm font-medium text-zinc-900 dark:text-zinc-100 outline-none placeholder:text-zinc-400 dark:placeholder:text-zinc-600"
               />
-              <div className="pr-2">
+              <div className="pr-2 shrink-0">
                 <button
                   type="submit"
                   disabled={!canSend}
